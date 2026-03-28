@@ -3,43 +3,52 @@ package com.ablute.deepsleep.data
 import com.ablute.deepsleep.domain.*
 import kotlinx.coroutines.delay
 
-class FixtureNightAnalysisRepository : NightAnalysisRepository {
-    
-    // We hold a state to allow simulated mutation (e.g., degraded or battery kill scenario)
-    private var currentFixtureState = FixtureScenario.IDEAL_NIGHT
+class FixtureNightAnalysisRepository(
+    private val capabilityManager: SensorCapabilityManager
+) : NightAnalysisRepository {
 
-    enum class FixtureScenario { IDEAL_NIGHT, DEGRADED_AUDIO, BATTERY_KILLED }
+    private var currentFixtureState = FixtureScenario.IDEAL_NIGHT
+    enum class FixtureScenario { IDEAL_NIGHT, BATTERY_KILLED }
 
     override suspend fun fetchLatestNightReview(): NightReviewPayload? {
-        // Simular latência de IO/Room Database query
         delay(600)
 
-        return when (currentFixtureState) {
-            FixtureScenario.IDEAL_NIGHT -> NightReviewPayload(
+        // Native Runtime Truth Injection
+        val realMissingInputs = capabilityManager.getMissingInputs()
+        val isAudioDegraded = realMissingInputs.contains(InputType.AUDIO_INPUT)
+        val isUsageDegraded = realMissingInputs.contains(InputType.USAGE_STATS)
+
+        if (currentFixtureState == FixtureScenario.BATTERY_KILLED) return null
+
+        // Se o OS nos cortou o acesso à framework de som, o Motor nunca pode apontar 
+        // Interrupções Acústicas. O Backend Local não mente se estiver cego.
+        return if (isAudioDegraded) {
+             NightReviewPayload(
                 statusCategory = NightStatusCategory.FRAGMENTED,
-                nightStatusKey = "STATUS_FRAGMENTED", // Maps to "Noite fragmentada"
-                systemConfidenceScore = 85,
-                confidenceLevel = ConfidenceLevel.HIGH,
-                primaryImpactKey = "IMPACT_DIGITAL_FRICTION", // Maps to "Ecrã ligado na madrugada"
-                primaryImpactEvidence = listOf("EV_AWAKE_COUNT_2", "EV_UNLOCK_TIME_0341", "EV_CONTINUOUS_SCREEN_11M", "EV_BASELINE_DROP_15"),
-                priorityActionKey = "ACTION_DEVICE_DISTANCING", // Maps to "Telemóvel longe da cama"
-                learningState = LearningState.CONSOLIDATED,
-                requiredInputsPresent = true,
-                missingInputs = emptyList()
-            )
-            FixtureScenario.DEGRADED_AUDIO -> NightReviewPayload(
-                statusCategory = NightStatusCategory.GOOD,
-                nightStatusKey = "STATUS_UNBROKEN",
-                systemConfidenceScore = 60,
-                confidenceLevel = ConfidenceLevel.MEDIUM,
-                primaryImpactKey = null,
+                nightStatusKey = "STATUS_LOW_EFFICIENCY",
+                systemConfidenceScore = 45, // Penalty brutal na ausência de sensor
+                confidenceLevel = ConfidenceLevel.LOW,
+                primaryImpactKey = null, // Causa mascarada / desconhecida
                 primaryImpactEvidence = emptyList(),
                 priorityActionKey = "ACTION_KEEP_ROUTINE",
                 learningState = LearningState.EMERGING,
                 requiredInputsPresent = true,
-                missingInputs = listOf(InputType.AUDIO_INPUT) // UI will mask acoustic inference
+                missingInputs = realMissingInputs
             )
-            FixtureScenario.BATTERY_KILLED -> null // Represents session_interrupted / too_short
+        } else {
+            // Default "Ideal"
+            NightReviewPayload(
+                statusCategory = NightStatusCategory.FRAGMENTED,
+                nightStatusKey = "STATUS_FRAGMENTED",
+                systemConfidenceScore = 85,
+                confidenceLevel = ConfidenceLevel.HIGH,
+                primaryImpactKey = "IMPACT_NOISE_DISRUPTION", // Ex: Ideal detetou cães a ladrar
+                primaryImpactEvidence = listOf("EV_NOISE_PEAK_0400", "EV_AWAKE_COUNT_2", "EV_BASELINE_DROP_15"),
+                priorityActionKey = "ACTION_DEVICE_DISTANCING",
+                learningState = LearningState.CONSOLIDATED,
+                requiredInputsPresent = true,
+                missingInputs = realMissingInputs
+            )
         }
     }
 

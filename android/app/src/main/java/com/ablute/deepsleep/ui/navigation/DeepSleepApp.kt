@@ -14,19 +14,37 @@ import com.ablute.deepsleep.ui.home.HomeScreen
 import com.ablute.deepsleep.ui.home.HomeViewModel
 import com.ablute.deepsleep.ui.insight.InsightDetailScreen
 import com.ablute.deepsleep.ui.insight.InsightDetailViewModel
-import com.ablute.deepsleep.ui.tonight.TonightScreen
-import com.ablute.deepsleep.ui.tonight.TonightViewModel
 import com.ablute.deepsleep.ui.theme.DeepSleepTheme
+import com.ablute.deepsleep.ui.patterns.PatternsScreen
+import com.ablute.deepsleep.ui.patterns.PatternsViewModel
+import com.ablute.deepsleep.ui.profile.ProfileScreen
+import com.ablute.deepsleep.ui.profile.ProfileViewModel
+import com.ablute.deepsleep.ui.control.ControlScreen
+import com.ablute.deepsleep.ui.control.ControlViewModel
+import com.ablute.deepsleep.ui.onboarding.OnboardingScreen
+import com.ablute.deepsleep.ui.onboarding.OnboardingViewModel
 
 @Composable
 fun DeepSleepApp(
     homeViewModel: HomeViewModel,
     insightViewModel: InsightDetailViewModel,
-    tonightViewModel: TonightViewModel
+    tonightViewModel: TonightViewModel,
+    patternsViewModel: PatternsViewModel,
+    profileViewModel: ProfileViewModel,
+    controlViewModel: ControlViewModel,
+    onboardingViewModel: OnboardingViewModel,
+    isOnboarded: Boolean
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: "home"
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    if (!isOnboarded) {
+        OnboardingScreen(viewModel = onboardingViewModel, onComplete = {
+            // DataStore state refresh automatically toggles isOnboarded
+        })
+        return
+    }
 
     // The BottomNav is explicitly hidden in states where user is locked (Tonight/Insight/Setup)
     val showBottomNav = currentRoute in listOf("home", "patterns", "profile", "control")
@@ -75,13 +93,13 @@ fun DeepSleepApp(
                     )
                 }
                 composable("patterns") {
-                     // Compose empty native sub-routing
+                     PatternsScreen(viewModel = patternsViewModel)
                 }
                 composable("profile") {
-                     // Compose empty native sub-routing
+                     ProfileScreen(viewModel = profileViewModel)
                 }
                 composable("control") {
-                     // Compose empty native sub-routing
+                     ControlScreen(viewModel = controlViewModel)
                 }
             }
         }

@@ -9,7 +9,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 sealed interface TonightUiState {
-    object ArmedNotStarted : TonightUiState 
+    data class ArmedNotStarted(
+        val hasAudio: Boolean,
+        val hasUsage: Boolean
+    ) : TonightUiState 
     object Active : TonightUiState // Represents strict ForegroundService running
     object Finalizing : TonightUiState // Morning transition: flush sensors to Room
     data class Interrupted(val errorReason: String) : TonightUiState // OS Aggressive battery kill
@@ -17,24 +20,43 @@ sealed interface TonightUiState {
     object ProcessingPendingMorning : TonightUiState // Engine extracting semantic keys
 }
 
-class TonightViewModel : ViewModel() {
+class TonightViewModel(
+    private val controller: com.ablute.deepsleep.domain.NightSessionController,
+    private val capabilityManager: com.ablute.deepsleep.domain.SensorCapabilityManager
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<TonightUiState>(TonightUiState.ArmedNotStarted)
+    private val _uiState = MutableStateFlow<TonightUiState>(
+        TonightUiState.ArmedNotStarted(
+            hasAudio = capabilityManager.hasAudioAccess(),
+            hasUsage = capabilityManager.hasUsageAccess()
+        )
+    )
     val uiState: StateFlow<TonightUiState> = _uiState.asStateFlow()
+
+    fun refreshCapabilityState() {
+        if (_uiState.value is TonightUiState.ArmedNotStarted) {
+            _uiState.value = TonightUiState.ArmedNotStarted(
+                hasAudio = capabilityManager.hasAudioAccess(),
+                hasUsage = capabilityManager.hasUsageAccess()
+            )
+        }
+    }
+
+    fun hasAudioAccess(): Boolean = capabilityManager.hasAudioAccess()
+    fun hasUsageAccess(): Boolean = capabilityManager.hasUsageAccess()
 
     fun startSession() {
         viewModelScope.launch {
-            // Em Android Real: startForegroundService(Intent(...)) 
-            // Ensures strict OS compliance for background sensor harvesting.
+            controller.spawnNightSession()
             _uiState.value = TonightUiState.Active
         }
     }
 
     fun stopSession() {
         viewModelScope.launch {
-            // Em Android Real: stopService()
+            controller.terminateNightSession()
             _uiState.value = TonightUiState.Finalizing
-            delay(1500) // Simular sensor buffer flush
+            delay(1500) // Simular Sensor Hardware Flush
             _uiState.value = TonightUiState.ProcessingPendingMorning
         }
     }

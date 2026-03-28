@@ -2,9 +2,19 @@ package com.ablute.deepsleep.domain
 
 // The immutable semantic contract between Engine and UI
 enum class ConfidenceLevel { HIGH, MEDIUM, LOW }
-enum class InputType { AUDIO_INPUT, USAGE_STATS, SENSOR_MOTION, HEALTH_CONNECT }
+enum class InputType {
+    AUDIO_INPUT,
+    USAGE_STATS,
+    SENSOR_MOTION,
+    HEALTH_CONNECT 
+}
 enum class LearningState { EMERGING, CONSOLIDATED, INSUFFICIENT_HISTORY }
 enum class NightStatusCategory { GOOD, FRAGMENTED, POOR, INVALID }
+
+data class EvidenceItem(
+    val evidenceTypeKey: String, // e.g. EVIDENCE_UNLOCK_COUNT
+    val evidenceValue: String    // e.g. "2"
+)
 
 data class NightReviewPayload(
     val statusCategory: NightStatusCategory,
@@ -12,15 +22,21 @@ data class NightReviewPayload(
     val systemConfidenceScore: Int, // 0-100
     val confidenceLevel: ConfidenceLevel,
     val primaryImpactKey: String?, // ex: "IMPACT_DIGITAL_FRICTION"
-    val primaryImpactEvidence: List<String>, // list of Evidence Keys e.g., ["EV_SCREEN_TIME_11M"]
+    val primaryImpactEvidence: List<EvidenceItem>, // Refactored to Structured Values
     val priorityActionKey: String, // ex: "ACTION_DEVICE_DISTANCING"
     val learningState: LearningState,
     val requiredInputsPresent: Boolean,
     val missingInputs: List<InputType>
 )
 
-// Repository interface reflecting real Room/DataStore interactions for when Track 3 happens
+// Feature-driven Repository Contract bound to Room
+sealed class NightReviewResult {
+    data class Success(val payload: NightReviewPayload) : NightReviewResult()
+    object NoData : NightReviewResult()
+    object Interrupted : NightReviewResult()
+}
+
 interface NightAnalysisRepository {
-    suspend fun fetchLatestNightReview(): NightReviewPayload?
-    suspend fun simulateAggressiveBatteryInterrupt() // Exclusively for TDD / Graceful Degradation Testing
+    suspend fun fetchLatestNightReview(): NightReviewResult
+    suspend fun simulateAggressiveBatteryInterrupt() // Mock Contract 2.5
 }

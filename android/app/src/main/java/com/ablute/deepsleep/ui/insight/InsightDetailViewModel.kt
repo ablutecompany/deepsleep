@@ -34,11 +34,13 @@ class InsightDetailViewModel(
 
     private fun loadInsight() {
         viewModelScope.launch {
-            val payload = repository.fetchLatestNightReview()
-            if (payload == null || payload.primaryImpactKey == null) {
+            val result = repository.fetchLatestNightReview()
+            if (result !is com.ablute.deepsleep.domain.NightReviewResult.Success || result.payload.primaryImpactKey == null) {
                 _uiState.value = InsightDetailUiState.Error
                 return@launch
             }
+            
+            val payload = result.payload
 
             // Semantic to PT-PT Translation (Product constraints isolate sentence authorship)
             val impactTitle = when (payload.primaryImpactKey) {
@@ -48,13 +50,15 @@ class InsightDetailViewModel(
                 else -> "Causa indeterminada"
             }
 
-            val evidenceList = payload.primaryImpactEvidence.map { key ->
-                when (key) {
-                    "EV_AWAKE_COUNT_2" -> "2 despertares motores profundos"
-                    "EV_UNLOCK_TIME_0341" -> "Dispositivo desbloqueado às 03:41"
-                    "EV_CONTINUOUS_SCREEN_11M" -> "11 minutos contínuos de ecrã ativo"
-                    "EV_BASELINE_DROP_15" -> "Queda de 15% na eficiência contínua pós-evento"
-                    else -> "Evidência genérica registada"
+            val evidenceList = payload.primaryImpactEvidence.map { item ->
+                when (item.evidenceTypeKey) {
+                    "EVIDENCE_UNLOCK_COUNT" -> "${item.evidenceValue} desbloqueios noturnos"
+                    "EVIDENCE_SCREEN_DURATION_MIN" -> "${item.evidenceValue} minutos consecutivos de luz emissiva no ecrã"
+                    "EVIDENCE_NOISE_PULSES" -> "${item.evidenceValue} distúrbios de ruído ambiente"
+                    "EVIDENCE_NOISE_PEAK_DB" -> "Pico acústico de ${item.evidenceValue} decibéis (dB)"
+                    "EVIDENCE_CLEAN_SIGNALS" -> "Análise sensorial limpa. Nenhuma perturbação anómala identificada."
+                    "EVIDENCE_INSUFFICIENT_PROOFS" -> "Os dados recolhidos foram insuficientes para isolar métricas seguras. Evangélica escassez de contexto."
+                    else -> "Métrica genérica documentada"
                 }
             }
 

@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val repository: NightAnalysisRepository
+    private val repository: NightAnalysisRepository,
+    private val historicalEngine: HistoricalAnalysisEngine
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -23,20 +24,24 @@ class HomeViewModel(
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
             
-            // Assume the Engine returns semantic payload via Contract
-            val payload = repository.fetchLatestNightReview()
+            val result = repository.fetchLatestNightReview()
+            val hasRecurringFriction = historicalEngine.hasRecurringDigitalFriction()
 
-            if (payload == null) {
-                // Deteção de Sessão Interrompida (ex: Fallback the Battery Kill Fixture)
-                _uiState.value = HomeUiState.SessionInterrupted("Sessão noturna descontinuada às 04:32. Tempo total inválido para processamento empírico.")
-                return@launch
+            when (result) {
+                is com.ablute.deepsleep.domain.NightReviewResult.NoData -> {
+                    _uiState.value = HomeUiState.SessionInterrupted("Sem memória empírica guardada. Inicia uma sessão hoje para processarmos o estado basal do teu sono.")
+                }
+                is com.ablute.deepsleep.domain.NightReviewResult.Interrupted -> {
+                    _uiState.value = HomeUiState.SessionInterrupted("Sessão noturna descontinuada precocemente. Volume capturado sem validade estrita para deduções seguras.")
+                }
+                is com.ablute.deepsleep.domain.NightReviewResult.Success -> {
+                    _uiState.value = mapPayloadToUiState(result.payload, hasRecurringFriction)
+                }
             }
-
-            _uiState.value = mapPayloadToUiState(payload)
         }
     }
 
-    private fun mapPayloadToUiState(payload: NightReviewPayload): HomeUiState.NightReviewReady {
+    private fun mapPayloadToUiState(payload: NightReviewPayload, hasRecurringFriction: Boolean): HomeUiState.NightReviewReady {
         // Translation Layer: Engine Semantic Keys -> PT-PT Editorial Voice
         
         val headline = when (payload.nightStatusKey) {
@@ -52,9 +57,12 @@ class HomeViewModel(
             "IMPACT_NOISE_DISRUPTION" -> "Interferência acústica"
             else -> "Causa indeterminada"
         }
+        
+        val isRecurringFriction = payload.primaryImpactKey == "IMPACT_DIGITAL_FRICTION" && hasRecurringFriction
 
-        val primaryDesc = when (payload.primaryImpactKey) {
-            "IMPACT_DIGITAL_FRICTION" -> "Foi detetada atividade no ecrã durante a madrugada. Esta luz interrompeu o ciclo e tornou mais difícil voltar a adormecer profundamente."
+        val primaryDesc = when {
+            isRecurringFriction -> "SINAL RECORRENTE. Foram detetados limiares de luz emissiva por repetidas noites recentes. A tua biologia não descansa estruturalmente enquanto manteres fricção nesta janela móvel."
+            payload.primaryImpactKey == "IMPACT_DIGITAL_FRICTION" -> "Foi detetada atividade no ecrã durante a madrugada. Esta luz interrompeu o ciclo e tornou mais difícil voltar a adormecer profundamente."
             else -> "O sistema detetou interrupções sem um vetor causal forte ou contínuo."
         }
 
@@ -70,13 +78,16 @@ class HomeViewModel(
              else -> "O sistema estuda as vulnerabilidades para gerar recomendações direcionadas na próxima noite."
         }
 
-        val confidenceText = when (payload.confidenceLevel) {
-            ConfidenceLevel.HIGH -> "CONFIANÇA: ALTA"
-            ConfidenceLevel.MEDIUM -> "CONFIANÇA: MÉDIA"
-            ConfidenceLevel.LOW -> "CONFIANÇA: BAIXA"
+        val confidenceText = when {
+            payload.missingInputs.isNotEmpty() -> "CONFIANÇA: LIMITADA (DADOS PARCIAIS)"
+            payload.confidenceLevel == ConfidenceLevel.HIGH -> "CONFIANÇA: ALTA"
+            payload.confidenceLevel == ConfidenceLevel.MEDIUM -> "CONFIANÇA: MÉDIA"
+            else -> "CONFIANÇA: BAIXA"
         }
 
-        val learningText = if (payload.learningState == LearningState.CONSOLIDATED) {
+        val learningText = if (payload.missingInputs.isNotEmpty()) {
+            "O sistema está a ser forçado a extrapolar as causas mecânicas destas interrupções porque o Android restringe os sensores de Fricção e Som. A extração heurística está amputada."
+        } else if (payload.learningState == LearningState.CONSOLIDATED) {
             "O teu adormecimento inicial continua rápido e eficiente. As interrupções estão a acontecer quase em exclusivo nesta janela madrugadora."
         } else {
             "Estamos a recolher os primeiros traços empiricamente viáveis. Mantém o padrão de registo."

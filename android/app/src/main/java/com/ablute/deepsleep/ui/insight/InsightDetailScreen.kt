@@ -146,4 +146,24 @@ private fun InsightContent(state: InsightDetailUiState.Content) {
         lineHeight = 24.sp,
         fontWeight = FontWeight.Normal
     )
+
+    if (state.maskedInputs.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(48.dp))
+        Text(
+            text = "DEGRADAÇÃO OPERATIVA",
+            color = DeepSleepTheme.colors.textMuted,
+            fontSize = 10.sp,
+            letterSpacing = 1.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "A precisão matemática de leitura desta noite esteve severamente limitada pela ausência de permissões profundas ao ecossistema do dispositivo. O modelo procedeu a isolamento heurístico.",
+            color = DeepSleepTheme.colors.textSecondary,
+            fontSize = 14.sp,
+            lineHeight = 22.sp,
+            fontWeight = FontWeight.Light,
+            modifier = Modifier.alpha(0.7f)
+        )
+    }
 }

@@ -15,6 +15,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Intent
+import android.provider.Settings
 import com.ablute.deepsleep.ui.theme.DeepSleepTheme
 
 @Composable
@@ -34,7 +38,8 @@ fun TonightScreen(
         when (val state = uiState) {
             is TonightUiState.ArmedNotStarted -> {
                 ArmedContent(
-                    onStart = { viewModel.startSession() },
+                    state = state,
+                    viewModel = viewModel,
                     onNavigateBack = onNavigateBack
                 )
             }
@@ -80,8 +85,54 @@ fun TonightScreen(
     }
 }
 
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.runtime.DisposableEffect
+
 @Composable
-private fun ArmedContent(onStart: () -> Unit, onNavigateBack: () -> Unit) {
+private fun ArmedContent(state: TonightUiState.ArmedNotStarted, viewModel: TonightViewModel, onNavigateBack: () -> Unit) {
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshCapabilityState()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // Native Permission Launchers that route seamlessly without fragmenting UI
+    val usageLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.refreshCapabilityState()
+        viewModel.startSession()
+    }
+
+    val audioLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        viewModel.refreshCapabilityState()
+        if (!viewModel.hasUsageAccess()) {
+            usageLauncher.launch(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        } else {
+            viewModel.startSession()
+        }
+    }
+
+    val runPermissionGateway = {
+        if (!viewModel.hasAudioAccess()) {
+             audioLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+        } else if (!viewModel.hasUsageAccess()) {
+             usageLauncher.launch(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        } else {
+             viewModel.startSession()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -114,10 +165,33 @@ private fun ArmedContent(onStart: () -> Unit, onNavigateBack: () -> Unit) {
             modifier = Modifier
                 .border(1.dp, DeepSleepTheme.colors.separator)
                 .padding(horizontal = 24.dp, vertical = 16.dp)
-                .clickable { onStart() }
+                .clickable { runPermissionGateway() }
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        val missingAudio = !state.hasAudio
+        val missingUsage = !state.hasUsage
+        if (missingAudio || missingUsage) {
+             Spacer(modifier = Modifier.height(24.dp))
+             Text(
+                 text = "A iniciar como sessão cega (precisão comprometida).",
+                 color = DeepSleepTheme.colors.accent,
+                 fontSize = 12.sp,
+                 fontWeight = FontWeight.Bold
+             )
+             Spacer(modifier = Modifier.height(4.dp))
+             val drops = mutableListOf<String>()
+             if (missingAudio) drops.add("Microfone")
+             if (missingUsage) drops.add("Uso de Ecrã")
+             Text(
+                 text = "Sensores com acesso em falta: ${drops.joinToString(" e ")}.\nAcede ao Controlo para limpares os bloqueios.",
+                 color = DeepSleepTheme.colors.textSecondary,
+                 fontSize = 12.sp,
+                 lineHeight = 16.sp,
+                 modifier = Modifier.alpha(0.8f)
+             )
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
         Text(
             text = "← Voltar",
             color = DeepSleepTheme.colors.textSecondary,
