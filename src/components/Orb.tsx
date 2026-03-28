@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 
 type OrbState = 'base' | 'calm' | 'fragmented' | 'learning' | 'high_confidence' | 'low_confidence';
@@ -12,6 +11,7 @@ interface OrbProps {
 export function Orb({ state = 'base', className = '', size = 80 }: OrbProps) {
   // Futuramente, a cor e comportamento dependem do 'state'.
   // Por agora, MVP usa o base (presença silenciosa, inteligência nocturna).
+  console.debug("[Orb] Renderizado em state:", state);
   
   return (
     <div 
