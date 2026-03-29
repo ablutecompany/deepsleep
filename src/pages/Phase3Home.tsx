@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePhase3Store } from '../store/Phase3ContextStore';
 import { usePhase2Store } from '../store/Phase2ContextStore';
-import { getProposals } from '../domain/Phase2/proposals';
-import { ArrowLeft, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import { getProposals, getPriorityTest } from '../domain/Phase2/proposals';
+import { ArrowLeft, CheckCircle2, XCircle, RotateCcw, Activity } from 'lucide-react';
 
 export function Phase3Home() {
   const navigate = useNavigate();
@@ -13,12 +13,18 @@ export function Phase3Home() {
   const [todayStr] = useState(() => new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
-    // If we have a deliverable but NO active cycle, start the top proposal automatically.
-    // This removes the choice barrier as requested.
     if (deliverable && !cycle) {
-      const topProposal = getProposals(deliverable)[0];
-      if (topProposal) {
-        startCycle(topProposal.id, deliverable.assessmentId, topProposal.minDays);
+      const priority = getPriorityTest(deliverable);
+      const matchedProposal = getProposals(deliverable).find(p => p.id === priority.primaryProposalId);
+      
+      if (matchedProposal) {
+        startCycle(
+          priority.primaryProposalId,
+          priority.priorityScore,
+          priority.selectionReason,
+          deliverable.assessmentId,
+          matchedProposal.minDays
+        );
       }
     }
   }, [deliverable, cycle, startCycle]);
@@ -38,12 +44,33 @@ export function Phase3Home() {
 
   const currentProposal = getProposals(deliverable).find(p => p.id === cycle.proposalId) || getProposals(deliverable)[0];
   
-  const loggedDaysCount = Object.keys(cycle.dailyCheckins).length;
-  const isMinWindowReached = loggedDaysCount >= cycle.minDays;
+  const checkinsList = Object.values(cycle.dailyCheckins);
+  const loggedDaysCount = checkinsList.length;
+  // Fallback para demodata se elapsed der negativo (timezones ou edge cases):
+  const daysElapsed = Math.max(0, Math.floor((Date.now() - new Date(cycle.startedAt).getTime()) / 86400000));
+  
+  // Numa demo real, `daysElapsed` pode ser 0 e bloquear o review. Assumimos o maior entre elapsed real e numero de checkins.
+  const effectiveElapsed = Math.max(daysElapsed, loggedDaysCount);
+  const isMinWindowReached = effectiveElapsed >= cycle.minDays;
+  
   const todayValue = cycle.dailyCheckins[todayStr];
 
+  // Cálculos de comparação e sinal
+  const successCount = checkinsList.filter(c => c === 'success').length;
+  const adherenceRate = loggedDaysCount > 0 ? successCount / loggedDaysCount : 0;
+  
+  let trendMsg = "ainda sem sinal claro";
+  if (loggedDaysCount < 3) trendMsg = "leitura ainda prematura";
+  else if (adherenceRate >= 0.7) trendMsg = "tendência a melhorar";
+  else if (adherenceRate <= 0.3) trendMsg = "sem melhoria visível";
+
   const handleReview = (review: 'manter' | 'ajustar' | 'trocar') => {
-    submitReview(review);
+    let rec = "";
+    if (review === 'manter') rec = "Sinal suficiente para manter esta direção. Há coerência entre o baseline limpo de perturbações e as interações observadas.";
+    else if (review === 'ajustar') rec = "A proposta atual revelou-se pouco compatível com o teu ritmo prático diário. Foi recomendada a redução de atrito.";
+    else rec = "O teste atingiu a janela de prova com estabilidade, mas sem alteração biológica clara no baseline da Fase 1. A abordagem será redirecionada.";
+    
+    submitReview(review, rec);
   };
 
   return (
@@ -56,14 +83,22 @@ export function Phase3Home() {
       </h1>
 
       <div style={{ background: '#0F172A', border: '1px solid #1E293B', borderRadius: '16px', padding: '24px', marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#F8FAFC', marginBottom: '12px' }}>{currentProposal.title}</h2>
-        <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '22px', marginBottom: '16px' }}>{currentProposal.why}</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#F8FAFC', marginBottom: '8px' }}>{currentProposal.title}</h2>
+        <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '22px', marginBottom: '16px' }}>{cycle.selectionReason}</p>
         
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '13px', color: '#64748B' }}>Progresso da janela:</span>
-          <span style={{ fontSize: '13px', fontWeight: 500, color: isMinWindowReached ? '#10B981' : '#F8FAFC' }}>
-            {loggedDaysCount} / {cycle.minDays} dias
-          </span>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>Dias decorridos do teste:</span>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: isMinWindowReached ? '#10B981' : '#F8FAFC' }}>
+              {effectiveElapsed} / {cycle.minDays} dias
+            </span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>Dias com registo de ação:</span>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: '#F8FAFC' }}>
+              {loggedDaysCount}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -106,30 +141,45 @@ export function Phase3Home() {
       )}
 
       {cycle.status === 'active' && isMinWindowReached && (
-        <div style={{ marginTop: 'auto', marginBottom: '40px', background: 'rgba(56, 189, 248, 0.05)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
-          <h3 style={{ fontSize: '18px', color: '#38BDF8', marginBottom: '16px', fontWeight: 500 }}>Revisão de Ciclo</h3>
-          <p style={{ fontSize: '14px', color: '#94A3B8', marginBottom: '24px', lineHeight: '22px' }}>
-            A janela mínima de teste({cycle.minDays} dias) foi atingida. Já notaste alguma tendência clara de alteração nos bloqueios que nos trouxeram até aqui?
-          </p>
+        <div style={{ marginTop: 'auto', marginBottom: '24px', background: 'rgba(30, 41, 59, 0.4)', padding: '24px', borderRadius: '16px', border: '1px solid #1E293B' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <Activity size={18} color="#38BDF8" />
+            <h3 style={{ fontSize: '16px', color: '#38BDF8', fontWeight: 500, margin: 0 }}>Comparação: Antes vs Durante</h3>
+          </div>
+          
+          <div style={{ marginBottom: '24px', paddingLeft: '26px' }}>
+            <p style={{ fontSize: '14px', color: '#94A3B8', marginBottom: '6px' }}>
+              Taxa de adaptação tática: <strong style={{ color: '#F8FAFC', fontWeight: 500 }}>{Math.round(adherenceRate * 100)}%</strong>
+            </p>
+            <p style={{ fontSize: '14px', color: '#94A3B8' }}>
+              Leitura face ao Baseline Inicial: <strong style={{ color: '#F8FAFC', fontWeight: 500 }}>{trendMsg}</strong>
+            </p>
+          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <h3 style={{ fontSize: '14px', color: '#64748B', marginBottom: '16px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Decisão Pós-Janela</h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <button 
               onClick={() => handleReview('manter')}
-              style={{ width: '100%', padding: '16px', borderRadius: '8px', background: '#F8FAFC', color: '#0F172A', border: 'none', fontWeight: 500 }}
+              style={{ width: '100%', padding: '16px', borderRadius: '8px', background: '#F8FAFC', color: '#0F172A', border: 'none', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '4px' }}
             >
-              Caminho Certo (Manter)
+              <span style={{ fontWeight: 600, fontSize: '15px' }}>Manter Caminho</span>
+              <span style={{ fontSize: '12px', color: '#475569', fontWeight: 400 }}>Porque manter: Adesão estruturada que pede consolidação tática.</span>
             </button>
             <button 
               onClick={() => handleReview('ajustar')}
-              style={{ width: '100%', padding: '16px', borderRadius: '8px', background: '#1E293B', color: '#F8FAFC', border: '1px solid #334155', fontWeight: 500 }}
+              style={{ width: '100%', padding: '16px', borderRadius: '8px', background: '#1E293B', color: '#F8FAFC', border: '1px solid #334155', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '4px' }}
             >
-              Difícil cumprir (Ajustar agora)
+              <span style={{ fontWeight: 500, fontSize: '15px' }}>Ajustar Complexidade</span>
+              <span style={{ fontSize: '12px', color: '#94A3B8' }}>Porque ajustar: Rigidez sentida face ao teu contexto prático.</span>
             </button>
             <button 
               onClick={() => handleReview('trocar')}
-              style={{ width: '100%', padding: '16px', borderRadius: '8px', background: 'transparent', color: '#94A3B8', border: '1px solid transparent', fontWeight: 500 }}
+              style={{ width: '100%', padding: '16px', borderRadius: '8px', background: 'transparent', color: '#94A3B8', border: '1px solid #1E293B', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '4px' }}
             >
-              Sem efeito (Trocar de teste)
+              <span style={{ fontWeight: 500, fontSize: '15px' }}>Pausar e Substituir Teste</span>
+              <span style={{ fontSize: '12px', color: '#64748B' }}>Porque trocar: Nenhuma vibração detetável. Isolamento errado.</span>
             </button>
           </div>
         </div>

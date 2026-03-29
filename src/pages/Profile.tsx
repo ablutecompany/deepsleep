@@ -142,18 +142,24 @@ export function Profile() {
           <section className="editorial-module" style={{ background: 'rgba(16, 185, 129, 0.03)', border: '1px solid rgba(16, 185, 129, 0.1)', padding: '24px', borderRadius: '16px', marginTop: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <CalendarClock size={16} color="#10B981" />
-              <span className="kicker" style={{ margin: 0, color: '#10B981', background: 'transparent', padding: 0 }}>Teste em curso (Fase 3)</span>
+              <span className="kicker" style={{ margin: 0, color: '#10B981', background: 'transparent', padding: 0 }}>
+                {cycle.status === 'active' ? 'Teste em curso (Fase 3)' : 'Teste concluído'}
+              </span>
             </div>
             
             <h2 className="module-title" style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '18px' }}>
               {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.title || 'Teste de Hipótese'}
             </h2>
             
-            <p className="module-desc" style={{ marginBottom: '16px', fontSize: '13px' }}>
-              Estado: <span style={{ color: '#F8FAFC' }}>{cycle.status === 'active' ? 'Em observância' : `Concluído (${cycle.reviewState})`}</span>
-              <br/>
-              Adesão: {Object.keys(cycle.dailyCheckins).length} dias registados
-            </p>
+            {cycle.status === 'active' ? (
+              <p className="module-desc" style={{ marginBottom: '16px', fontSize: '13px' }}>
+                A observância está neste momento num total de <span style={{ color: '#F8FAFC' }}>{Object.keys(cycle.dailyCheckins).length} dias</span> de registo consecutivo.
+              </p>
+            ) : (
+              <p className="module-desc" style={{ marginBottom: '16px', fontSize: '13px' }}>
+                Recomendação Final: <span style={{ color: '#F8FAFC' }}>{cycle.finalRecommendation || `Ação: ${cycle.reviewState}`}</span>
+              </p>
+            )}
           </section>
         )}
 

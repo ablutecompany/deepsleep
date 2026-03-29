@@ -5,19 +5,22 @@ export type CheckinValue = 'success' | 'failed' | 'skipped';
 export interface Phase3Cycle {
   cycleId: string;
   proposalId: string;
+  priorityScore: number;
+  selectionReason: string;
   linkedAssessmentId: string;
   startedAt: string;
   minDays: number;
   dailyCheckins: Record<string, CheckinValue>; // Date string (YYYY-MM-DD): value
   status: 'active' | 'completed' | 'adjusted';
   reviewState?: 'manter' | 'ajustar' | 'trocar';
+  finalRecommendation?: string;
 }
 
 interface Phase3ContextType {
   cycle: Phase3Cycle | null;
-  startCycle: (proposalId: string, linkedAssessmentId: string, minDays: number) => void;
+  startCycle: (proposalId: string, priorityScore: number, selectionReason: string, linkedAssessmentId: string, minDays: number) => void;
   checkInToday: (val: CheckinValue) => void;
-  submitReview: (review: NonNullable<Phase3Cycle['reviewState']>) => void;
+  submitReview: (review: NonNullable<Phase3Cycle['reviewState']>, recommendation: string) => void;
 }
 
 const Phase3StoreContext = createContext<Phase3ContextType | undefined>(undefined);
@@ -37,10 +40,12 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const startCycle = (proposalId: string, linkedAssessmentId: string, minDays: number) => {
+  const startCycle = (proposalId: string, priorityScore: number, selectionReason: string, linkedAssessmentId: string, minDays: number) => {
     const newCycle: Phase3Cycle = {
       cycleId: 'cyc_' + Date.now(),
       proposalId,
+      priorityScore,
+      selectionReason,
       linkedAssessmentId,
       startedAt: new Date().toISOString(),
       minDays,
@@ -59,12 +64,13 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const submitReview = (review: NonNullable<Phase3Cycle['reviewState']>) => {
+  const submitReview = (review: NonNullable<Phase3Cycle['reviewState']>, recommendation: string) => {
     if (!cycle) return;
     saveCycle({
       ...cycle,
       status: review !== 'manter' ? 'adjusted' : 'completed',
-      reviewState: review
+      reviewState: review,
+      finalRecommendation: recommendation
     });
   };
 

@@ -11,6 +11,12 @@ export type EnhancedProposal = {
   future: string;
 };
 
+export type PriorityTest = {
+  primaryProposalId: string;
+  priorityScore: number;
+  selectionReason: string;
+};
+
 export function getProposals(deliverable: AssessmentDeliverable | null): EnhancedProposal[] {
   let proposals: EnhancedProposal[] = [
     { 
@@ -78,4 +84,37 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
   }
 
   return proposals;
+}
+
+export function getPriorityTest(deliverable: AssessmentDeliverable): PriorityTest {
+  if (deliverable.proposalConstraints.some(c => c.includes('Dor'))) {
+    return {
+      primaryProposalId: 'prop_ergo',
+      priorityScore: 95,
+      selectionReason: 'A presença de dor física ativa assume sempre prioridade sobre otimizações cognitivas ou de rotina biológica.'
+    };
+  }
+
+  if (deliverable.dominantDrivers.includes('P2')) {
+    return {
+      primaryProposalId: 'prop_foco',
+      priorityScore: 90,
+      selectionReason: 'O medo crónico da noite bloqueia qualquer intervenção baseada em restrição ou fixação de horários.'
+    };
+  }
+
+  if (deliverable.flags.includes('Noctúria presente')) {
+    return {
+      primaryProposalId: 'prop_hidrica',
+      priorityScore: 85,
+      selectionReason: 'Desobstrução primária do metabolismo de fluidos para limpar os ciclos fragmentados.'
+    };
+  }
+
+  // Fallback to default foundation
+  return {
+    primaryProposalId: 'prop_ancora',
+    priorityScore: 80,
+    selectionReason: 'Ausência de bloqueadores críticos. O caminho inicia-se pela fundação da estabilidade circadiana.'
+  };
 }
