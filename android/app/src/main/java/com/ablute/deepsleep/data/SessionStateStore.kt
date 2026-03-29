@@ -16,10 +16,12 @@ class SessionStateStore(private val context: Context) {
     private val ACTIVE_KEY = booleanPreferencesKey("session_is_active")
     private val START_TIME_KEY = longPreferencesKey("session_start_time_ms")
     private val ONBOARDING_KEY = booleanPreferencesKey("onboarding_complete")
+    private val AUTH_KEY = booleanPreferencesKey("is_authenticated")
 
     val isSessionActiveFlow: Flow<Boolean> = context.dataStore.data.map { p -> p[ACTIVE_KEY] ?: false }
     val sessionStartTimeMsFlow: Flow<Long> = context.dataStore.data.map { p -> p[START_TIME_KEY] ?: 0L }
     val hasCompletedOnboardingFlow: Flow<Boolean> = context.dataStore.data.map { p -> p[ONBOARDING_KEY] ?: false }
+    val isAuthenticatedFlow: Flow<Boolean> = context.dataStore.data.map { p -> p[AUTH_KEY] ?: false }
 
     suspend fun markSessionStart(timeMs: Long) {
         context.dataStore.edit { p ->
@@ -37,6 +39,12 @@ class SessionStateStore(private val context: Context) {
     suspend fun markOnboardingComplete() {
         context.dataStore.edit { p ->
             p[ONBOARDING_KEY] = true
+        }
+    }
+
+    suspend fun setAuthenticated(isAuthenticated: Boolean) {
+        context.dataStore.edit { p ->
+            p[AUTH_KEY] = isAuthenticated
         }
     }
 }

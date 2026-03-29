@@ -46,9 +46,19 @@ interface SessionDao {
     suspend fun deleteAllSessions()
 }
 
-@Database(entities = [HistoricalSession::class], version = 1, exportSchema = false)
+@Database(
+    entities = [
+        HistoricalSession::class,
+        ProcessEntity::class,
+        Phase2Responses::class,
+        ProposalEntity::class
+    ],
+    version = 2,
+    exportSchema = false
+)
 abstract class DeepSleepDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
+    abstract fun processDao(): ProcessDao
 
     companion object {
         @Volatile

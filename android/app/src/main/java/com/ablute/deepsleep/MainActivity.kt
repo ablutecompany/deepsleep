@@ -36,6 +36,9 @@ class MainActivity : ComponentActivity() {
     // Package C: Historical Persistence and Pattern Analysis
     private val database by lazy { com.ablute.deepsleep.data.local.DeepSleepDatabase.getDatabase(applicationContext) }
     private val sessionDao by lazy { database.sessionDao() }
+    private val processDao by lazy { database.processDao() }
+    private val processRepository by lazy { com.ablute.deepsleep.data.ProcessRepository(processDao, sessionDao) }
+    
     private val analysisEngine by lazy { com.ablute.deepsleep.domain.HistoricalAnalysisEngine(sessionDao) }
     private val signalEngine by lazy { SignalInferenceEngine() }
     
@@ -51,12 +54,18 @@ class MainActivity : ComponentActivity() {
     private val profileViewModel by lazy { com.ablute.deepsleep.ui.profile.ProfileViewModel(analysisEngine) }
     private val controlViewModel by lazy { com.ablute.deepsleep.ui.control.ControlViewModel(capabilityManager, sessionDao) }
     private val onboardingViewModel by lazy { com.ablute.deepsleep.ui.onboarding.OnboardingViewModel(sessionStore) }
+    
+    private val authViewModel by lazy { com.ablute.deepsleep.ui.auth.AuthViewModel(sessionStore) }
+    private val processViewModel by lazy { com.ablute.deepsleep.ui.process.ProcessViewModel(processRepository) }
+    private val phase2ViewModel by lazy { com.ablute.deepsleep.ui.process.Phase2ViewModel(processRepository) }
+    private val phase3ViewModel by lazy { com.ablute.deepsleep.ui.process.Phase3ViewModel(processRepository) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         setContent {
             val isOnboarded by sessionStore.hasCompletedOnboardingFlow.collectAsState(initial = true)
+            val isAuthenticated by sessionStore.isAuthenticatedFlow.collectAsState(initial = false)
             
             DeepSleepTheme {
                 Surface(
@@ -71,7 +80,12 @@ class MainActivity : ComponentActivity() {
                         profileViewModel = profileViewModel,
                         controlViewModel = controlViewModel,
                         onboardingViewModel = onboardingViewModel,
-                        isOnboarded = isOnboarded
+                        authViewModel = authViewModel,
+                        processViewModel = processViewModel,
+                        phase2ViewModel = phase2ViewModel,
+                        phase3ViewModel = phase3ViewModel,
+                        isOnboarded = isOnboarded,
+                        isAuthenticated = isAuthenticated
                     )
                 }
             }

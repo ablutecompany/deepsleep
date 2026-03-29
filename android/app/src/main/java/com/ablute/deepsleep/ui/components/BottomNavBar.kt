@@ -27,11 +27,10 @@ fun BottomNavBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NavItem("Início", "home", currentRoute, onNavigate)
+        NavItem("Início", "phase1_home", currentRoute, onNavigate)
         NavItem("Noite", "tonight", currentRoute, onNavigate)
         NavItem("Padrões", "patterns", currentRoute, onNavigate)
         NavItem("Perfil", "profile", currentRoute, onNavigate)
-        NavItem("Controlo", "control", currentRoute, onNavigate)
     }
 }
 
