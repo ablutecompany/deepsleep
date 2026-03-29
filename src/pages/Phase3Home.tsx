@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePhase3Store } from '../store/Phase3ContextStore';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { getProposals, getPriorityTest } from '../domain/Phase2/proposals';
+import { generateLearningPayload } from '../domain/Phase3/learningStore';
 import { ArrowLeft, CheckCircle2, XCircle, MapPin } from 'lucide-react';
 
 export function Phase3Home() {
@@ -69,6 +70,9 @@ export function Phase3Home() {
     if (review === 'manter') rec = "Observável o comportamento positivo da tua execução, sugerindo valor em prolongar mais alguns dias a ação de teste atual para clarificar resultados na Fase 1 madura.";
     else if (review === 'ajustar') rec = "Iremos rever as ações recomendadas num ângulo com menos atrito. Esta proposta atual gerou atrito logístico nas tuas opções concretas e de estilo prático.";
     else rec = "Faltam provas na tua fase original de haver alteração contundente dos despertares com este trajeto específico. A escolha tática vai redirecionar-se.";
+    
+    // Gerar registo incremental vivo 
+    generateLearningPayload(cycle, deliverable, review, rec);
     
     submitReview(review, rec);
   };

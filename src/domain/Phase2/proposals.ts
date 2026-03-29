@@ -1,4 +1,5 @@
 import type { AssessmentDeliverable } from './engine';
+import { getLearningRecords } from '../Phase3/learningStore';
 
 export type EnhancedProposal = {
   id: string;
@@ -118,6 +119,35 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
       minDays: 3,
       future: "Prepara a base temporal livre de perturbação antes do deitar planeado."
     });
+  }
+
+  // 2. Re-Otimização Viva com base nos Ciclos Concluídos (Aprendizagem Longitudinal)
+  const learningRecords = getLearningRecords();
+  if (learningRecords.length > 0 && deliverable) {
+    // Propostas que o utilizador já reportou como ineficazes ou impossíveis ("ajustar" ou "trocar")
+    const rejectedIds = learningRecords
+      .filter(r => r.linkedAssessmentId === deliverable.assessmentId && r.finalDecision === 'REJECT_AND_REOPTIMIZE')
+      .map(r => r.activeProposalId);
+
+    if (rejectedIds.length > 0) {
+      // Filtrar propostas rejeitadas, exceto se for a única que resta (fallback)
+      const validProposals = proposals.filter(p => !rejectedIds.includes(p.id));
+      if (validProposals.length > 0) {
+        proposals = validProposals;
+      } else {
+        // Se todas as listadas esgotaram, fazemos fallback de contingência
+        proposals = [{
+          id: 'prop_fallback_regenerativo',
+          title: "Controlo Passivo de Luz",
+          why: "Os testes anteriores geraram atrito funcional. O passo base mais seguro e irrejeitável é fechar a componente luminosa exógena.",
+          observe: "Frestas de estores ou leds espalhados no quarto que afetam a fase 1 biológica.",
+          whenNotTo: "Quando existir fobia comprovada ao escuro total.",
+          minWindow: "4 noites sucessivas",
+          minDays: 4,
+          future: "Estabelece química isolada permitindo repensar abordagens táticas nulas."
+        }];
+      }
+    }
   }
 
   return proposals;

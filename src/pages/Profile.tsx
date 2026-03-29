@@ -5,6 +5,7 @@ import { usePhase2Store } from '../store/Phase2ContextStore';
 import { usePhase3Store } from '../store/Phase3ContextStore';
 import { getManualLogs } from '../domain/Phase1/manualLogStore';
 import { getProposals } from '../domain/Phase2/proposals';
+import { getLearningRecords } from '../domain/Phase3/learningStore';
 import { FACTOR_LABELS } from '../domain/Phase2/interpreter';
 
 function getConfidenceLabel(confidence: number): string {
@@ -19,6 +20,7 @@ export function Profile() {
   const { deliverable } = usePhase2Store();
   const { cycle } = usePhase3Store();
   const logs = getManualLogs();
+  const learningRecords = getLearningRecords();
   const nightCount = logs.length;
 
   if (nightCount < 3) {
@@ -200,6 +202,29 @@ export function Profile() {
                 ? `${Object.keys(cycle.dailyCheckins).length} dias em percurso observacional.`
                 : cycle.finalRecommendation}
             </p>
+          </section>
+        )}
+
+        {learningRecords.length > 0 && (
+          <section className="editorial-card" style={{ marginTop: '24px', padding: '24px', borderRadius: '12px', background: 'transparent', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <h3 className="kicker" style={{ color: '#F59E0B', marginBottom: '16px' }}>Histórico Evolutivo</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {learningRecords.map((rec, i) => (
+                <div key={i} style={{ padding: '12px', borderLeft: rec.finalDecision === 'KEEP_REFINING' ? '2px solid #10B981' : '2px solid #EF4444', background: 'rgba(255,255,255,0.02)' }}>
+                   <p style={{ fontSize: '11px', color: '#64748B', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                     {rec.createdAt.split('T')[0]} · Ciclo Tático {rec.cycleWindowDays} noites
+                   </p>
+                   <p style={{ fontSize: '14px', color: '#E2E8F0', marginBottom: '8px' }}>
+                     Decisão: <span style={{ color: rec.finalDecision === 'KEEP_REFINING' ? '#10B981' : '#F59E0B' }}>
+                       {rec.userPerceivedOutcome.toUpperCase()}
+                     </span>
+                   </p>
+                   <p style={{ fontSize: '13px', color: '#94A3B8', lineHeight: '1.5' }}>
+                     {rec.observedChangeSummary}
+                   </p>
+                </div>
+              ))}
+            </div>
           </section>
         )}
 
