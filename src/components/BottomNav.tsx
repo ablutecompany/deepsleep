@@ -14,7 +14,8 @@ export function BottomNav() {
     }
   }, [location.pathname]);
 
-  if (!['/process_home', '/phase1_home', '/patterns', '/profile'].includes(location.pathname)) {
+  // Allow visibility in the 4 stable tabs plus the active plan home
+  if (!['/process_home', '/manual_log_hub', '/phase2/context', '/profile', '/phase3_home'].includes(location.pathname)) {
     return null;
   }
 
@@ -27,8 +28,8 @@ export function BottomNav() {
 
   const tabs = [
     { to: '/process_home', icon: Home, label: 'Início' },
-    { to: '/tonight', icon: MoonStar, label: 'Noite' },
-    { to: '/patterns', icon: Activity, label: 'Padrões' },
+    { to: '/manual_log_hub', icon: MoonStar, label: 'Noite' },
+    { to: '/phase2/context', icon: Activity, label: 'Padrões' },
     { to: '/profile', icon: User, label: 'Perfil' }
   ];
 

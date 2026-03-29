@@ -7,9 +7,11 @@ export function Phase2Entry() {
   const { deliverable, setAnswersDraft, setDeliverable } = usePhase2Store();
 
   const handleStart = (mode: 10 | 25) => {
-    setAnswersDraft({}); // Clear draft when forcing new
-    setDeliverable(null);
-    navigate(`/phase2/questions?mode=${mode}`);
+    if (window.confirm("Queres mesmo apagar a tua leitura atual e refazer o questionário? O teu plano ativo, se existir, não será afetado, mas perderás o contexto.")) {
+      setAnswersDraft({}); // Clear draft when forcing new
+      setDeliverable(null);
+      navigate(`/phase2/questions?mode=${mode}`);
+    }
   };
 
   if (deliverable) {
@@ -26,9 +28,17 @@ export function Phase2Entry() {
         <button onClick={() => navigate('/phase2/context')} className="primary-btn" style={{ marginBottom: '16px' }}>
           Consultar Leitura Atual
         </button>
-        <button onClick={() => handleStart(10)} className="text-btn" style={{ color: '#EF4444', marginBottom: '40px' }}>
-          Quero mesmo refazer a leitura base (10 perguntas)
+        <button onClick={() => navigate('/phase2/proposals')} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#F8FAFC', padding: '16px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '16px' }}>
+          Ver Propostas
         </button>
+        <button onClick={() => navigate('/process_home')} className="text-btn" style={{ color: '#94A3B8', marginBottom: '32px' }}>
+          Voltar ao Início
+        </button>
+        <div style={{ paddingBottom: '40px', textAlign: 'center' }}>
+          <button onClick={() => handleStart(10)} className="text-btn" style={{ color: '#EF4444', fontSize: '12px' }}>
+            Refazer leitura base (10 perguntas)
+          </button>
+        </div>
       </div>
     );
   }

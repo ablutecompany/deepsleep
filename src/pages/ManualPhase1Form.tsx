@@ -44,7 +44,7 @@ export function ManualPhase1Form() {
   const isComplete = Boolean(dateStr && bedTime && wakeTime && timeToSleepMin !== '' && awakenings !== '' && awakeTimeMin !== '' && recovery);
 
   return (
-    <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="home-page fade-in" style={{ background: 'var(--bg-core)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div className="home-content" style={{ position: 'relative', zIndex: 10, paddingTop: '40px', paddingLeft: '24px', paddingRight: '24px', flex: 1 }}>
         
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate(-1)} />

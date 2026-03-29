@@ -99,7 +99,12 @@ export function ProcessHome() {
       <div style={{ marginTop: '64px', textAlign: 'center' }}>
         <button 
           className="text-btn" 
-          onClick={() => { localStorage.clear(); window.location.href = '/'; }}
+          onClick={() => { 
+            if (window.confirm("Queres mesmo apagar tudo e reiniciar o beta? Vais perder todo o teu histórico.")) {
+              localStorage.clear(); 
+              window.location.href = '/'; 
+            }
+          }}
         >
           Reiniciar Beta
         </button>

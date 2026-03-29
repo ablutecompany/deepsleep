@@ -18,7 +18,7 @@ export function DataSourceSelection() {
   };
 
   return (
-    <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="home-page fade-in" style={{ background: 'var(--bg-core)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div className="home-content" style={{ position: 'relative', zIndex: 10, paddingTop: '40px', paddingLeft: '24px', paddingRight: '24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
         
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate(-1)} />

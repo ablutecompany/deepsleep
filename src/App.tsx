@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { BottomNav } from './components/BottomNav';
 import { DevTools } from './components/DevTools';
 import { Home } from './pages/Home';
@@ -26,11 +27,20 @@ import { Phase3Home } from './pages/Phase3Home';
 import { Phase2StoreProvider } from './store/Phase2ContextStore';
 import { Phase3StoreProvider } from './store/Phase3ContextStore';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 export default function App() {
   return (
     <Phase2StoreProvider>
       <Phase3StoreProvider>
         <BrowserRouter>
+          <ScrollToTop />
         <div className="app-container">
           <main className="main-content">
             <Routes>

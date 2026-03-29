@@ -74,7 +74,7 @@ export function Phase3Home() {
   };
 
   return (
-    <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)', position: 'relative' }}>
+    <div className="home-page fade-in" style={{ background: 'var(--bg-core)', position: 'relative' }}>
       
       <div className="home-content" style={{ position: 'relative', zIndex: 10, paddingTop: '40px', paddingLeft: '24px', paddingRight: '24px', display: 'flex', flexDirection: 'column', minHeight: '90vh' }}>
         
@@ -150,9 +150,22 @@ export function Phase3Home() {
             </div>
             
             {todayValue && (
-              <p style={{ fontSize: '13px', color: '#64748B', textAlign: 'center', marginTop: '24px', fontWeight: 300 }}>
-                Posição guardada sileciosamente. O trajeto continua amanhã.
-              </p>
+              <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+                <p style={{ fontSize: '13px', color: '#64748B', textAlign: 'center', fontWeight: 300 }}>
+                  Posição guardada sileciosamente. O trajeto continua amanhã.
+                </p>
+                <button onClick={() => navigate('/process_home')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                  Voltar ao Início
+                </button>
+                <div style={{ display: 'flex', width: '100%', gap: '12px' }}>
+                  <button onClick={() => navigate('/phase2/context')} style={{ flex: 1, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', padding: '12px', borderRadius: '8px', color: '#94A3B8', fontSize: '13px' }}>
+                    Consultar Padrões
+                  </button>
+                  <button onClick={() => navigate('/profile')} style={{ flex: 1, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', padding: '12px', borderRadius: '8px', color: '#94A3B8', fontSize: '13px' }}>
+                    Consultar Perfil
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         )}

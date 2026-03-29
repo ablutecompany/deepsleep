@@ -12,7 +12,7 @@ export function Phase2Proposals() {
 
 
   return (
-    <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)' }}>
+    <div className="home-page fade-in" style={{ background: 'var(--bg-core)' }}>
       <div className="home-content" style={{ position: 'relative', zIndex: 10, paddingTop: '40px', paddingLeft: '24px', paddingRight: '24px', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate(-1)} />
@@ -74,13 +74,22 @@ export function Phase2Proposals() {
         ))}
       </div>
 
-      <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingBottom: '32px' }}>
+      <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <button 
           onClick={() => navigate('/phase3_home')}
           className="primary-btn"
         >
           <span>Começar teste</span>
           <ArrowRight size={16} />
+        </button>
+        <button 
+          onClick={() => navigate('/phase2/context')}
+          style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#F8FAFC', padding: '16px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+        >
+          Voltar ao Contexto Base
+        </button>
+        <button onClick={() => navigate('/process_home')} className="text-btn" style={{ color: '#94A3B8', marginTop: '8px' }}>
+          Ir para o Início
         </button>
       </div>
     </div>

@@ -77,7 +77,7 @@ export function Profile() {
   const frequentMarkers = Object.entries(markerCounts).filter(([_, count]) => count >= nightCount / 2).map(([m]) => m);
 
   return (
-    <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)' }}>
+    <div className="home-page fade-in" style={{ background: 'var(--bg-core)' }}>
       <div style={{ opacity: 0.08, position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none', height: '30vh', overflow: 'hidden' }}>
         <NightSignature />
       </div>

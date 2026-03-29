@@ -49,7 +49,7 @@ export function Phase2Context() {
   const secondaryContextDesc = sec && FACTOR_DESCRIPTIONS[sec] ? FACTOR_DESCRIPTIONS[sec] : null;
 
   return (
-    <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)' }}>
+    <div className="home-page fade-in" style={{ background: 'var(--bg-core)' }}>
       <div className="home-content" style={{ position: 'relative', zIndex: 10, paddingTop: '40px', paddingLeft: '24px', paddingRight: '24px' }}>
         
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/phase2/entry')} />

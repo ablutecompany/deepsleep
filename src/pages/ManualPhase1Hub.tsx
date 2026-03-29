@@ -19,12 +19,14 @@ export function ManualPhase1Hub() {
   const done = progress >= target;
 
   const handleDelete = (id: string) => {
-    deleteManualLog(id);
-    setLogs(getManualLogs());
+    if (window.confirm("Queres mesmo apagar este registo? Esta ação não pode ser anulada.")) {
+      deleteManualLog(id);
+      setLogs(getManualLogs());
+    }
   };
 
   return (
-    <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="home-page fade-in" style={{ background: 'var(--bg-core)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div className="home-content" style={{ position: 'relative', zIndex: 10, paddingTop: '40px', paddingLeft: '24px', paddingRight: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/process_home')} />
