@@ -1,197 +1,151 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NightSignature } from '../components/NightSignature';
-import { ArrowRight, Activity, Info, CalendarClock } from 'lucide-react';
+import { ArrowLeft, Clock, Activity, ShieldAlert, Sparkles, Map } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { usePhase3Store } from '../store/Phase3ContextStore';
+import { useNightCount } from '../hooks/useNightCount';
 import { getProposals } from '../domain/Phase2/proposals';
 import { FACTOR_LABELS } from '../domain/Phase2/interpreter';
+
+function getConfidenceLabel(confidence: number): string {
+  if (confidence < 60) return "Leitura inicial";
+  if (confidence < 75) return "Útil, mas ainda a estabilizar";
+  if (confidence < 90) return "Leitura forte e consistente";
+  return "Leitura altamente estável";
+}
 
 export function Profile() {
   const navigate = useNavigate();
   const { deliverable } = usePhase2Store();
   const { cycle } = usePhase3Store();
-  const [nightCount, setNightCount] = useState(0);
-
-  useEffect(() => {
-    let count = parseInt(localStorage.getItem('nightCount') || '0', 10);
-    if (isNaN(count)) count = 0;
-    setNightCount(count);
-  }, []);
+  const nightCount = useNightCount();
 
   if (nightCount < 5) {
     return (
-      <div className="home-page" style={{ paddingBottom: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#000', padding: '24px', textAlign: 'center' }}>
-        <Activity size={48} color="#1E293B" style={{ marginBottom: '24px' }} />
-        <h2 style={{ fontSize: '24px', color: '#F8FAFC', fontWeight: 500, marginBottom: '16px' }}>
+      <div className="home-page fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--bg-core)', padding: '24px', textAlign: 'center' }}>
+        <Activity size={32} color="#1E293B" style={{ marginBottom: '24px' }} />
+        <h2 style={{ fontSize: '20px', color: '#F8FAFC', fontWeight: 300, marginBottom: '12px' }}>
           Ouve primeiro.
         </h2>
-        <p style={{ color: '#94A3B8', fontSize: '14px', lineHeight: '22px', maxWidth: '280px' }}>
-          O sistema precisa de analisar 5 noites válidas do teu sono mecânico (Fase 1) antes de conseguir projetar a tua identidade biológica.
+        <p style={{ color: '#64748B', fontSize: '14px', lineHeight: '22px', maxWidth: '280px', fontWeight: 300 }}>
+          O sistema precisa de observar o teu sono mecânico em silêncio. Faltam {5 - nightCount} noites.
         </p>
         <button 
           onClick={() => navigate('/process_home')}
-          style={{ marginTop: '40px', padding: '16px 32px', borderRadius: '8px', background: '#0F172A', color: '#F8FAFC', border: '1px solid #1E293B', fontWeight: 500, letterSpacing: '1px' }}
+          className="text-btn"
+          style={{ marginTop: '40px', color: '#38BDF8' }}
         >
-          VOLTAR AO INÍCIO
+          Voltar a monitorizar
         </button>
       </div>
     );
   }
 
   return (
-    <div className="home-page" style={{ paddingBottom: '100px' }}>
-      <div style={{ opacity: 0.15 }}>
+    <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)' }}>
+      <div style={{ opacity: 0.08, position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none', height: '30vh', overflow: 'hidden' }}>
         <NightSignature />
       </div>
       
-      <div className="home-content">
-        <header className="hero-section">
-          <span className="kicker">Identidade Base</span>
-          <h1 className="title-large" style={{ fontSize: '38px' }}>Perfil em<br/>construção</h1>
-          <div className="readout-pill mt-4">
-            <span className="status-dot"></span>
-            NÍVEL DE CERTEZA DO PERFIL: ~60%
-          </div>
+      <div className="home-content" style={{ position: 'relative', zIndex: 10, paddingTop: '40px', paddingLeft: '24px', paddingRight: '24px' }}>
+        
+        <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/process_home')} />
+        
+        <header style={{ marginBottom: '40px' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>A tua identidade<br />biológica.</h1>
+          <p style={{ marginTop: '12px', fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
+            Baseado na análise silenciosa do teu ritmo natural.
+          </p>
+          {localStorage.getItem('dataSourceType') && (
+            <p style={{ marginTop: '16px', fontSize: '12px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#38BDF8' }} />
+              Fonte atual: {localStorage.getItem('dataSourceType') === 'manual' ? 'registo manual' : localStorage.getItem('dataSourceType')}
+            </p>
+          )}
         </header>
 
-        <section className="editorial-module">
-          <span className="kicker">Traços mais consistentes</span>
-
-          <div className="trait-block" style={{ marginTop: '24px' }}>
-            <h3 className="trait-label">Regularidade</h3>
-            <h2 className="module-title">Responde melhor a horários estáveis</h2>
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          
+          <div className="editorial-card">
+            <h3 className="kicker">Proteção Inerente</h3>
+            <h2 className="module-title" style={{ marginTop: '4px', marginBottom: '8px' }}>Adormecimento rápido e denso</h2>
             <p className="module-desc">
-              O teu sono tende a estabilizar visivelmente nas noites em que a hora de deitar não varia mais do que trinta minutos.
+              O momento em que adormeces mantém-se incrivelmente constante. Funciona como um bloco fundacional protetor do teu descanso.
             </p>
-            <div className="pattern-evidence">
-              <div className="evidence-row">
-                <span className="evidence-key">Base:</span>
-                <span className="evidence-val">Confiança alta</span>
-              </div>
-            </div>
           </div>
 
-          <div className="trait-block" style={{ marginTop: '40px' }}>
-            <h3 className="trait-label">Fricção Digital</h3>
-            <h2 className="module-title" style={{ color: 'var(--text-primary)' }}>Sensibilidade tátil</h2>
+          <div className="editorial-card">
+            <h3 className="kicker" style={{ color: '#F59E0B' }}>Padrão Sensível</h3>
+            <h2 className="module-title" style={{ marginTop: '4px', marginBottom: '8px' }}>Reatividade à fricção tátil</h2>
             <p className="module-desc">
-              A reentrada no telemóvel a meio da noite pesa significativamente mais do que a média do teu padrão. Quando acontece, a continuidade da noite tende a cair.
+              Quando há quebras a meio da noite, a reentrada em estímulos digitais agrava severamente a continuidade das fases profundas subsequentes.
             </p>
-            <div className="pattern-evidence">
-              <div className="evidence-row">
-                <span className="evidence-key">Base:</span>
-                <span className="evidence-val">Confiança média-alta</span>
-              </div>
-            </div>
           </div>
-        </section>
 
-        <section className="editorial-module">
-          <span className="kicker accent">Maior fragilidade</span>
-          <h2 className="module-title">Janela crítica na madrugada</h2>
-          <p className="module-desc">
-            Até agora, as horas entre as 03:00 e as 04:30 concentram quase toda a tua dispersão de sono contínuo.
-          </p>
-        </section>
+          <div className="editorial-card">
+            <h3 className="kicker" style={{ color: '#EF4444' }}>Zona Instável</h3>
+            <h2 className="module-title" style={{ marginTop: '4px', marginBottom: '8px' }}>Pico de alerta na madrugada</h2>
+            <p className="module-desc">
+              Até agora, as horas entre as 03:00 e as 04:30 concentram quase toda a tua dispersão de sono contínuo de forma sistemática.
+            </p>
+          </div>
 
-        <section className="editorial-module">
-          <span className="kicker">O que mais te protege</span>
-          <h2 className="module-title" style={{ color: 'var(--text-primary)' }}>Ritmo de adormecimento</h2>
-          <p className="module-desc">
-            O adormecimento inicial tem-se mantido incrívelmente constante e rápido. Tem funcionado como a fundação protetora do teu descanso.
-          </p>
         </section>
 
         {deliverable && (
-          <section className="editorial-module" style={{ background: 'rgba(56, 189, 248, 0.03)', border: '1px solid rgba(56, 189, 248, 0.1)', padding: '24px', borderRadius: '16px', marginTop: '40px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <Activity size={16} color="#38BDF8" />
-              <span className="kicker" style={{ margin: 0, color: '#38BDF8' }}>Contexto Comportamental</span>
+          <section className="editorial-card contextual-layer" style={{ marginTop: '48px', padding: '24px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.03)', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+              <Sparkles size={14} color="#38BDF8" />
+              <span className="kicker" style={{ margin: 0, color: '#38BDF8' }}>Inferência Contextual</span>
             </div>
             
-            <h2 className="module-title" style={{ color: 'var(--text-primary)', marginBottom: '16px' }}>
-              {deliverable.dominantDrivers.length > 0 ? FACTOR_LABELS[deliverable.dominantDrivers[0]] : 'Padrão multifatorial complexo'}
+            <h2 className="module-title" style={{ color: '#F8FAFC', marginBottom: '12px', fontSize: '20px' }}>
+              {deliverable.dominantDrivers.length > 0 ? FACTOR_LABELS[deliverable.dominantDrivers[0]] : 'Arquitetura complexa mista'}
             </h2>
             
-            <p className="module-desc" style={{ marginBottom: '16px' }}>
-              Baseado na tua última auto-análise. <span style={{ color: '#94A3B8' }}>{deliverable.temporalProfile}</span>.
+            <p className="module-desc" style={{ marginBottom: '24px' }}>
+              {deliverable.temporalProfile}. {deliverable.flags.length > 0 ? `Foram identificados fatores de tensão transversais (Ex: ${deliverable.flags[0].toLowerCase()}).` : ""}
             </p>
 
-            <div className="pattern-evidence" style={{ borderLeftColor: '#38BDF8', background: 'transparent', padding: '0 0 0 16px', margin: 0 }}>
-              <div className="evidence-row">
-                <span className="evidence-key" style={{ color: '#F8FAFC' }}>Confiança:</span>
-                <span className="evidence-val" style={{ color: '#38BDF8' }}>{deliverable.confidence}%</span>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Robutez da inferência</span>
+                <span style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400 }}>{getConfidenceLabel(deliverable.confidence)}</span>
               </div>
             </div>
-
-            {deliverable.flags.length > 0 && (
-              <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {deliverable.flags.map((flag, idx) => (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#94A3B8' }}>
-                    <Info size={14} />
-                    <span>{flag}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           </section>
         )}
 
         {cycle && (
-          <section className="editorial-module" style={{ background: 'rgba(16, 185, 129, 0.03)', border: '1px solid rgba(16, 185, 129, 0.1)', padding: '24px', borderRadius: '16px', marginTop: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <CalendarClock size={16} color="#10B981" />
-              <span className="kicker" style={{ margin: 0, color: '#10B981', background: 'transparent', padding: 0 }}>
-                {cycle.status === 'active' ? 'Teste em curso (Fase 3)' : 'Teste concluído'}
+          <section className="editorial-card test-track-card" style={{ marginTop: '24px', padding: '20px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.03)', border: '1px solid rgba(16, 185, 129, 0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <Clock size={14} color="#10B981" />
+              <span className="kicker" style={{ margin: 0, color: '#10B981' }}>
+                {cycle.status === 'active' ? 'Direção Ativa' : 'Direção Concluída'}
               </span>
             </div>
             
-            <h2 className="module-title" style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '18px' }}>
-              {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.title || 'Teste de Hipótese'}
+            <h2 className="module-title" style={{ fontSize: '16px', marginBottom: '8px' }}>
+              {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.title || 'Hipótese ativa'}
             </h2>
             
-            {cycle.status === 'active' ? (
-              <p className="module-desc" style={{ marginBottom: '16px', fontSize: '13px' }}>
-                A observância está neste momento num total de <span style={{ color: '#F8FAFC' }}>{Object.keys(cycle.dailyCheckins).length} dias</span> de registo consecutivo.
-              </p>
-            ) : (
-              <p className="module-desc" style={{ marginBottom: '16px', fontSize: '13px' }}>
-                Recomendação Final: <span style={{ color: '#F8FAFC' }}>{cycle.finalRecommendation || `Ação: ${cycle.reviewState}`}</span>
-              </p>
-            )}
+            <p style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
+              {cycle.status === 'active' 
+                ? `${Object.keys(cycle.dailyCheckins).length} dias em percurso observacional.`
+                : cycle.finalRecommendation}
+            </p>
           </section>
         )}
 
-        <section className="editorial-module footer-module" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>
-          <span className="kicker">Ainda a ganhar forma</span>
-          <h3 className="trait-label" style={{ color: 'var(--text-muted)' }}>Recuperação percebida</h3>
-          <h2 className="module-title muted-title" style={{ fontSize: '15px', marginBottom: '12px' }}>
-            O sistema tenta agora observar a ligação entre as tuas noites profundas e como sentes os teus dias de maior energia.
-          </h2>
-          <div className="pattern-evidence" style={{ borderLeft: 'none', paddingLeft: 0, marginTop: 0 }}>
-            <div className="evidence-row">
-              <span className="evidence-key">Estado:</span>
-              <span className="evidence-val" style={{ color: 'var(--text-secondary)' }}>Ainda a ganhar forma. Estamos a cruzar dados empíricos.</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Bloco de Continuidade Final */}
-        <section className="continuity-block" style={{ marginTop: '64px', marginBottom: '32px' }}>
-          <p className="flow-text text-secondary mb-6 text-center" style={{ fontSize: '14px' }}>
-            O teu perfil inicial já está formado.<br/>Podes avançar para a fase seguinte ou voltar ao início.
-          </p>
-          <div className="stack-btns">
-            <button className="primary-action-btn w-100" onClick={() => navigate('/phase2/entry')}>
-              <span>Avançar para contexto e propostas</span>
-              <ArrowRight size={16} strokeWidth={1.5} />
+        <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'center' }}>
+            <button 
+              onClick={() => navigate(deliverable ? '/phase2/proposals' : '/phase2/entry')}
+              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#F8FAFC', padding: '16px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+            >
+              <Map size={16} />
+              {deliverable ? 'Ver Propostas Guardadas' : 'Avancar para Contexto Inicial'}
             </button>
-            <button className="secondary-action-btn w-100 mt-4" onClick={() => navigate('/process_home')}>
-              Voltar ao início
-            </button>
-          </div>
-        </section>
+        </div>
 
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { BottomNav } from './components/BottomNav';
+import { DevTools } from './components/DevTools';
 import { Home } from './pages/Home';
 import { InsightDetail } from './pages/InsightDetail';
 import { Tonight } from './pages/Tonight';
@@ -9,6 +10,7 @@ import { Control } from './pages/Control';
 
 import { Auth } from './pages/Auth';
 import { ProcessHome } from './pages/ProcessHome';
+import { DataSourceSelection } from './pages/DataSourceSelection';
 import { Phase1Entry } from './pages/Phase1Entry';
 import { Phase1Progress } from './pages/Phase1Progress';
 import { ActiveSession } from './pages/ActiveSession';
@@ -32,6 +34,7 @@ export default function App() {
             <Route path="/" element={<Auth />} />
             <Route path="/process_home" element={<ProcessHome />} />
             
+            <Route path="/data_source" element={<DataSourceSelection />} />
             <Route path="/phase1_entry" element={<Phase1Entry />} />
             <Route path="/phase1_home" element={<Home />} />
             <Route path="/phase1_progress" element={<Phase1Progress />} />
@@ -54,6 +57,7 @@ export default function App() {
         </main>
         {/* <BottomNav /> - Temporarily hidden during guided flow testing if wanted, but left here for global structure */}
         <BottomNav />
+        <DevTools />
       </div>
     </BrowserRouter>
     </Phase3StoreProvider>

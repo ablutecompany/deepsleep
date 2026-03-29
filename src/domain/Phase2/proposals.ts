@@ -21,23 +21,23 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
   let proposals: EnhancedProposal[] = [
     { 
       id: 'prop_ancora',
-      title: "Ancoragem Matinal", 
-      why: "A base biológica precisa de um horário inegociável para começar a calcular a pressão de sono noturna.", 
-      observe: "O quão difícil é levantar nos primeiros 3 dias e se a 'fome de sono' aparece mais cedo à noite.",
-      whenNotTo: "Se o teu horário de trabalho mudou drasticamente (turnos).",
+      title: "Fixar a hora de despertar", 
+      why: "Acordar à mesma hora ajuda o corpo a prever e preparar o sono para a noite seguinte.", 
+      observe: "A dificuldade em sair da cama à hora marcada nos primeiros dias.",
+      whenNotTo: "O teu horário de trabalho for inconstante (turnos).",
       minWindow: "5 dias",
       minDays: 5,
-      future: "Fundação para as propostas de compressão de sono da Fase 3."
+      future: "Estabelece um relógio biológico estável antes de tentar alterar hábitos noturnos."
     },
     { 
       id: 'prop_descomp',
-      title: "Descompressão Passiva", 
-      why: "O teu cérebro está a levar estímulos visuais rápidos até o momento de tentar apagar, confundindo o ritmo circadiano.",
-      observe: "Os pensamentos circulares quando ficas em total silêncio sem o telemóvel.",
-      whenNotTo: "Nunca. É uma recomendação universal.",
+      title: "Reduzir estímulo antes de deitar", 
+      why: "Demasiado estímulo visual ou mental perto da hora de deitar pode dificultar a transição para o sono.",
+      observe: "A tendência para voltar ao telemóvel ou entrar em pensamento circular quando tudo acalma.",
+      whenNotTo: "O estímulo digital não parecer ter peso real no teu padrão atual.",
       minWindow: "3 dias",
       minDays: 3,
-      future: "Permite iniciar testes de relaxamento cognitivo na Fase futura."
+      future: "Cria uma base mais limpa para perceber se a ativação mental está a ser alimentada pelo ambiente."
     }
   ];
 
@@ -45,13 +45,13 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
     if (deliverable.proposalConstraints.some(c => c.includes('Dor'))) {
       proposals.push({ 
         id: 'prop_ergo',
-        title: "Proteção Ergonómica", 
-        why: "A matriz detetou que a tensão corporal e a dor são gatilhos ativos a meio da noite.", 
-        observe: "A frequência com que acordas para corrigir a posição.",
-        whenNotTo: "Se tiveres uma lesão aguda recente que já tem indicação médica de imobilidade específica.",
+        title: "Aliviar o desconforto físico", 
+        why: "A tensão corporal ou dor durante a noite provoca despertares frequentes que fragmentam o descanso.", 
+        observe: "Quantas vezes acordas especificamente para mudar de posição devido a desconforto.",
+        whenNotTo: "Tiveres indicação médica para manter uma posição específica a dormir.",
         minWindow: "4 dias",
         minDays: 4,
-        future: "Essencial para não confundir 'mente hiperativa' com 'resposta a dor'."
+        future: "Resolve barreiras físicas óbvias antes de assumirmos que o problema é stress ou rotina."
       });
     }
 
@@ -59,26 +59,26 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
       proposals = proposals.filter(p => p.id !== 'prop_ancora');
       proposals.unshift({ 
         id: 'prop_foco',
-        title: "Foco Deslocado", 
-        why: "O medo de não dormir virou o vilão. Tentar forçar o sono deitado na cama só aumenta o nível de alerta do teu corpo.", 
-        observe: "O nível de resistência em sair da cama quando o sono não vem após 20 minutos.",
-        whenNotTo: "Se a casa for extremamente fria ou insegura, fica apenas sentado na cama em vez de deitado.",
+        title: "Sair da cama quando o sono não vem", 
+        why: "Quando ficas deitado a tentar adormecer à força, o estado de alerta sobe e o sono tende a afastar-se ainda mais.", 
+        observe: "A dificuldade em sair da cama quando o sono não aparece ao fim de cerca de 20 minutos.",
+        whenNotTo: "A casa for insegura, demasiado fria, ou se te sentires mais estável sentado na cama do que a circular.",
         minWindow: "7 dias",
         minDays: 7,
-        future: "Será o teu trunfo de segurança antes de aplicar restrições ao tempo na cama na Fase futura."
+        future: "Ajuda a quebrar a associação entre cama e estado de alerta antes de testar medidas mais exigentes."
       });
     }
 
     if (deliverable.flags.includes('Noctúria presente')) {
       proposals.push({ 
         id: 'prop_hidrica',
-        title: "Restrição Hídrica Noturna", 
-        why: "O volume de líquido noturno acorda o metabolismo renal e impede o sono contínuo e profundo.", 
-        observe: "A densidade do teu primeiro ciclo de sono sem interrupções gástricas.",
-        whenNotTo: "Se trabalhas fisicamente até perto da hora de deitar ou estás sob medicação diurética noturna.",
+        title: "Ajustar líquidos ao fim do dia", 
+        why: "Beber demasiado perto da hora de deitar pode fragmentar o sono logo na primeira metade da noite.", 
+        observe: "Despertares precoces ligados a idas à casa de banho ou sensação de bexiga ativa durante a noite.",
+        whenNotTo: "Tiveres muita sede ao fim do dia, actividade física tardia, ou medicação que altere claramente o padrão urinário.",
         minWindow: "3 dias",
         minDays: 3,
-        future: "Preparação metabólica de base para métricas limpas."
+        future: "Permite reduzir uma causa física simples de fragmentação antes de testar mudanças mais complexas."
       });
     }
   }

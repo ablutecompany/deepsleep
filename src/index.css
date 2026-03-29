@@ -2,15 +2,15 @@
   /* Colors - Ultra Deep Pitch Black */
   --bg-core: #020203; 
   --surface-1: rgba(20, 20, 23, 0.4); 
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.15);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-strong: rgba(255, 255, 255, 0.1);
   
-  --text-primary: #f2f2f5;
-  --text-secondary: #8b8d96;
-  --text-muted: #52545c;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
   
-  --accent-color: #8c96ff; 
-  --warning-color: #ffa078;
+  --accent-color: #38BDF8; 
+  --warning-color: #F59E0B;
   
   --nav-bg: rgba(2, 2, 3, 0.7);
   
@@ -82,12 +82,23 @@ body {
 }
 
 .title-large {
-  font-size: 44px;
+  font-size: 36px;
   font-weight: 300;
-  letter-spacing: -0.05em;
-  line-height: 1.05;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
   color: var(--text-primary);
-  margin-top: -4px;
+}
+
+.editorial-card {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+}
+.editorial-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 /* System Readout */
@@ -165,50 +176,32 @@ body {
 }
 
 .editorial-module {
-  background: #0a0a0c;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 24px;
+  background: transparent;
+  border-top: 1px solid var(--border-subtle);
+  padding: 32px 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   position: relative;
-}
-.module-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.module-icon {
-  color: var(--text-muted);
-}
-.module-icon.accent {
-  color: var(--text-secondary); /* Removida cor berrante */
-}
-
-.footer-module {
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 48px;
 }
 
 .module-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 400;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
 }
 
 .muted-title {
   color: var(--text-muted);
-  font-size: 18px;
-  line-height: 1.4;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .module-desc {
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-secondary);
-  line-height: 1.65;
+  line-height: 1.6;
   font-weight: 300;
 }
 
@@ -730,8 +723,8 @@ body {
   background-color: var(--text-primary);
   color: var(--bg-core);
   border: none;
-  border-radius: 4px;
-  padding: 18px 24px;
+  border-radius: 8px;
+  padding: 16px 24px;
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -748,6 +741,24 @@ body {
 .primary-btn:active {
   transform: scale(0.98);
   opacity: 0.9;
+}
+
+/* Secondary Button Minimal */
+.secondary-btn {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 16px 24px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
 }
 
 /* Session State Panel */

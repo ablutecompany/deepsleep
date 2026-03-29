@@ -1,16 +1,10 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useNightCount } from '../hooks/useNightCount';
 
 export function Phase1Progress() {
   const navigate = useNavigate();
-  const [nightCount, setNightCount] = useState(0);
-
-  useEffect(() => {
-    let count = parseInt(localStorage.getItem('nightCount') || '0', 10);
-    if (isNaN(count)) count = 0;
-    setNightCount(count);
-  }, []);
+  const nightCount = useNightCount();
 
   const progressPercent = Math.min((nightCount / 5) * 100, 100);
 

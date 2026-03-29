@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Settings, Lock } from 'lucide-react';
+import { useNightCount } from '../hooks/useNightCount';
 
 export function ProcessHome() {
   const navigate = useNavigate();
-  const [nightCount, setNightCount] = useState(0);
-
-  useEffect(() => {
-    let count = parseInt(localStorage.getItem('nightCount') || '0', 10);
-    if (isNaN(count)) count = 0;
-    setNightCount(count);
-  }, []);
+  const nightCount = useNightCount();
 
   const phase1Done = nightCount >= 5;
+
+  const handlePhase1Click = () => {
+    const dataSource = localStorage.getItem('dataSourceType');
+    if (!dataSource) {
+      navigate('/data_source');
+    } else {
+      navigate('/phase1_entry');
+    }
+  };
 
   return (
     <div className="process-home fade-in" style={{ padding: '24px', paddingBottom: '100px' }}>
@@ -34,7 +37,7 @@ export function ProcessHome() {
       <div className="process-stages">
         {/* Phase 1 */}
         <div 
-          onClick={() => navigate('/phase1_entry')}
+          onClick={handlePhase1Click}
           className={`stage-card ${phase1Done ? 'completed' : 'active'}`}
         >
           <div className="stage-header">
@@ -68,7 +71,7 @@ export function ProcessHome() {
       
       {/* Botão de reset de testes */}
       <div style={{ marginTop: '64px', textAlign: 'center' }}>
-        <button className="text-btn" onClick={() => { localStorage.setItem('nightCount', '0'); window.location.reload(); }}>
+        <button className="text-btn" onClick={() => { localStorage.setItem('nightCount', '0'); window.dispatchEvent(new Event('deepsleep_simulated_change')); }}>
           Reset Flow Simulation
         </button>
       </div>

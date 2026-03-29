@@ -1,7 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { FACTOR_LABELS, FACTOR_DESCRIPTIONS } from '../domain/Phase2/interpreter';
+
+function getConfidenceLabel(confidence: number): string {
+  if (confidence < 60) return "Leitura inicial";
+  if (confidence < 75) return "Útil, mas ainda a estabilizar";
+  if (confidence < 90) return "Leitura forte e consistente";
+  return "Leitura altamente estável";
+}
 
 export function Phase2Context() {
   const navigate = useNavigate();
@@ -9,9 +16,9 @@ export function Phase2Context() {
 
   if (!deliverable) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#000', color: '#F8FAFC', padding: '24px', justifyContent: 'center', alignItems: 'center' }}>
-        <p>Ainda não há dados contextuais gerados.</p>
-        <button onClick={() => navigate('/phase2/entry')} style={{ marginTop: '24px', background: '#334155', color: '#F8FAFC', padding: '12px 24px', borderRadius: '8px', border: 'none' }}>
+      <div className="home-page fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-core)', color: '#F8FAFC', padding: '24px', justifyContent: 'center', alignItems: 'center' }}>
+        <p style={{ color: '#64748B', fontWeight: 300 }}>Ainda não há dados contextuais gerados.</p>
+        <button onClick={() => navigate('/phase2/entry')} style={{ marginTop: '32px', color: '#38BDF8' }} className="text-btn">
           Voltar ao início
         </button>
       </div>
@@ -28,81 +35,73 @@ export function Phase2Context() {
   const secondaryDesc = sec && FACTOR_DESCRIPTIONS[sec] ? FACTOR_DESCRIPTIONS[sec] : null;
 
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '100vh', boxSizing: 'border-box', background: '#000' }}>
-      <header style={{ marginBottom: '40px', marginTop: '16px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 500, color: '#F8FAFC', lineHeight: '40px' }}>
-          Leitura contextual
-        </h1>
-        <p style={{ fontSize: '14px', color: '#94A3B8', marginTop: '8px' }}>
-          Síntese comportamental com {deliverable.confidence}% de certeza.
-        </p>
-      </header>
+    <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)' }}>
+      <div className="home-content" style={{ position: 'relative', zIndex: 10, paddingTop: '40px', paddingLeft: '24px', paddingRight: '24px' }}>
+        
+        <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/phase2/entry')} />
+        
+        <header style={{ marginBottom: '40px' }}>
+          <span className="kicker" style={{ color: '#A855F7', marginBottom: '16px' }}>Inferência Contextual</span>
+          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Leitura<br />Comportamental.</h1>
+          <p style={{ marginTop: '12px', fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
+            {getConfidenceLabel(deliverable.confidence)}.
+          </p>
+        </header>
 
-      <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1px', color: '#64748B', marginBottom: '16px', textTransform: 'uppercase' }}>O que está a pesar mais</h3>
-        <div style={{ background: '#1E293B', borderRadius: '12px', padding: '20px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 500, color: '#F8FAFC', marginBottom: '8px' }}>{primaryLabel}</h2>
-          {primaryDesc && <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '22px' }}>{primaryDesc.weight}</p>}
-        </div>
-      </section>
-
-      {secondaryLabel && (
-        <section style={{ marginBottom: '32px' }}>
-          <h3 style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1px', color: '#64748B', marginBottom: '16px', textTransform: 'uppercase' }}>O que pode estar a agravar</h3>
-          <div style={{ background: 'transparent', border: '1px solid #1E293B', borderRadius: '12px', padding: '20px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 500, color: '#E2E8F0', marginBottom: '8px' }}>{secondaryLabel}</h2>
-            {secondaryDesc && <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '22px' }}>{secondaryDesc.weight}</p>}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          
+          <div className="editorial-card">
+            <h3 className="kicker" style={{ color: '#F8FAFC' }}>O que está a pesar mais</h3>
+            <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '20px' }}>{primaryLabel}</h2>
+            {primaryDesc && <p className="module-desc">{primaryDesc.weight}</p>}
           </div>
-        </section>
-      )}
 
-      {deliverable.hiddenFactorIndex > 1.4 && (
-        <section style={{ marginBottom: '32px' }}>
-          <h3 style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1px', color: '#64748B', marginBottom: '16px', textTransform: 'uppercase' }}>O que ainda não está claro</h3>
-          <div style={{ background: 'rgba(255, 255, 255, 0.03)', borderRadius: '12px', padding: '16px 20px', borderLeft: '3px solid #38BDF8' }}>
-            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '22px' }}>
-              Existem pequenos sinais de defesa nas tuas escolhas. Pode haver um fator escondido ou uma causa física dissimulada que ainda estamos a subpercepcionar.
-            </p>
-          </div>
-        </section>
-      )}
-
-      <section style={{ marginBottom: '40px' }}>
-        <h3 style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1px', color: '#64748B', marginBottom: '16px', textTransform: 'uppercase' }}>Onde vale a pena testar primeiro</h3>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          {primaryDesc && (
-            <li style={{ position: 'relative', paddingLeft: '20px', fontSize: '14px', color: '#F8FAFC', marginBottom: '12px', lineHeight: '22px' }}>
-              <span style={{ position: 'absolute', left: 0, top: '6px', width: '6px', height: '6px', borderRadius: '50%', background: '#38BDF8' }}></span>
-              {primaryDesc.testFirst}
-            </li>
+          {secondaryLabel && (
+            <div className="editorial-card" style={{ background: 'transparent', border: 'none', borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '20px', paddingRight: 0, paddingBottom: 0, paddingTop: '8px' }}>
+              <h3 className="kicker" style={{ color: '#94A3B8' }}>O que pode estar a agravar</h3>
+              <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '18px', color: '#E2E8F0' }}>{secondaryLabel}</h2>
+              {secondaryDesc && <p className="module-desc">{secondaryDesc.weight}</p>}
+            </div>
           )}
-          {deliverable.proposalOpportunities.map((opp, idx) => (
-            <li key={idx} style={{ position: 'relative', paddingLeft: '20px', fontSize: '14px', color: '#F8FAFC', marginBottom: '12px', lineHeight: '22px' }}>
-              <span style={{ position: 'absolute', left: 0, top: '6px', width: '6px', height: '6px', borderRadius: '50%', background: '#38BDF8' }}></span>
-              {opp}
-            </li>
-          ))}
-        </ul>
-      </section>
 
-      <div style={{ flex: 1 }} />
+          {deliverable.hiddenFactorIndex > 1.4 && (
+            <div className="editorial-card" style={{ background: 'rgba(56, 189, 248, 0.03)', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
+              <h3 className="kicker" style={{ color: '#38BDF8' }}>O que ainda não está claro</h3>
+              <p className="module-desc" style={{ marginTop: '12px', color: '#94A3B8' }}>
+                Existem pequenos sinais de defesa nas tuas respostas. Pode haver um fator reativo escondido que ainda não compreendemos totalmente.
+              </p>
+            </div>
+          )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
-        <button 
-          onClick={() => navigate('/phase2/proposals')}
-          style={{ width: '100%', height: '56px', borderRadius: '8px', background: '#F8FAFC', color: '#0F172A', border: 'none', fontWeight: 500, letterSpacing: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-        >
-          <span>Avançar para propostas</span>
-          <ArrowRight size={18} />
-        </button>
+          <div style={{ marginTop: '16px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <h3 className="kicker" style={{ color: '#94A3B8', marginBottom: '24px' }}>Direção Tática Recomendada</h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {primaryDesc && (
+                <li style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#F8FAFC', marginTop: '10px', flexShrink: 0 }}></div>
+                  <span style={{ fontSize: '15px', color: '#E2E8F0', lineHeight: '1.6', fontWeight: 300 }}>{primaryDesc.testFirst}</span>
+                </li>
+              )}
+              {deliverable.proposalOpportunities.map((opp, idx) => (
+                <li key={idx} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#64748B', marginTop: '10px', flexShrink: 0 }}></div>
+                  <span style={{ fontSize: '15px', color: '#94A3B8', lineHeight: '1.6', fontWeight: 300 }}>{opp}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
 
-        <button 
-          onClick={() => navigate('/phase2/questions')}
-          style={{ width: '100%', background: 'transparent', color: '#64748B', border: 'none', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-        >
-          <ChevronLeft size={16} />
-          Voltar às respostas
-        </button>
+        <div style={{ marginTop: '64px', marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <button 
+            onClick={() => navigate('/phase2/proposals')}
+            className="primary-btn"
+          >
+            <span>Ver propostas de ação</span>
+            <ArrowRight size={16} />
+          </button>
+        </div>
+
       </div>
     </div>
   );
