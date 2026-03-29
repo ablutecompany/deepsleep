@@ -9,9 +9,9 @@ export function ManualPhase1Form() {
   const [dateStr, setDateStr] = useState(new Date().toISOString().split('T')[0]);
   const [bedTime, setBedTime] = useState('23:00');
   const [wakeTime, setWakeTime] = useState('07:00');
-  const [timeToSleepMin, setTimeToSleepMin] = useState<number>(15);
-  const [awakenings, setAwakenings] = useState<number>(0);
-  const [awakeTimeMin, setAwakeTimeMin] = useState<number>(0);
+  const [timeToSleepMin, setTimeToSleepMin] = useState<number | ''>('');
+  const [awakenings, setAwakenings] = useState<number | ''>('');
+  const [awakeTimeMin, setAwakeTimeMin] = useState<number | ''>('');
   const [recovery, setRecovery] = useState<ManualNightLog['recovery']>('Razoável');
   const [markers, setMarkers] = useState<string[]>([]);
 
@@ -24,18 +24,24 @@ export function ManualPhase1Form() {
   };
 
   const handleSave = () => {
+    if (!dateStr || !bedTime || !wakeTime || timeToSleepMin === '' || awakenings === '' || awakeTimeMin === '' || !recovery) {
+      alert('Por favor, preenche todos os campos numéricos e horários.');
+      return;
+    }
     saveManualLog({
       dateStr,
       bedTime,
       wakeTime,
-      timeToSleepMin,
-      awakenings,
-      awakeTimeMin,
+      timeToSleepMin: Number(timeToSleepMin),
+      awakenings: Number(awakenings),
+      awakeTimeMin: Number(awakeTimeMin),
       recovery,
       markers
     });
     navigate(-1);
   };
+
+  const isComplete = Boolean(dateStr && bedTime && wakeTime && timeToSleepMin !== '' && awakenings !== '' && awakeTimeMin !== '' && recovery);
 
   return (
     <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -166,6 +172,7 @@ export function ManualPhase1Form() {
           <button 
             onClick={handleSave}
             className="primary-btn"
+            style={{ opacity: isComplete ? 1 : 0.5, cursor: isComplete ? 'pointer' : 'not-allowed' }}
           >
             <span>Guardar Noite</span>
             <Save size={16} />

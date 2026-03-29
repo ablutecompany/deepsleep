@@ -19,8 +19,6 @@ export function ProcessHome() {
       navigate('/data_source');
     } else if (dataSource === 'manual') {
       navigate('/manual_log_hub');
-    } else {
-      navigate('/phase1_entry');
     }
   };
 
@@ -97,9 +95,13 @@ export function ProcessHome() {
       </div>
       
       {/* Botão de reset de testes */}
+      {/* Reset beta button for testing safely */}
       <div style={{ marginTop: '64px', textAlign: 'center' }}>
-        <button className="text-btn" onClick={() => { localStorage.setItem('nightCount', '0'); window.dispatchEvent(new Event('deepsleep_simulated_change')); }}>
-          Reset Flow Simulation
+        <button 
+          className="text-btn" 
+          onClick={() => { localStorage.clear(); window.location.href = '/'; }}
+        >
+          Reiniciar Beta
         </button>
       </div>
     </div>
