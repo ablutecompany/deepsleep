@@ -11,6 +11,9 @@ import { Control } from './pages/Control';
 import { Auth } from './pages/Auth';
 import { ProcessHome } from './pages/ProcessHome';
 import { DataSourceSelection } from './pages/DataSourceSelection';
+import { ManualPhase1Hub } from './pages/ManualPhase1Hub';
+import { ManualPhase1Form } from './pages/ManualPhase1Form';
+
 import { Phase1Entry } from './pages/Phase1Entry';
 import { Phase1Progress } from './pages/Phase1Progress';
 import { ActiveSession } from './pages/ActiveSession';
@@ -35,6 +38,9 @@ export default function App() {
             <Route path="/process_home" element={<ProcessHome />} />
             
             <Route path="/data_source" element={<DataSourceSelection />} />
+            <Route path="/manual_log_hub" element={<ManualPhase1Hub />} />
+            <Route path="/manual_log_form" element={<ManualPhase1Form />} />
+
             <Route path="/phase1_entry" element={<Phase1Entry />} />
             <Route path="/phase1_home" element={<Home />} />
             <Route path="/phase1_progress" element={<Phase1Progress />} />

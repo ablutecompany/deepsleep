@@ -22,6 +22,7 @@ export function Auth() {
   const handleReset = () => {
     localStorage.clear();
     setHasState(false);
+    window.location.reload();
   };
 
   return (

@@ -26,14 +26,20 @@ export function Phase2Questions() {
 
   useEffect(() => {
     if (isGenerating) {
-      // Evaluate and save deliverable
-      const finalDeliverable = evaluateAssessment(answersDraft, mode);
-      setDeliverable(finalDeliverable);
-      
-      const t = setTimeout(() => navigate('/phase2/context'), 2500);
+      let t: ReturnType<typeof setTimeout>;
+      try {
+        const finalDeliverable = evaluateAssessment(answersDraft, mode);
+        setDeliverable(finalDeliverable);
+      } catch (e) {
+        console.error("Phase 2 Generation Error:", e);
+      } finally {
+        // Reduzido para 800ms para evitar retenções irritantes e prevenir re-renders de store clearing o timeout
+        t = setTimeout(() => navigate('/phase2/context', { replace: true }), 800);
+      }
       return () => clearTimeout(t);
     }
-  }, [isGenerating, navigate, answersDraft, mode, setDeliverable]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGenerating]);
 
   if (isGenerating) {
     return (

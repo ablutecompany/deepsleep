@@ -12,6 +12,8 @@ export function ProcessHome() {
     const dataSource = localStorage.getItem('dataSourceType');
     if (!dataSource) {
       navigate('/data_source');
+    } else if (dataSource === 'manual') {
+      navigate('/manual_log_hub');
     } else {
       navigate('/phase1_entry');
     }

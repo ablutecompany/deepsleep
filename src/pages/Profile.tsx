@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { NightSignature } from '../components/NightSignature';
-import { ArrowLeft, Clock, Activity, ShieldAlert, Sparkles, Map } from 'lucide-react';
+import { ArrowLeft, Clock, Activity, Sparkles, Map } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { usePhase3Store } from '../store/Phase3ContextStore';
 import { useNightCount } from '../hooks/useNightCount';

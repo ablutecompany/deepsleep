@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Database, RotateCcw, FastForward, CheckCircle, Activity, Bug, Moon, Clock, UserX } from 'lucide-react';
+import { RotateCcw, Activity, Bug, Moon, Clock, UserX } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
-import { usePhase3Store } from '../store/Phase3ContextStore';
 
 // SEEDED USERS COERENTES
 const PROFILES = {
@@ -46,7 +45,6 @@ const PROFILES = {
 export function DevTools() {
   const [isOpen, setIsOpen] = useState(false);
   const { setDeliverable } = usePhase2Store();
-  const { startCycle } = usePhase3Store();
 
   const softReload = () => {
     window.dispatchEvent(new Event('deepsleep_simulated_change'));
@@ -71,7 +69,7 @@ export function DevTools() {
     window.location.href = '/phase2/proposals';
   };
 
-  const simulateNight = (type: 'boa' | 'fragmentada' | 'curta') => {
+  const simulateNight = () => {
     let current = parseInt(localStorage.getItem('nightCount') || '0', 10);
     current += 1;
     localStorage.setItem('nightCount', current.toString());
@@ -108,9 +106,9 @@ export function DevTools() {
         <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', marginTop: '8px' }}>
           <p style={{ fontSize: '11px', color: '#64748B', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Simulador de Noites (Fase 1)</p>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => simulateNight('boa')} style={btnStyle('#10B981', 'transparent', true)}><Moon size={12}/> Boa</button>
-            <button onClick={() => simulateNight('fragmentada')} style={btnStyle('#F59E0B', 'transparent', true)}><Activity size={12}/> Frag</button>
-            <button onClick={() => simulateNight('curta')} style={btnStyle('#EF4444', 'transparent', true)}><Clock size={12}/> Curta</button>
+            <button onClick={() => simulateNight()} style={btnStyle('#10B981', 'transparent', true)}><Moon size={12}/> Boa</button>
+            <button onClick={() => simulateNight()} style={btnStyle('#F59E0B', 'transparent', true)}><Activity size={12}/> Frag</button>
+            <button onClick={() => simulateNight()} style={btnStyle('#EF4444', 'transparent', true)}><Clock size={12}/> Curta</button>
           </div>
         </div>
 

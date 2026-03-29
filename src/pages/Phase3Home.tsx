@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePhase3Store } from '../store/Phase3ContextStore';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { getProposals, getPriorityTest } from '../domain/Phase2/proposals';
-import { ArrowLeft, CheckCircle2, XCircle, RotateCcw, Activity, ShieldCheck, MapPin } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, MapPin } from 'lucide-react';
 
 export function Phase3Home() {
   const navigate = useNavigate();

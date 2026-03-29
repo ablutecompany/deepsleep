@@ -1,9 +1,16 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export function ActiveSession() {
   const navigate = useNavigate();
   // Fixed start time for mockup
   const startTime = "01:23";
+
+  useEffect(() => {
+    if (localStorage.getItem('dataSourceType') === 'manual') {
+      navigate('/manual_log_hub', { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <div className="active-session-page fade-in">

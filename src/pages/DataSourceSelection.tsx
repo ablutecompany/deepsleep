@@ -7,7 +7,14 @@ export function DataSourceSelection() {
   const handleManualSelect = () => {
     localStorage.setItem('dataSourceType', 'manual');
     localStorage.setItem('dataSourceChosenAt', Date.now().toString());
-    navigate('/phase1_entry');
+    
+    // Limpeza de estado falso herdado da demo sensorial
+    const logs = localStorage.getItem('manualNightLogs');
+    if (!logs || JSON.parse(logs).length === 0) {
+      localStorage.setItem('nightCount', '0');
+    }
+    
+    navigate('/manual_log_hub');
   };
 
   return (

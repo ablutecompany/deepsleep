@@ -1,4 +1,3 @@
-import { QUESTIONS_BANK } from './questions';
 
 export interface AssessmentDeliverable {
   schemaVersion: number;

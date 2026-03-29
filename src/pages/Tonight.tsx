@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 export function Tonight() {
   const navigate = useNavigate();
   const [isActivating, setIsActivating] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem('dataSourceType') === 'manual') {
+      navigate('/manual_log_hub', { replace: true });
+    }
+  }, [navigate]);
 
   const handleActivation = () => {
     setIsActivating(true);

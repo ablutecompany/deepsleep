@@ -17,16 +17,17 @@ export function Phase2Context() {
   if (!deliverable) {
     return (
       <div className="home-page fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-core)', color: '#F8FAFC', padding: '24px', justifyContent: 'center', alignItems: 'center' }}>
-        <p style={{ color: '#64748B', fontWeight: 300 }}>Ainda não há dados contextuais gerados.</p>
-        <button onClick={() => navigate('/phase2/entry')} style={{ marginTop: '32px', color: '#38BDF8' }} className="text-btn">
-          Voltar ao início
+        <p style={{ color: '#64748B', fontWeight: 300, textAlign: 'center', lineHeight: '1.6' }}>Não foi possível concluir o cálculo contextual ou não existem respostas suficientes gravadas.</p>
+        <button onClick={() => navigate('/phase2/entry', { replace: true })} style={{ marginTop: '32px', color: '#38BDF8', padding: '12px 24px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.1)', cursor: 'pointer', border: 'none' }} className="text-btn">
+          Tentar novamente
         </button>
       </div>
     );
   }
 
-  const dom = deliverable.dominantDrivers[0];
-  const sec = deliverable.secondaryDrivers[0];
+  // Safety fallbacks for array destructuring
+  const dom = deliverable?.dominantDrivers?.[0];
+  const sec = deliverable?.secondaryDrivers?.[0];
 
   const primaryLabel = dom && FACTOR_LABELS[dom] ? FACTOR_LABELS[dom] : 'Causas distribuídas / multifatoriais';
   const primaryDesc = dom && FACTOR_DESCRIPTIONS[dom] ? FACTOR_DESCRIPTIONS[dom] : null;
