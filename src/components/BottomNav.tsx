@@ -1,19 +1,18 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, MoonStar, Activity, User, ShieldCheck } from 'lucide-react';
+import { Home, MoonStar, Activity, User } from 'lucide-react';
 
 export function BottomNav() {
   const location = useLocation();
 
-  if (location.pathname === '/insight' || location.pathname === '/tonight') {
+  if (!['/phase1_home', '/patterns', '/profile'].includes(location.pathname)) {
     return null;
   }
 
   const tabs = [
-    { to: '/', icon: Home, label: 'Início' },
+    { to: '/phase1_home', icon: Home, label: 'Início' },
     { to: '/tonight', icon: MoonStar, label: 'Noite' },
     { to: '/patterns', icon: Activity, label: 'Padrões' },
-    { to: '/profile', icon: User, label: 'Perfil' },
-    { to: '/control', icon: ShieldCheck, label: 'Controlo' }
+    { to: '/profile', icon: User, label: 'Perfil' }
   ];
 
   return (

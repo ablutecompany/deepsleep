@@ -5,47 +5,62 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class RoomNightAnalysisRepository(
-    private val sessionDao: SessionDao
+    private val inferenceEngine: SignalInferenceEngine,
+    private val capabilityManager: SensorCapabilityManager,
+    private val orchestrator: ConsentOrchestrator
 ) : NightAnalysisRepository {
 
     override suspend fun fetchLatestNightReview(): NightReviewResult = withContext(Dispatchers.IO) {
-        val allCount = sessionDao.getAllSessionsCount()
-        val validSessions = sessionDao.getValidSessionsSync()
-
-        if (allCount == 0) return@withContext NightReviewResult.NoData
-        if (validSessions.isEmpty()) return@withContext NightReviewResult.Interrupted
-
-        val latest = validSessions.first()
-        val missing = latest.getMissingInputs()
-
-        val parsedEvidence = if (latest.primaryImpactEvidenceStr.isNotEmpty()) {
-            latest.primaryImpactEvidenceStr.split(";").mapNotNull { token ->
-                val parts = token.split(":")
-                if (parts.size == 2) EvidenceItem(parts[0], parts[1]) else null
+        
+        // Simulating the fetch of the last session state from StateStore.
+        // In a real flow, we would read the LAST_STOP_REASON from DataStore.
+        // For the sake of this wiring, we will assume a Completed session, 
+        // but evaluating actual hardware snapshot dynamically.
+        
+        val snapshot = capabilityManager.produceSnapshot()
+        val (availability, degradation) = inferenceEngine.evaluateCapabilities(snapshot)
+        val insightMap = inferenceEngine.produceInsightMap(snapshot)
+        val confidence = inferenceEngine.calculateConfidenceBand(snapshot)
+        
+        // 1. Check fatal conditions first (Invalid / Interrupted)
+        if (!availability.isSessionValid) {
+             val fallback = orchestrator.getFallbackDisclosure("SENSOR_MOTION")
+             return@withContext NightReviewResult.Interrupted(
+                 reason = "Missing vital movement capability",
+                 disclosure = "Sessão interrompida. " + fallback.whatWillBeUnavailable
+             )
+        }
+        
+        // 2. Build polite disclosure based on missing/degraded inputs
+        val disclosure = StringBuilder()
+        if (snapshot.missingInputs.isNotEmpty()) {
+            if (snapshot.missingInputs.contains("AUDIO_INPUT")) {
+                disclosure.append("Esta leitura foi feita sem entrada acústica. ")
             }
-        } else emptyList()
+            if (snapshot.missingInputs.contains("DEVICE_USAGE")) {
+                disclosure.append("Alguns sinais contextuais (fricção) não estavam disponíveis esta noite. ")
+            }
+        }
+        
+        if (confidence == ConfidenceBand.MODERATE || confidence == ConfidenceBand.LOW) {
+            disclosure.append("A confiança desta leitura é ${if(confidence == ConfidenceBand.MODERATE) "moderada" else "baixa"} devido a dados em falta.")
+        } else {
+            if (disclosure.isEmpty()) {
+                disclosure.append("Sinais estruturais limpos e estáveis.")
+            }
+        }
 
         NightReviewResult.Success(
             NightReviewPayload(
-                statusCategory = NightStatusCategory.FRAGMENTED,
-                nightStatusKey = latest.nightStatusKey ?: "STATUS_UNBROKEN",
-                systemConfidenceScore = latest.confidenceScore,
-                confidenceLevel = when {
-                    latest.confidenceScore > 80 -> ConfidenceLevel.HIGH
-                    latest.confidenceScore > 50 -> ConfidenceLevel.MEDIUM
-                    else -> ConfidenceLevel.LOW
-                },
-                primaryImpactKey = latest.primaryImpactKey,
-                primaryImpactEvidence = parsedEvidence,
-                priorityActionKey = if (latest.primaryImpactKey == "IMPACT_DIGITAL_FRICTION") "ACTION_DEVICE_DISTANCING" else "ACTION_KEEP_ROUTINE",
-                learningState = LearningState.EMERGING,
-                requiredInputsPresent = missing.isEmpty(),
-                missingInputs = missing
+                missingInputs = snapshot.missingInputs,
+                degradedInsights = degradation.reasonList,
+                inconclusiveInsights = insightMap.inconclusiveInsights,
+                confidenceBand = confidence,
+                disclosureCopy = disclosure.toString().trim(),
+                nightStatusKey = "STATUS_FRAGMENTED", // Legacy stub
+                primaryImpactKey = "IMPACT_UNKNOWN", // Legacy stub
+                priorityActionKey = "ACTION_KEEP_ROUTINE" // Legacy stub
             )
         )
-    }
-
-    override suspend fun simulateAggressiveBatteryInterrupt() {
-        // Obsoleto na Track D. Fallbacks são lidadores pela UI Native da Track 2.
     }
 }

@@ -1,6 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { NightSignature } from '../components/NightSignature';
+import { ArrowRight } from 'lucide-react';
 
 export function Profile() {
+  const navigate = useNavigate();
+
   return (
     <div className="home-page" style={{ paddingBottom: '100px' }}>
       <div style={{ opacity: 0.15 }}>
@@ -11,7 +15,7 @@ export function Profile() {
         <header className="hero-section">
           <span className="kicker">Identidade Base</span>
           <h1 className="title-large" style={{ fontSize: '38px' }}>Perfil em<br/>construção</h1>
-          <div className="readout-pill">
+          <div className="readout-pill mt-4">
             <span className="status-dot"></span>
             NÍVEL DE CERTEZA DO PERFIL: ~60%
           </div>
@@ -78,6 +82,23 @@ export function Profile() {
             </div>
           </div>
         </section>
+
+        {/* Bloco de Continuidade Final */}
+        <section className="continuity-block" style={{ marginTop: '64px', marginBottom: '32px' }}>
+          <p className="flow-text text-secondary mb-6 text-center" style={{ fontSize: '14px' }}>
+            O teu perfil inicial já está formado.<br/>Podes avançar para a fase seguinte ou voltar ao início.
+          </p>
+          <div className="stack-btns">
+            <button className="primary-action-btn w-100" onClick={() => navigate('/phase2_entry')}>
+              <span>Avançar para contexto e propostas</span>
+              <ArrowRight size={16} strokeWidth={1.5} />
+            </button>
+            <button className="secondary-action-btn w-100 mt-4" onClick={() => navigate('/process_home')}>
+              Voltar ao início
+            </button>
+          </div>
+        </section>
+
       </div>
     </div>
   );

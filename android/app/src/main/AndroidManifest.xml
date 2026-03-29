@@ -30,7 +30,7 @@
         </activity>
 
         <service
-            android:name=".services.NightSessionService"
+            android:name=".domain.NightSessionService"
             android:foregroundServiceType="health|microphone"
             android:exported="false" />
             

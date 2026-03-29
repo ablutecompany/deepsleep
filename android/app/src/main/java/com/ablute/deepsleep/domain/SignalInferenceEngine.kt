@@ -1,76 +1,96 @@
 package com.ablute.deepsleep.domain
 
-import com.ablute.deepsleep.domain.features.NightFeatureMatrix
+// ==========================================
+// FASE F — SIGNALINFERENCEENGINE
+// ==========================================
 
 class SignalInferenceEngine {
 
-    fun runInference(matrix: NightFeatureMatrix, durationMs: Long, missingInputs: List<InputType>): NightReviewPayload {
+    fun evaluateCapabilities(snapshot: CapabilitySnapshot): Pair<InferenceAvailability, InferenceDegradationSummary> {
+        val reasons = mutableListOf<String>()
+        var severity = 0
         
-        // Inference Base Confidence begins based on presence of vectors
-        var confidence = 95
-        val evidenceList = mutableListOf<EvidenceItem>()
-        var primaryImpact: String? = null
-        var priorityAction = "ACTION_DEVICE_DISTANCING"
-        var nightStatus = "STATUS_UNBROKEN"
-
-        // Degradation 
-        if (missingInputs.isNotEmpty()) {
-            confidence -= 20 * missingInputs.size
+        // Even without audio, we don't collapse.
+        if (snapshot.audioCapability == AudioCapability.DENIED) {
+            reasons.add("Acoustic mapping suspended (Missing permission)")
+            severity += 1
+        }
+        
+        if (snapshot.deviceUsageCapability != DeviceUsageCapability.GRANTED) {
+            reasons.add("Digital friction correlation disabled")
+            severity += 1
+        }
+        
+        // Critical Movement fallback check
+        val isSessionValid = snapshot.rawMovementCapability == RawMovementCapability.AVAILABLE
+        if (!isSessionValid) {
+            reasons.add("Fatal: Raw mechanical sensing unavailable")
+            severity += 5
+        } else if (snapshot.activityDerivedMovementCapability != ActivityDerivedMovementCapability.AVAILABLE) {
+            reasons.add("Semantic phase classification constrained to mechanical approximations")
+            severity += 2
         }
 
-        // 1. Digital Friction Extraction 
-        if (matrix.usage.isAvailable && matrix.usage.totalUnlocks > 0) {
-            primaryImpact = "IMPACT_DIGITAL_FRICTION"
-            nightStatus = "STATUS_FRAGMENTED"
-            priorityAction = "ACTION_DEVICE_DISTANCING"
-            
-            evidenceList.add(EvidenceItem("EVIDENCE_UNLOCK_COUNT", matrix.usage.totalUnlocks.toString()))
-            
-            if (matrix.usage.longestScreenOnDurationMs > 60000L) {
-                 val minutes = matrix.usage.longestScreenOnDurationMs / 60000L
-                 evidenceList.add(EvidenceItem("EVIDENCE_SCREEN_DURATION_MIN", minutes.toString()))
-            }
-        } 
-        // 2. Acústico Extraction
-        else if (matrix.audio.isAvailable && matrix.audio.noiseInterruptionCount > 0) {
-            primaryImpact = "IMPACT_NOISE_DISRUPTION"
-            nightStatus = "STATUS_LOW_EFFICIENCY"
-            priorityAction = "ACTION_KEEP_ROUTINE"
-            
-            evidenceList.add(EvidenceItem("EVIDENCE_NOISE_PULSES", matrix.audio.noiseInterruptionCount.toString()))
-            if (matrix.audio.peakNoiseLevelDb != null) {
-                evidenceList.add(EvidenceItem("EVIDENCE_NOISE_PEAK_DB", matrix.audio.peakNoiseLevelDb.toString()))
-            }
-        } 
-        // 3. Fallback / Unbroken
-        else {
-            if (missingInputs.isEmpty()) {
-                evidenceList.add(EvidenceItem("EVIDENCE_CLEAN_SIGNALS", "true"))
-                priorityAction = "ACTION_KEEP_ROUTINE"
-            } else {
-                nightStatus = "STATUS_LOW_EFFICIENCY"
-                evidenceList.add(EvidenceItem("EVIDENCE_INSUFFICIENT_PROOFS", "true"))
-                priorityAction = "ACTION_KEEP_ROUTINE"
-            }
-        }
-
-        val level = when {
-             confidence > 80 -> ConfidenceLevel.HIGH
-             confidence > 50 -> ConfidenceLevel.MEDIUM
-             else -> ConfidenceLevel.LOW
-        }
-
-        return NightReviewPayload(
-            statusCategory = NightStatusCategory.FRAGMENTED,
-            nightStatusKey = nightStatus,
-            systemConfidenceScore = confidence.coerceAtLeast(10),
-            confidenceLevel = level,
-            primaryImpactKey = primaryImpact,
-            primaryImpactEvidence = evidenceList,
-            priorityActionKey = priorityAction,
-            learningState = LearningState.EMERGING,
-            requiredInputsPresent = missingInputs.isEmpty(),
-            missingInputs = missingInputs
+        return Pair(
+            InferenceAvailability(
+                isSessionValid = isSessionValid,
+                isDegraded = severity > 0
+            ),
+            InferenceDegradationSummary(
+                severityLevel = severity,
+                reasonList = reasons
+            )
         )
+    }
+
+    fun produceInsightMap(snapshot: CapabilitySnapshot): InsightAvailabilityMap {
+        val available = mutableListOf("SLEEP_DURATION", "MECHANICAL_FRAGMENTATION")
+        val inconclusive = mutableListOf<String>()
+        val amputated = mutableListOf<String>()
+
+        when (snapshot.audioCapability) {
+            AudioCapability.GRANTED -> available.add("ACOUSTIC_INTERRUPTIONS")
+            AudioCapability.TEMPORARILY_UNAVAILABLE -> inconclusive.add("ACOUSTIC_INTERRUPTIONS")
+            else -> amputated.add("ACOUSTIC_INTERRUPTIONS")
+        }
+
+        when (snapshot.deviceUsageCapability) {
+            DeviceUsageCapability.GRANTED -> available.add("DIGITAL_FRICTION")
+            else -> amputated.add("DIGITAL_FRICTION")
+        }
+
+        if (snapshot.healthConnectCapability.overallState == HealthConnectState.AVAILABLE) {
+            available.add("HRV_RECOVERY")
+            available.add("BLOOD_OXYGEN")
+        } else {
+            amputated.add("WEARABLE_ENRICHMENT")
+        }
+
+        if (snapshot.activityDerivedMovementCapability == ActivityDerivedMovementCapability.AVAILABLE) {
+            available.add("SEMANTIC_SLEEP_STAGES")
+        } else {
+            inconclusive.add("SEMANTIC_SLEEP_STAGES") // Can't be certain with just raw accel
+        }
+
+        return InsightAvailabilityMap(available, inconclusive, amputated)
+    }
+
+    fun calculateConfidenceBand(snapshot: CapabilitySnapshot): ConfidenceBand {
+        // Start high, drop based on hardware truth limits
+        var score = 100
+        
+        if (snapshot.rawMovementCapability != RawMovementCapability.AVAILABLE) return ConfidenceBand.UNKNOWN
+        
+        if (snapshot.activityDerivedMovementCapability != ActivityDerivedMovementCapability.AVAILABLE) score -= 30
+        if (snapshot.audioCapability != AudioCapability.GRANTED) score -= 15
+        if (snapshot.wearableMovementEnrichment != WearableMovementEnrichment.AVAILABLE) score -= 10
+        if (snapshot.deviceUsageCapability != DeviceUsageCapability.GRANTED) score -= 5
+
+        return when {
+            score >= 80 -> ConfidenceBand.HIGH
+            score >= 50 -> ConfidenceBand.MODERATE
+            score >= 20 -> ConfidenceBand.LOW
+            else -> ConfidenceBand.UNKNOWN
+        }
     }
 }

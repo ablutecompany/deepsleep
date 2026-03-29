@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Shield, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { NightSignature } from '../components/NightSignature';
+import { ArrowLeft } from 'lucide-react';
 
 export function Tonight() {
   const navigate = useNavigate();
@@ -9,45 +8,52 @@ export function Tonight() {
 
   const handleActivation = () => {
     setIsActivating(true);
-    // Simula bloqueio de ativação sagrado / timeout ritualístico
     setTimeout(() => {
-      // Por agora retorna à Home (simulando que entrou no estado ativo)
-      navigate('/');
-    }, 1800);
+      navigate('/active_session');
+    }, 1200);
   };
 
   return (
-    <div className="tonight-page">
-      {/* NightSignature é meramente um vulto muito escuro nesta vista para proteger a retina */}
-      <div style={{ opacity: isActivating ? 0 : 0.2, transition: 'opacity 1.5s ease' }}>
-        <NightSignature />
-      </div>
-
-      <nav className="top-bar" style={{ position: 'absolute', top: 0, width: '100%', padding: '24px 32px' }}>
-        <button className="icon-btn" onClick={() => navigate(-1)} style={{ opacity: isActivating ? 0 : 1 }}>
-          <ArrowRight size={24} strokeWidth={1} style={{ transform: 'rotate(180deg)' }} />
+    <div className="flow-page preparation-state fade-in">
+      <nav className="top-bar">
+        <button className="icon-btn" onClick={() => navigate('/phase1_entry')} disabled={isActivating}>
+          <ArrowLeft size={22} strokeWidth={1.5} />
         </button>
       </nav>
 
-      <div className="tonight-content" style={{ opacity: isActivating ? 0 : 1, transition: 'opacity 0.8s ease' }}>
-        <span className="kicker intimate">Recomendação · Janela das 03:00</span>
-        <h1 className="title-serene">
-          Risco de interrupção no ciclo profundo.
-        </h1>
-        <p className="recommendation-text">
-          O afastamento do telemóvel neutraliza este padrão. Remova o dispositivo do seu alcance antes de iniciarmos a sessão.
+      <div className={`flow-content pt-8 ${isActivating ? 'fade-out' : ''}`}>
+        <span className="session-kicker">Estado da recolha desta noite</span>
+        
+        <div className="capability-list mt-8">
+          <div className="capability-row">
+            <span className="cap-name">Movimento mecânico</span>
+            <span className="cap-status">Disponível</span>
+          </div>
+          <div className="capability-row">
+            <span className="cap-name">Áudio do quarto</span>
+            <span className="cap-status">Disponível</span>
+          </div>
+          <div className="capability-row">
+            <span className="cap-name">Uso de ecrã</span>
+            <span className="cap-status limited">Limitado</span>
+          </div>
+        </div>
+
+        <p className="flow-text mt-8 text-secondary">
+          O dispositivo deve permanecer com o ecrã virado para cima, imobilizado na mesa de cabeceira. O modo de voo é recomendado.
         </p>
       </div>
 
-      <button 
-        className={`sacred-trigger ${isActivating ? 'activating' : ''}`} 
-        onClick={handleActivation}
-      >
-        <span className="sacred-label">
-          {isActivating ? 'A iniciar monitorização...' : 'Iniciar sessão nocturna'}
-        </span>
-        <Shield size={20} strokeWidth={1.2} className="sacred-icon" />
-      </button>
+      <div className="bottom-action">
+        <button 
+          className={`primary-trigger ${isActivating ? 'activating' : ''}`} 
+          onClick={handleActivation}
+        >
+          <span className="trigger-label">
+            {isActivating ? 'A iniciar...' : 'Iniciar sessão nocturna'}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }

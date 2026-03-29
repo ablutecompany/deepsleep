@@ -1,7 +1,13 @@
 package com.ablute.deepsleep.ui.tonight
 
+import android.content.Context
+import android.content.Intent
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ablute.deepsleep.domain.AudioCapability
+import com.ablute.deepsleep.domain.DeviceUsageCapability
+import com.ablute.deepsleep.domain.NightSessionService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,14 +27,14 @@ sealed interface TonightUiState {
 }
 
 class TonightViewModel(
-    private val controller: com.ablute.deepsleep.domain.NightSessionController,
+    private val context: Context,
     private val capabilityManager: com.ablute.deepsleep.domain.SensorCapabilityManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<TonightUiState>(
         TonightUiState.ArmedNotStarted(
-            hasAudio = capabilityManager.hasAudioAccess(),
-            hasUsage = capabilityManager.hasUsageAccess()
+            hasAudio = capabilityManager.produceSnapshot().audioCapability == AudioCapability.GRANTED,
+            hasUsage = capabilityManager.produceSnapshot().deviceUsageCapability == DeviceUsageCapability.GRANTED
         )
     )
     val uiState: StateFlow<TonightUiState> = _uiState.asStateFlow()
@@ -36,25 +42,29 @@ class TonightViewModel(
     fun refreshCapabilityState() {
         if (_uiState.value is TonightUiState.ArmedNotStarted) {
             _uiState.value = TonightUiState.ArmedNotStarted(
-                hasAudio = capabilityManager.hasAudioAccess(),
-                hasUsage = capabilityManager.hasUsageAccess()
+                hasAudio = capabilityManager.produceSnapshot().audioCapability == AudioCapability.GRANTED,
+                hasUsage = capabilityManager.produceSnapshot().deviceUsageCapability == DeviceUsageCapability.GRANTED
             )
         }
     }
 
-    fun hasAudioAccess(): Boolean = capabilityManager.hasAudioAccess()
-    fun hasUsageAccess(): Boolean = capabilityManager.hasUsageAccess()
-
     fun startSession() {
         viewModelScope.launch {
-            controller.spawnNightSession()
+            val serviceIntent = Intent(context, NightSessionService::class.java).apply {
+                action = NightSessionService.ACTION_START
+            }
+            ContextCompat.startForegroundService(context, serviceIntent)
             _uiState.value = TonightUiState.Active
         }
     }
 
     fun stopSession() {
         viewModelScope.launch {
-            controller.terminateNightSession()
+            val serviceIntent = Intent(context, NightSessionService::class.java).apply {
+                action = NightSessionService.ACTION_STOP
+            }
+            context.startService(serviceIntent)
+            
             _uiState.value = TonightUiState.Finalizing
             delay(1500) // Simular Sensor Hardware Flush
             _uiState.value = TonightUiState.ProcessingPendingMorning
@@ -63,12 +73,11 @@ class TonightViewModel(
 
     fun abortSessionEarly() {
         viewModelScope.launch {
-            _uiState.value = TonightUiState.InvalidTooShort("Sessão muito curta para processamento empírico (< 2 horas).")
+            _uiState.value = TonightUiState.InvalidTooShort("Sessão demasiado curta para análise consistente.")
         }
     }
 
     fun interruptSession(reason: String) {
-        // Exposed to gracefully handle ForegroundService OS destruction 
         viewModelScope.launch {
              _uiState.value = TonightUiState.Interrupted(reason)
         }
