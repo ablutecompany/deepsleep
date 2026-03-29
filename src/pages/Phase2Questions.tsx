@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePhase2Store } from '../store/Phase2ContextStore';
-import { QUESTIONS_BANK, SHORT_MODE_QIDS, LONG_MODE_QIDS } from '../domain/Phase2/questions';
+import { QUESTIONS_BANK, getQuestionsForMode } from '../domain/Phase2/questions';
 import { evaluateAssessment } from '../domain/Phase2/engine';
 
 export function Phase2Questions() {
@@ -12,7 +12,13 @@ export function Phase2Questions() {
   const modeRaw = searchParams.get('mode');
   const mode = modeRaw === '25' ? 25 : 10;
   
-  const qids = mode === 25 ? LONG_MODE_QIDS : SHORT_MODE_QIDS;
+  const [qids] = useState(() => {
+    // Ensure we don't re-roll the questions if we already answered some.
+    if (Object.keys(answersDraft).length > 0) {
+      return Object.keys(answersDraft);
+    }
+    return getQuestionsForMode(mode);
+  });
   
   // Find first unanswered question
   const initialIndex = qids.findIndex(qid => !answersDraft[qid] || answersDraft[qid].length === 0);

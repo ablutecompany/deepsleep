@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePhase3Store } from '../store/Phase3ContextStore';
 
 export function Auth() {
   const navigate = useNavigate();
   const [hasState, setHasState] = useState(false);
+
+  const { cycle } = usePhase3Store();
 
   useEffect(() => {
     const isBeta = localStorage.getItem('appMode') === 'beta_internal';
@@ -16,7 +19,13 @@ export function Auth() {
       localStorage.setItem('betaStartedAt', Date.now().toString());
     }
     localStorage.setItem('lastActiveAt', Date.now().toString());
-    navigate('/process_home');
+    
+    // Regra 5: Routing do Plano Ativo
+    if (cycle && cycle.status === 'active') {
+      navigate('/phase3_home');
+    } else {
+      navigate('/process_home');
+    }
   };
 
   const handleReset = () => {

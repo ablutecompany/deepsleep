@@ -4,7 +4,7 @@ import { usePhase2Store } from '../store/Phase2ContextStore';
 
 export function Phase2Entry() {
   const navigate = useNavigate();
-  const { setAnswersDraft, setDeliverable } = usePhase2Store();
+  const { deliverable, setAnswersDraft, setDeliverable } = usePhase2Store();
 
   const handleStart = (mode: 10 | 25) => {
     setAnswersDraft({}); // Clear draft when forcing new
@@ -12,16 +12,37 @@ export function Phase2Entry() {
     navigate(`/phase2/questions?mode=${mode}`);
   };
 
+  if (deliverable) {
+    return (
+      <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '100vh', boxSizing: 'border-box' }}>
+        <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer' }} onClick={() => navigate(-1)} />
+        <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', lineHeight: '40px', marginBottom: '24px' }}>
+          Interpretação ativa.
+        </h1>
+        <p style={{ fontSize: '15px', color: '#94A3B8', lineHeight: '24px', fontWeight: 300 }}>
+          O teu motor de contexto já dispõe de um referencial concluído. A não ser que o teu padrão de sono tenha ignorado ou alterado drasticamente sem justificação temporal percecionada, não é aconselhado refazer o inquérito base cego.
+        </p>
+        <div style={{ flex: 1 }} />
+        <button onClick={() => navigate('/phase2/context')} className="primary-btn" style={{ marginBottom: '16px' }}>
+          Consultar Leitura Atual
+        </button>
+        <button onClick={() => handleStart(10)} className="text-btn" style={{ color: '#EF4444', marginBottom: '40px' }}>
+          Quero mesmo refazer a leitura base (10 perguntas)
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '100vh', boxSizing: 'border-box' }}>
       <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer' }} onClick={() => navigate(-1)} />
       
       <h1 style={{ fontSize: '32px', fontWeight: 500, color: '#F8FAFC', lineHeight: '40px', marginBottom: '24px' }}>
-        Contexto
+        Aprofundamento
       </h1>
       
-      <p style={{ fontSize: '16px', color: '#94A3B8', lineHeight: '24px' }}>
-        Para perceber melhor o que está a afectar o teu sono as nossas escolhas automáticas não chegam. Escolhe a dimensão da tua partilha.
+      <p style={{ fontSize: '15px', color: '#94A3B8', lineHeight: '24px', fontWeight: 300 }}>
+        Para orientar a intervenção e as tuas escolhas a motorização limpa não chega. Seleciona qual a amplitude de questionário complementar a que queres responder hoje.
       </p>
 
       <div style={{ flex: 1 }} />

@@ -25,15 +25,27 @@ export function Phase2Context() {
     );
   }
 
-  // Safety fallbacks for array destructuring
-  const dom = deliverable?.dominantDrivers?.[0];
-  const sec = deliverable?.secondaryDrivers?.[0];
+  // Determine pattern text
+  const patternLabels: Record<string, { label: string, desc: string }> = {
+    'DIFICULDADE_ADORMECIMENTO': { label: 'Latência de Entrada', desc: 'A tua medição base denota dificuldade primordial na quebra de percepção inicial.' },
+    'FRAGMENTACAO_MANUTENCAO': { label: 'Fragmentação de Manutenção', desc: 'A tua noite não consolida, manifestando quebras frequentes que inviabilizam a arquitectura regular.' },
+    'REENTRADA_DESPERTAR': { label: 'Alerta de Madrugada', desc: 'O teu foco central é o estado de vigília persistente a meio da noite, sem conseguir voltar ao abandono.' },
+    'IRREGULARIDADE_HORARIOS': { label: 'Sem Âncora Circadiana', desc: 'Os teus horários medidos cruzados com a tua cadência apontam para um arrastar crónico ou mudança severa de ritmos.' },
+    'COMPONENTE_ORGANICA': { label: 'Impacto Físico Direto', desc: 'Sinais claros mecânicos ou orgânicos parecem sobrepor-se à componente puramente psicológica no teu padrão.' },
+    'INDEFINIDO': { label: 'Padrão Distribuído', desc: 'O teu perfil ainda mistura vários sinais mecânicos.' }
+  };
 
-  const primaryLabel = dom && FACTOR_LABELS[dom] ? FACTOR_LABELS[dom] : 'Causas distribuídas / multifatoriais';
-  const primaryDesc = dom && FACTOR_DESCRIPTIONS[dom] ? FACTOR_DESCRIPTIONS[dom] : null;
+  const patternData = patternLabels[deliverable.primarySleepPattern] || patternLabels['INDEFINIDO'];
 
-  const secondaryLabel = sec && FACTOR_LABELS[sec] ? FACTOR_LABELS[sec] : null;
-  const secondaryDesc = sec && FACTOR_DESCRIPTIONS[sec] ? FACTOR_DESCRIPTIONS[sec] : null;
+  // Sub-context
+  const dom = deliverable?.contextualDrivers?.[0] || deliverable?.dominantDrivers?.[0];
+  const sec = deliverable?.contextualDrivers?.[1] || deliverable?.secondaryDrivers?.[0];
+
+  const primaryContextLabel = dom && FACTOR_LABELS[dom] ? FACTOR_LABELS[dom] : 'Causas distribuídas / multifatoriais';
+  const primaryContextDesc = dom && FACTOR_DESCRIPTIONS[dom] ? FACTOR_DESCRIPTIONS[dom] : null;
+
+  const secondaryContextLabel = sec && FACTOR_LABELS[sec] ? FACTOR_LABELS[sec] : null;
+  const secondaryContextDesc = sec && FACTOR_DESCRIPTIONS[sec] ? FACTOR_DESCRIPTIONS[sec] : null;
 
   return (
     <div className="home-page fade-in" style={{ padding: '0 0 100px 0', background: 'var(--bg-core)' }}>
@@ -52,16 +64,21 @@ export function Phase2Context() {
         <section style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
           <div className="editorial-card">
-            <h3 className="kicker" style={{ color: '#F8FAFC' }}>Sinal mais consistente hoje</h3>
-            <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '20px' }}>{primaryLabel}</h2>
-            {primaryDesc && <p className="module-desc">{primaryDesc.weight}</p>}
+            <h3 className="kicker" style={{ color: '#F8FAFC' }}>Padrão Base (Fase 1)</h3>
+            <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '20px' }}>{patternData.label}</h2>
+            <p className="module-desc">{patternData.desc}</p>
           </div>
 
-          {secondaryLabel && (
-            <div className="editorial-card" style={{ background: 'transparent', border: 'none', borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '20px', paddingRight: 0, paddingBottom: 0, paddingTop: '8px' }}>
-              <h3 className="kicker" style={{ color: '#94A3B8' }}>Outros fatores presentes</h3>
-              <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '18px', color: '#E2E8F0' }}>{secondaryLabel}</h2>
-              {secondaryDesc && <p className="module-desc">{secondaryDesc.weight}</p>}
+          <div className="editorial-card" style={{ background: 'transparent', border: 'none', borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '20px', paddingRight: 0, paddingBottom: 0, paddingTop: '8px' }}>
+            <h3 className="kicker" style={{ color: '#94A3B8' }}>Sub-motivos Apurados (Fase 2)</h3>
+            <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '18px', color: '#E2E8F0' }}>{primaryContextLabel}</h2>
+            {primaryContextDesc && <p className="module-desc">{primaryContextDesc.weight}</p>}
+          </div>
+
+          {secondaryContextLabel && (
+            <div className="editorial-card" style={{ background: 'transparent', border: 'none', borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '20px', paddingRight: 0, paddingBottom: 0, paddingTop: '8px', marginTop: '-16px' }}>
+              <h2 className="module-title" style={{ marginTop: '0', marginBottom: '8px', fontSize: '18px', color: '#E2E8F0' }}>{secondaryContextLabel}</h2>
+              {secondaryContextDesc && <p className="module-desc">{secondaryContextDesc.weight}</p>}
             </div>
           )}
 
@@ -77,10 +94,10 @@ export function Phase2Context() {
           <div style={{ marginTop: '16px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             <h3 className="kicker" style={{ color: '#94A3B8', marginBottom: '24px' }}>Direção a considerar em teste</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {primaryDesc && (
+              {primaryContextDesc && (
                 <li style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
                   <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#F8FAFC', marginTop: '10px', flexShrink: 0 }}></div>
-                  <span style={{ fontSize: '15px', color: '#E2E8F0', lineHeight: '1.6', fontWeight: 300 }}>{primaryDesc.testFirst}</span>
+                  <span style={{ fontSize: '15px', color: '#E2E8F0', lineHeight: '1.6', fontWeight: 300 }}>{primaryContextDesc.testFirst}</span>
                 </li>
               )}
               {deliverable.proposalOpportunities.map((opp, idx) => (

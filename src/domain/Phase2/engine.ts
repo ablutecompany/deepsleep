@@ -1,3 +1,6 @@
+import { getManualLogs } from '../Phase1/manualLogStore';
+
+export type PrimarySleepPattern = 'DIFICULDADE_ADORMECIMENTO' | 'FRAGMENTACAO_MANUTENCAO' | 'REENTRADA_DESPERTAR' | 'IRREGULARIDADE_HORARIOS' | 'COMPONENTE_ORGANICA' | 'INDEFINIDO';
 
 export interface AssessmentDeliverable {
   schemaVersion: number;
@@ -10,6 +13,11 @@ export interface AssessmentDeliverable {
   flags: string[];
   contradictions: string[];
   confidence: number;
+  
+  primarySleepPattern: PrimarySleepPattern;
+  contextualDrivers: string[];
+  
+  // Legacy fields to not break other unrefactored UI files
   dominantDrivers: string[];
   secondaryDrivers: string[];
   temporalProfile: string;
@@ -18,6 +26,7 @@ export interface AssessmentDeliverable {
   proposalConstraints: string[];
   proposalOpportunities: string[];
 }
+
 
 // Helpers for formulas
 const MIN = (x: number, y: number) => Math.min(x, y);
@@ -210,6 +219,60 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
   
   F18 += F18_penalty;
 
+  // CROSS-INTEGRATION: Phase 1 (Nightly Metrics) Modulating Phase 2
+  const logs = getManualLogs();
+  const numLogs = logs.length;
+  let avgLatency = 0;
+  let avgAwakenings = 0;
+  let avgAwakeTime = 0;
+  let markerUsage: Record<string, number> = {};
+
+  if (numLogs > 0) {
+    logs.forEach(l => {
+      avgLatency += l.timeToSleepMin;
+      avgAwakenings += l.awakenings;
+      avgAwakeTime += l.awakeTimeMin;
+      l.markers.forEach(m => {
+        markerUsage[m] = (markerUsage[m] || 0) + 1;
+      });
+    });
+    avgLatency /= numLogs;
+    avgAwakenings /= numLogs;
+    avgAwakeTime /= numLogs;
+
+    // Modulate based on truth-data from tracker
+    if (avgLatency > 40) {
+      F1 *= 1.4; // Hard evidence of Onset difficulty
+      F2 *= 1.3; // Sleep anxiety reinforced
+    } else {
+      F1 *= 0.6; // If onset is actually fast, reduce arbitrary onset anxiety scores
+      F2 *= 0.6;
+    }
+
+    if (avgAwakenings >= 2 && avgAwakeTime > 45) {
+      F11 *= 1.6; // Maintenance failure / fragmentation confirmed
+      F2 *= 1.4;  // Fear of returning to sleep
+    }
+
+    if (markerUsage['Ida à casa de banho'] && markerUsage['Ida à casa de banho'] > numLogs * 0.4) {
+      F16 += 2.0; // Nocturia confirmed
+    }
+
+    if (markerUsage['Dor / desconforto'] && markerUsage['Dor / desconforto'] > numLogs * 0.3) {
+      F9 *= 1.8;  // Pain interference overrides subtle psych factors
+    }
+
+    // Phone is only considered an "aggravator" (F1) if the user actually struggles to fall asleep.
+    if (markerUsage['Telemóvel antes de dormir'] && markerUsage['Telemóvel antes de dormir'] > numLogs * 0.5) {
+      if (avgLatency > 30) {
+        F1 *= 1.3; // Replicated friction
+      } else {
+        // If falling asleep is fine, mobile phone is a functional regulator, ignore it.
+        confidence += 5; 
+      }
+    }
+  }
+
   const scores = [
     { f: 'P1', val: F1, score: F1 },
     { f: 'P2', val: F2, score: F2 },
@@ -237,19 +300,45 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
   if (q82 === 2) temporalProfile = 'Padrão crónico instalado';
   else if (q82 === 0) temporalProfile = 'Episódio recente / agudo';
 
-  let constraints = [];
-  let opportunities = [];
+  let constraints: string[] = [];
+  let opportunities: string[] = [];
 
-  if (F8 > 1.5) constraints.push('Cuidadores: Rotinas estritas não são viáveis.');
-  if (F9 > 1.5) constraints.push('Dor/Corpo: Ajuste ergonómico preferencial ao ajustamento mental.');
-  if (F5 > 1.5) constraints.push('Horários: Não forçar alvoradas fixas caso existam turnos.');
+  // Re-write Constraints and Opportunities strictly intersecting Phase 1 truths
+  if (markerUsage['Dor / desconforto'] && markerUsage['Dor / desconforto'] > 0) {
+    constraints.push('Dor/Desconforto físico registados.');
+  } else if (F9 > 1.5) {
+    constraints.push('Indícios de potencial bloqueio mecânico que precisa eliminação clara.');
+  }
 
-  if (F13 > 1.5) opportunities.push('Otimizar ambiente tátil/auditivo do quarto.');
-  if (F1 > 2.0) opportunities.push('Focar em protocolos de descompressão ativa antes da luz apagar.');
+  if (F8 > 1.5 || markerUsage['Cuidadores/Dependentes']) constraints.push('Cuidadores/Dependentes na janela noturna.');
+  if (F5 > 1.5) constraints.push('Não sugerir rotinas rígidas por irregularidade nos turnos.');
+
+  if (avgAwakenings >= 2 && avgAwakeTime > 30) {
+    opportunities.push('Trabalhar consolidacao da vigilha re-entrante após despertar.');
+  } else if (avgLatency > 30) {
+    opportunities.push('Trabalhar focos pre-cama com carga passiva.');
+  } else {
+    opportunities.push('Estabilização holística de âncoras circadianas de dia e de noite.');
+  }
 
   let flags = [];
-  if (F12 > 1.5) flags.push('Uso de substâncias ativo');
-  if (F16 > 1.5) flags.push('Noctúria presente');
+  if (F12 > 1.5) flags.push('Consumo associado de estimulantes/álcool detetado.');
+  if (F16 > 1.5 || markerUsage['Ida à casa de banho']) flags.push('Noctúria registada.');
+
+  // DETERMINATION OF PRIMARY SLEEP PATTERN (Rule 1)
+  let primarySleepPattern: PrimarySleepPattern = 'INDEFINIDO';
+
+  if (markerUsage['Dor / desconforto'] > 0 || markerUsage['Ida à casa de banho'] > numLogs * 0.4) {
+    primarySleepPattern = 'COMPONENTE_ORGANICA';
+  } else if (avgAwakenings >= 2 && avgAwakeTime > 45) {
+    primarySleepPattern = 'REENTRADA_DESPERTAR';
+  } else if (avgAwakenings >= 2) {
+    primarySleepPattern = 'FRAGMENTACAO_MANUTENCAO';
+  } else if (F5 > 1.8) { // Severe schedule irregularity
+    primarySleepPattern = 'IRREGULARIDADE_HORARIOS';
+  } else if (avgLatency > 40) {
+    primarySleepPattern = 'DIFICULDADE_ADORMECIMENTO';
+  }
 
   return {
     schemaVersion: 1,
@@ -262,6 +351,8 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
     flags,
     contradictions,
     confidence: Math.max(0, Math.min(100, confidence)),
+    primarySleepPattern,
+    contextualDrivers: dominantDrivers, // Using top P-factors to explain *why* pattern exists
     dominantDrivers,
     secondaryDrivers,
     temporalProfile,

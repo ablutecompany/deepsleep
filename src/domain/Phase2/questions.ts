@@ -12,11 +12,53 @@ export interface Question {
   options: Option[];
 }
 
-export const SHORT_MODE_QIDS = ['Q02', 'Q03', 'Q11', 'Q19', 'Q29', 'Q36', 'Q43', 'Q56', 'Q73', 'Q84'];
-export const LONG_MODE_QIDS = [
-  'Q02', 'Q03', 'Q06', 'Q10', 'Q11', 'Q13', 'Q16', 'Q19', 'Q22', 'Q26', 'Q29', 'Q36', 'Q39',
-  'Q43', 'Q49', 'Q53', 'Q56', 'Q58', 'Q63', 'Q67', 'Q73', 'Q77', 'Q84', 'Q86', 'Q99'
-];
+export function getQuestionsForMode(mode: 10 | 25): string[] {
+  // Pool 1: Onset & Anxiety
+  const p1 = ['Q11', 'Q12', 'Q13', 'Q16', 'Q17', 'Q19', 'Q21', 'Q23', 'Q25'];
+  // Pool 2: Maintenance & Waking
+  const p2 = ['Q02', 'Q10', 'Q20', 'Q22', 'Q04', 'Q05'];
+  // Pool 3: Routine/Schedule/Deceleration
+  const p3 = ['Q26', 'Q29', 'Q30', 'Q33', 'Q36', 'Q39'];
+  // Pool 4: Emotion/Mental load/Relations
+  const p4 = ['Q42', 'Q43', 'Q47', 'Q49', 'Q53', 'Q54'];
+  // Pool 5: Physical Discomfort/Environment/Substances
+  const p5 = ['Q56', 'Q57', 'Q58', 'Q61', 'Q63', 'Q73', 'Q77'];
+  // Pool 6: Chronicity & Evaluation
+  const p6 = ['Q82', 'Q84', 'Q86', 'Q93', 'Q99'];
+
+  const shuffle = (array: string[]) => {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+
+  const draw = (pool: string[], count: number) => shuffle(pool).slice(0, count);
+
+  if (mode === 10) {
+    return [
+      'Q03', // Anchor: Baseline state at bedtime
+      ...draw(p1, 2),
+      ...draw(p2, 2),
+      ...draw(p3, 1),
+      ...draw(p4, 1),
+      ...draw(p5, 2),
+      ...draw(p6, 1)
+    ];
+  }
+
+  return [
+    'Q03', 'Q06', // Anchors
+    ...draw(p1, 4),
+    ...draw(p2, 4),
+    ...draw(p3, 4),
+    ...draw(p4, 3),
+    ...draw(p5, 5),
+    ...draw(p6, 3)
+  ];
+}
 
 export const QUESTIONS_BANK: Record<string, Question> = {
   Q01: {

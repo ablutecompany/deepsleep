@@ -2,9 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import { User, Settings, Lock } from 'lucide-react';
 import { useNightCount } from '../hooks/useNightCount';
 
+import { usePhase2Store } from '../store/Phase2ContextStore';
+import { usePhase3Store } from '../store/Phase3ContextStore';
+
 export function ProcessHome() {
   const navigate = useNavigate();
   const nightCount = useNightCount();
+  const { deliverable } = usePhase2Store();
+  const { cycle } = usePhase3Store();
 
   const phase1Done = nightCount >= 5;
 
@@ -16,6 +21,23 @@ export function ProcessHome() {
       navigate('/manual_log_hub');
     } else {
       navigate('/phase1_entry');
+    }
+  };
+
+  const handlePhase2Click = () => {
+    if (!phase1Done) return;
+    if (cycle) {
+      navigate('/phase3_home');
+    } else if (deliverable) {
+      navigate('/phase2/context');
+    } else {
+      navigate('/phase2/entry');
+    }
+  };
+
+  const handlePhase3Click = () => {
+    if (cycle || deliverable) {
+      navigate('/phase3_home');
     }
   };
 
@@ -51,23 +73,26 @@ export function ProcessHome() {
 
         {/* Phase 2 */}
         <div 
-          onClick={() => phase1Done ? navigate('/phase2/entry') : undefined}
-          className={`stage-card ${phase1Done ? 'active highlight' : 'locked'}`}
+          onClick={handlePhase2Click}
+          className={`stage-card ${phase1Done ? (deliverable ? 'completed' : 'active highlight') : 'locked'}`}
         >
           <div className="stage-header">
-            <h3 className="stage-title">2. Contexto e propostas</h3>
-            <span className="stage-status">{phase1Done ? 'DISPONÍVEL' : <><Lock size={10} style={{marginRight: '4px', display:'inline-block'}}/> BLOQUEADA</>}</span>
+            <h3 className="stage-title">2. Interpretação Contextual</h3>
+            <span className="stage-status">{phase1Done ? (deliverable ? 'CONCLUÍDA' : 'DISPONÍVEL') : <><Lock size={10} style={{marginRight: '4px', display:'inline-block'}}/> BLOQUEADA</>}</span>
           </div>
-          <p className="stage-desc">Interpretação comportamental e introdução de mecânicas de melhoria.</p>
+          <p className="stage-desc">Leitura do contexto de fricção e formulação de estratégias.</p>
         </div>
 
         {/* Phase 3 */}
-        <div className="stage-card locked">
+        <div 
+          onClick={handlePhase3Click}
+          className={`stage-card ${deliverable ? (cycle ? 'active highlight' : 'active') : 'locked'}`}
+        >
           <div className="stage-header">
-            <h3 className="stage-title">3. Observância e ajustes</h3>
-            <span className="stage-status"><Lock size={10} style={{marginRight: '4px', display:'inline-block'}}/> BLOQUEADA</span>
+            <h3 className="stage-title">3. Plano e Intervenções</h3>
+            <span className="stage-status">{deliverable ? (cycle ? 'EM CURSO' : 'PRONTO A INICIAR') : <><Lock size={10} style={{marginRight: '4px', display:'inline-block'}}/> BLOQUEADA</>}</span>
           </div>
-          <p className="stage-desc">Calibração contínua baseada em protocolos clínicos.</p>
+          <p className="stage-desc">Teste controlado das propostas de ação e observação.</p>
         </div>
       </div>
       
