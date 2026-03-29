@@ -40,25 +40,25 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
       if (deliverable.flags.some(f => f.includes('Noctúria'))) {
         proposals.push({
           id: 'prop_hidrica',
-          title: "Cronometria e Restrição Hídrica à Noite",
-          why: "A fragmentação provada deve-se primariamente à pressão vesical que o cérebro tenta atender, roubando coesão.",
-          observe: "A distribuição real dos teus mililitros ingeridos (muitos utentes compensam secas diurnas empurrando água para a ceia).",
-          whenNotTo: "Estiveres a tomar medicação noturna que exige trato molhado.",
+          title: "Cronometria de Impacto Hídrico Noturno",
+          why: "A fragmentação registada cruza-se com a pressão vesical durante o ciclo. Adiar ou concentrar hidratação ajuda a distinguir causas orgânicas de ansiedade na interrupção do sono.",
+          observe: "Padrões de ingestão concentrados na hora da refeição ou ceia por défice diurno.",
+          whenNotTo: "Se existir indicação médica contrária ou necessidade para medicação específica.",
           minWindow: "4 noites sucessivas",
           minDays: 4,
-          future: "Permite eliminar da equação o falso 'Acorda por ansiedade' e focar na mecânica do órgão."
+          future: "Reduz o volume de interrupções puramente fisiológicas."
         });
       }
       if (deliverable.proposalConstraints.some(c => c.includes('Dor'))) {
         proposals.push({
           id: 'prop_ergo',
-          title: "Eliminação e Reposicionamento Físico",
-          why: "O impacto mecânico e articular está a vencer a intenção biológica de paralisação no sono (atonia).",
-          observe: "Exatamente qual a transição de perna ou braço que interrompe o delta profundo.",
-          whenNotTo: "Já estares sob reabilitação ativa conflituante.",
+          title: "Eliminação e Suporte Físico",
+          why: "O impacto mecânico relatado interfere com a continuidade natural do ciclo do sono.",
+          observe: "A relação entre posições adotadas e o momento de despertar consecutivo.",
+          whenNotTo: "Quando existir protocolo médico de reabilitação estruturado.",
           minWindow: "3 noites seguidas",
           minDays: 3,
-          future: "O corpo precisa deixar de ser o vigilante primário de ti próprio."
+          future: "Diminui o potencial de despertar gerado pelo próprio corpo."
         });
       }
       break;
@@ -67,26 +67,26 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
     case 'FRAGMENTACAO_MANUTENCAO':
       proposals.push({
         id: 'prop_levantar',
-        title: "Tática de Dissociação Condicionada (Sair da Cama)",
-        why: "A tua medição prova que ficas refém da madrugada no escuro. A almofada começa a servir ao cérebro como 'Gabinete de Resolução de Problemas' e perdes o sinal de adormecimento.",
-        observe: "A negociação mental que fazes para continuar lá deitado à força.",
-        whenNotTo: "O impacto no resto da casa for perturbador ou a temperatura do domicílio inibir a saída de forma doente.",
-        minWindow: "5 dias",
+        title: "Estratégia de Interrupção do Comportamento de Cama",
+        why: "Permanecer na cama durante muito tempo sem conseguir dormir agrava o alerta. Levantar-se temporariamente interrompe essa fase de associação negativa.",
+        observe: "A tendência para justificar a permanência na cama enquanto o estado de alerta aumenta.",
+        whenNotTo: "Quando o levantar gerar risco físico de quedas ou impacto no contexto familiar.",
+        minWindow: "5 dias experimentais",
         minDays: 5,
-        future: "Impede a cronificação do pânico secundário, devolvendo neutralidade tátil ao colchão."
+        future: "Impede a cronificação do alerta condicionado perante o ambiente de dormida."
       });
       break;
 
     case 'IRREGULARIDADE_HORARIOS':
       proposals.push({
         id: 'prop_ancora_horaria',
-        title: "Estipular Barreira de Fecho Central",
-        why: "Os turnos ou falhas de rotina impedem a criação da melatonina orgânica às horas habituais. Forçar ritmos noturnos exatos não vai funcionar se estipulares apenas a hora de adormecer.",
-        observe: "Como tentas justificar continuar ativo mesmo não tendo turno marcado.",
-        whenNotTo: "Semana sem margem com chamadas aleatórias madrugadoras obrigatórias.",
+        title: "Barreira Circadiana de Fecho",
+        why: "A ausência de ritmo inibe a produção de melatonina no tempo exato. Ajustar uma barreira fixa para terminar a atividade diária serve de indutor passivo.",
+        observe: "O prolongamento desnecessário do dia em alturas críticas.",
+        whenNotTo: "Quando sujeito a horários rotativos curtos impostos por turnos laborais.",
         minWindow: "7 dias seguidos",
         minDays: 7,
-        future: "Reseta o relógio circadiano."
+        future: "Normalização do ponto zero noturno antes do sono surgir."
       });
       break;
 
@@ -96,28 +96,27 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
         proposals.push({
           id: 'prop_foco_passivo',
           title: "Substituição para Carga Cognitiva Neutra",
-          why: "O cérebro demora a abrandar. Se o ecrã funciona para ti como pacificador visual, reduz-lhe apenas a taxa de input imprevisível. Substitui 'scroll infinito' por conteudos lineares (séries antigas, podcasts lentos).",
-          observe: "A vontade imediata de rodar rápido o conteúdo. A mudança de foco.",
-          whenNotTo: "Nunca conseguiste usar ecrãs pacificamente.",
+          why: "O uso de ecrãs não tem de interromper o adormecimento se o estímulo for reduzido. Preferir conteúdos previsíveis e lineares pode pacificar a transição e modular a carga do foco.",
+          observe: "A necessidade de interação constante e rodar o feed de forma intensa antes do sono.",
+          whenNotTo: "Se o próprio dispositivo for fonte central do disparo ansiogénico e houver histórico forte de excitação digital.",
           minWindow: "3 noites",
           minDays: 3,
-          future: "Teste de separação entre 'Estimula' e 'Regula' comportamental."
+          future: "Validação entre estímulo utilitário que regula e o que perturba visualmente."
         });
       }
       break;
   }
 
-  // Falback caso nenhuma entre (raro, pois default cobre DIFICULDADE e o resto foi mapeado)
   if (proposals.length === 0) {
     proposals.push({
       id: 'prop_descompressao',
-      title: "Descompressão Activa Isolada",
-      why: "Para o teu padrão, existe uma componente residual emocional a filtrar.",
-      observe: "Irritabilidade não gerida durante o dia.",
-      whenNotTo: "Dias caóticos impossíveis.",
+      title: "Descompressão Cognitiva Suave",
+      why: "Para o padrão assinalado, gerir a passagem do estado ativo para passivo carece de regulação marginal.",
+      observe: "A dificuldade em mudar de registos agitados para ações de processamento basal.",
+      whenNotTo: "Semanas de exceção incontornável.",
       minWindow: "3 noites",
       minDays: 3,
-      future: "Trabalhar rampa de acesso."
+      future: "Prepara a base temporal livre de perturbação antes do deitar planeado."
     });
   }
 

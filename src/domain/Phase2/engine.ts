@@ -13,8 +13,9 @@ export interface AssessmentDeliverable {
   flags: string[];
   contradictions: string[];
   confidence: number;
-  
   primarySleepPattern: PrimarySleepPattern;
+  secondarySleepPattern: PrimarySleepPattern | null;
+  patternConfidence: number;
   contextualDrivers: string[];
   
   // Legacy fields to not break other unrefactored UI files
@@ -327,18 +328,37 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
 
   // DETERMINATION OF PRIMARY SLEEP PATTERN (Rule 1)
   let primarySleepPattern: PrimarySleepPattern = 'INDEFINIDO';
+  let secondarySleepPattern: PrimarySleepPattern | null = null;
+  let patternConfidence = confidence; // starting point from Q engine
+
+  const patternsFound: { pattern: PrimarySleepPattern, weight: number }[] = [];
 
   if (markerUsage['Dor / desconforto'] > 0 || markerUsage['Ida à casa de banho'] > numLogs * 0.4) {
-    primarySleepPattern = 'COMPONENTE_ORGANICA';
-  } else if (avgAwakenings >= 2 && avgAwakeTime > 45) {
-    primarySleepPattern = 'REENTRADA_DESPERTAR';
+    patternsFound.push({ pattern: 'COMPONENTE_ORGANICA', weight: 90 });
+  } 
+  if (avgAwakenings >= 2 && avgAwakeTime > 45) {
+    patternsFound.push({ pattern: 'REENTRADA_DESPERTAR', weight: 85 });
   } else if (avgAwakenings >= 2) {
-    primarySleepPattern = 'FRAGMENTACAO_MANUTENCAO';
-  } else if (F5 > 1.8) { // Severe schedule irregularity
-    primarySleepPattern = 'IRREGULARIDADE_HORARIOS';
-  } else if (avgLatency > 40) {
-    primarySleepPattern = 'DIFICULDADE_ADORMECIMENTO';
+    patternsFound.push({ pattern: 'FRAGMENTACAO_MANUTENCAO', weight: 75 });
   }
+  if (F5 > 1.8) {
+    patternsFound.push({ pattern: 'IRREGULARIDADE_HORARIOS', weight: 80 });
+  }
+  if (avgLatency > 40) {
+    patternsFound.push({ pattern: 'DIFICULDADE_ADORMECIMENTO', weight: avgLatency > 60 ? 85 : 70 });
+  }
+
+  patternsFound.sort((a, b) => b.weight - a.weight);
+
+  if (patternsFound.length > 0) {
+    primarySleepPattern = patternsFound[0].pattern;
+    patternConfidence = Math.min(patternConfidence, patternsFound[0].weight);
+  }
+  if (patternsFound.length > 1) {
+    secondarySleepPattern = patternsFound[1].pattern;
+    patternConfidence -= 10; // Penalize confidence if there are dual strong competing signals
+  }
+  if (numLogs < 3) patternConfidence -= 20;
 
   return {
     schemaVersion: 1,
@@ -350,8 +370,10 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
     factorScores: { F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18 },
     flags,
     contradictions,
-    confidence: Math.max(0, Math.min(100, confidence)),
+    confidence: Math.max(0, Math.min(100, confidence)), // purely from QA
     primarySleepPattern,
+    secondarySleepPattern,
+    patternConfidence: Math.max(0, Math.min(100, patternConfidence)),
     contextualDrivers: dominantDrivers, // Using top P-factors to explain *why* pattern exists
     dominantDrivers,
     secondaryDrivers,

@@ -82,9 +82,17 @@ export function Phase3Home() {
         
         <header style={{ marginBottom: '40px' }}>
           <span className="kicker" style={{ color: '#10B981', marginBottom: '16px' }}>Direção Ativa · Observância</span>
-          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2', marginBottom: '16px' }}>
             {cycle.status === 'active' ? "Em Percurso" : "Janela Concluída"}
           </h1>
+          <div style={{ display: 'flex', gap: '16px' }}>
+             <button onClick={() => navigate('/phase2/context')} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94A3B8', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}>
+               Consultar Contexto (Fase 2)
+             </button>
+             <button onClick={() => navigate('/process_home')} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94A3B8', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}>
+               Ver Métricas Bases
+             </button>
+          </div>
         </header>
 
         <section className="editorial-card" style={{ marginBottom: '32px' }}>

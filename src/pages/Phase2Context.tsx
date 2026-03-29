@@ -27,15 +27,16 @@ export function Phase2Context() {
 
   // Determine pattern text
   const patternLabels: Record<string, { label: string, desc: string }> = {
-    'DIFICULDADE_ADORMECIMENTO': { label: 'Latência de Entrada', desc: 'A tua medição base denota dificuldade primordial na quebra de percepção inicial.' },
-    'FRAGMENTACAO_MANUTENCAO': { label: 'Fragmentação de Manutenção', desc: 'A tua noite não consolida, manifestando quebras frequentes que inviabilizam a arquitectura regular.' },
-    'REENTRADA_DESPERTAR': { label: 'Alerta de Madrugada', desc: 'O teu foco central é o estado de vigília persistente a meio da noite, sem conseguir voltar ao abandono.' },
-    'IRREGULARIDADE_HORARIOS': { label: 'Sem Âncora Circadiana', desc: 'Os teus horários medidos cruzados com a tua cadência apontam para um arrastar crónico ou mudança severa de ritmos.' },
-    'COMPONENTE_ORGANICA': { label: 'Impacto Físico Direto', desc: 'Sinais claros mecânicos ou orgânicos parecem sobrepor-se à componente puramente psicológica no teu padrão.' },
-    'INDEFINIDO': { label: 'Padrão Distribuído', desc: 'O teu perfil ainda mistura vários sinais mecânicos.' }
+    'DIFICULDADE_ADORMECIMENTO': { label: 'Latência Prolongada', desc: 'A medição base assinala dificuldade na transição inicial para o sono.' },
+    'FRAGMENTACAO_MANUTENCAO': { label: 'Fragmentação do Sono', desc: 'A noite apresenta quebras e despertares frequentes que afetam a continuidade.' },
+    'REENTRADA_DESPERTAR': { label: 'Dificuldade de Reentrada', desc: 'O padrão central aponta para despertares mantidos a meio da noite, com dificuldade em retomar o sono.' },
+    'IRREGULARIDADE_HORARIOS': { label: 'Irregularidade Circadiana', desc: 'Os horários medidos indicam variabilidade ou ausência de rotina térmica/estável.' },
+    'COMPONENTE_ORGANICA': { label: 'Impacto Físico Direto', desc: 'Sinais orgânicos ou físicos destacam-se como interrupção primária nas noites medidas.' },
+    'INDEFINIDO': { label: 'Padrão Distribuído', desc: 'O perfil atual não isola um único mecanismo dominante.' }
   };
 
   const patternData = patternLabels[deliverable.primarySleepPattern] || patternLabels['INDEFINIDO'];
+  const secondaryPatternData = deliverable.secondarySleepPattern ? (patternLabels[deliverable.secondarySleepPattern] || null) : null;
 
   // Sub-context
   const dom = deliverable?.contextualDrivers?.[0] || deliverable?.dominantDrivers?.[0];
@@ -57,17 +58,25 @@ export function Phase2Context() {
           <span className="kicker" style={{ color: '#A855F7', marginBottom: '16px' }}>Leitura Inicial</span>
           <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Contexto<br />Sugerido.</h1>
           <p style={{ marginTop: '12px', fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
-            Baseado nas tuas noites e respostas. {getConfidenceLabel(deliverable.confidence)}.
+            Baseado nas tuas noites e respostas. {getConfidenceLabel(deliverable.patternConfidence || deliverable.confidence)}.
           </p>
         </header>
 
         <section style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
           <div className="editorial-card">
-            <h3 className="kicker" style={{ color: '#F8FAFC' }}>Padrão Base (Fase 1)</h3>
+            <h3 className="kicker" style={{ color: '#F8FAFC' }}>Padrão Base Predominante</h3>
             <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '20px' }}>{patternData.label}</h2>
             <p className="module-desc">{patternData.desc}</p>
           </div>
+
+          {secondaryPatternData && (
+             <div className="editorial-card" style={{ background: 'transparent', border: 'none', borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '20px', paddingRight: 0, paddingBottom: 0, paddingTop: '8px', marginTop: '-16px' }}>
+               <h3 className="kicker" style={{ color: '#94A3B8' }}>Padrão Concorrente (Fase 1)</h3>
+               <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '18px', color: '#E2E8F0' }}>{secondaryPatternData.label}</h2>
+               <p className="module-desc">{secondaryPatternData.desc}</p>
+             </div>
+          )}
 
           <div className="editorial-card" style={{ background: 'transparent', border: 'none', borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '20px', paddingRight: 0, paddingBottom: 0, paddingTop: '8px' }}>
             <h3 className="kicker" style={{ color: '#94A3B8' }}>Sub-motivos Apurados (Fase 2)</h3>

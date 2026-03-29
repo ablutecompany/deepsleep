@@ -35,7 +35,24 @@ export function getQuestionsForMode(mode: 10 | 25): string[] {
     return arr;
   };
 
-  const draw = (pool: string[], count: number) => shuffle(pool).slice(0, count);
+  // Memory Rotation Logic
+  let recentIds: string[] = [];
+  try {
+    const rawCache = localStorage.getItem('deepsleep-phase2-storage');
+    if (rawCache) {
+      const parsed = JSON.parse(rawCache);
+      if (parsed?.state?.deliverable?.selectedQuestionIds) {
+        recentIds = parsed.state.deliverable.selectedQuestionIds;
+      }
+    }
+  } catch (e) {}
+
+  const draw = (pool: string[], count: number) => {
+    const fresh = pool.filter(id => !recentIds.includes(id));
+    const recent = pool.filter(id => recentIds.includes(id));
+    const orderedPool = [...shuffle(fresh), ...shuffle(recent)];
+    return orderedPool.slice(0, count);
+  };
 
   if (mode === 10) {
     return [
