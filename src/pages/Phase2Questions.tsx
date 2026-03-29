@@ -1,67 +1,83 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-const MOCK_QUESTIONS = [
-  { id: 'q1', text: 'Como sentes o teu nível de stress atual?', options: ['Muito Alto', 'Gerível', 'Baixo', 'Inexistente'], maxChoices: 1 },
-  { id: 'q2', text: 'Quais destes fatores costumam acordar-te?', options: ['Telemóvel/Ecrãs', 'Barulho', 'Temperatura', 'Ansiedade'], maxChoices: 2 }
-];
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { usePhase2Store } from '../store/Phase2ContextStore';
+import { QUESTIONS_BANK, SHORT_MODE_QIDS, LONG_MODE_QIDS } from '../domain/Phase2/questions';
+import { evaluateAssessment } from '../domain/Phase2/engine';
 
 export function Phase2Questions() {
   const navigate = useNavigate();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string[]>>({});
+  const [searchParams] = useSearchParams();
+  const { answersDraft, setAnswersDraft, setDeliverable } = usePhase2Store();
+
+  const modeRaw = searchParams.get('mode');
+  const mode = modeRaw === '25' ? 25 : 10;
+  
+  const qids = mode === 25 ? LONG_MODE_QIDS : SHORT_MODE_QIDS;
+  
+  // Find first unanswered question
+  const initialIndex = qids.findIndex(qid => !answersDraft[qid] || answersDraft[qid].length === 0);
+  const skipTo = initialIndex === -1 ? 0 : initialIndex; // If all answered, start at 0 (unlikely unless done)
+
+  const [currentIndex, setCurrentIndex] = useState(skipTo);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const currentQ = MOCK_QUESTIONS[currentIndex];
+  const currentQid = qids[currentIndex];
+  const currentQ = QUESTIONS_BANK[currentQid];
 
   useEffect(() => {
     if (isGenerating) {
-      const t = setTimeout(() => navigate('/phase2_proposals'), 2000);
+      // Evaluate and save deliverable
+      const finalDeliverable = evaluateAssessment(answersDraft, mode);
+      setDeliverable(finalDeliverable);
+      
+      const t = setTimeout(() => navigate('/phase2/context'), 2500);
       return () => clearTimeout(t);
     }
-  }, [isGenerating, navigate]);
+  }, [isGenerating, navigate, answersDraft, mode, setDeliverable]);
 
   if (isGenerating) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#000', color: '#F8FAFC', padding: '24px' }}>
-        <p style={{ fontSize: '14px', color: '#94A3B8' }}>A analisar contexto e a isolar propostas...</p>
+        <p style={{ fontSize: '14px', color: '#94A3B8' }}>A gerar mapa contextual...</p>
       </div>
     );
   }
 
   if (!currentQ) return null;
 
-  const currentAnswers = answers[currentQ.id] || [];
+  const currentAnswers = answersDraft[currentQ.id] || [];
 
-  const handleToggle = (option: string) => {
+  const handleToggle = (optId: string) => {
     let newAnswers = [...currentAnswers];
-    if (newAnswers.includes(option)) {
-      newAnswers = newAnswers.filter(a => a !== option);
+    if (newAnswers.includes(optId)) {
+      newAnswers = newAnswers.filter(a => a !== optId);
     } else {
-      if (currentQ.maxChoices === 1) {
-        newAnswers = [option];
-      } else if (newAnswers.length < currentQ.maxChoices) {
-        newAnswers.push(option);
+      if (currentQ.type === 'single_choice') {
+        newAnswers = [optId];
+      } else {
+        newAnswers.push(optId);
       }
     }
     
-    setAnswers({ ...answers, [currentQ.id]: newAnswers });
+    setAnswersDraft({ ...answersDraft, [currentQ.id]: newAnswers });
 
-    if (newAnswers.length === currentQ.maxChoices) {
-      setTimeout(() => {
-        if (currentIndex < MOCK_QUESTIONS.length - 1) {
-          setCurrentIndex(currentIndex + 1);
-        } else {
-          setIsGenerating(true);
-        }
-      }, 300);
+    if (currentQ.type === 'single_choice' && newAnswers.length > 0) {
+      setTimeout(() => proceed(), 300);
+    }
+  };
+
+  const proceed = () => {
+    if (currentIndex < qids.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setIsGenerating(true);
     }
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#000', color: '#F8FAFC', padding: '24px', boxSizing: 'border-box' }}>
       <p style={{ textAlign: 'center', color: '#64748B', fontSize: '12px', letterSpacing: '2px', marginTop: '32px', marginBottom: '64px' }}>
-        {currentIndex + 1} / {MOCK_QUESTIONS.length}
+        {currentIndex + 1} / {qids.length}
       </p>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -69,16 +85,16 @@ export function Phase2Questions() {
           {currentQ.text}
         </h2>
         <p style={{ fontSize: '12px', color: '#64748B', letterSpacing: '1px', marginBottom: '48px' }}>
-          {currentQ.maxChoices > 1 ? `Escolhe até ${currentQ.maxChoices}` : 'Escolhe 1'}
+          {currentQ.type === 'multi_choice' ? 'Escolha múltipla' : 'Escolhe 1'}
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {currentQ.options.map(opt => {
-            const isSelected = currentAnswers.includes(opt);
+            const isSelected = currentAnswers.includes(opt.id);
             return (
               <div 
-                key={opt}
-                onClick={() => handleToggle(opt)}
+                key={opt.id}
+                onClick={() => handleToggle(opt.id)}
                 style={{
                   padding: '16px 20px',
                   borderRadius: '8px',
@@ -88,11 +104,23 @@ export function Phase2Questions() {
                   transition: 'all 0.2s ease'
                 }}
               >
-                <span style={{ fontSize: '16px', color: '#F8FAFC' }}>{opt}</span>
+                <span style={{ fontSize: '16px', color: '#F8FAFC' }}>{opt.text}</span>
               </div>
             );
           })}
         </div>
+      </div>
+
+      {/* Footer for multi_choice confirm */}
+      <div style={{ height: '80px', display: 'flex', alignItems: 'flex-end' }}>
+        {currentQ.type === 'multi_choice' && currentAnswers.length > 0 && (
+          <button 
+            onClick={proceed}
+            style={{ width: '100%', height: '56px', borderRadius: '8px', background: '#F8FAFC', color: '#0F172A', border: 'none', fontWeight: 500, letterSpacing: '1px' }}
+          >
+            CONFIRMAR
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,9 +1,43 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NightSignature } from '../components/NightSignature';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Activity, Info, CalendarClock } from 'lucide-react';
+import { usePhase2Store } from '../store/Phase2ContextStore';
+import { usePhase3Store } from '../store/Phase3ContextStore';
+import { getProposals } from '../domain/Phase2/proposals';
+import { FACTOR_LABELS } from '../domain/Phase2/interpreter';
 
 export function Profile() {
   const navigate = useNavigate();
+  const { deliverable } = usePhase2Store();
+  const { cycle } = usePhase3Store();
+  const [nightCount, setNightCount] = useState(0);
+
+  useEffect(() => {
+    let count = parseInt(localStorage.getItem('nightCount') || '0', 10);
+    if (isNaN(count)) count = 0;
+    setNightCount(count);
+  }, []);
+
+  if (nightCount < 5) {
+    return (
+      <div className="home-page" style={{ paddingBottom: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#000', padding: '24px', textAlign: 'center' }}>
+        <Activity size={48} color="#1E293B" style={{ marginBottom: '24px' }} />
+        <h2 style={{ fontSize: '24px', color: '#F8FAFC', fontWeight: 500, marginBottom: '16px' }}>
+          Ouve primeiro.
+        </h2>
+        <p style={{ color: '#94A3B8', fontSize: '14px', lineHeight: '22px', maxWidth: '280px' }}>
+          O sistema precisa de analisar 5 noites válidas do teu sono mecânico (Fase 1) antes de conseguir projetar a tua identidade biológica.
+        </p>
+        <button 
+          onClick={() => navigate('/process_home')}
+          style={{ marginTop: '40px', padding: '16px 32px', borderRadius: '8px', background: '#0F172A', color: '#F8FAFC', border: '1px solid #1E293B', fontWeight: 500, letterSpacing: '1px' }}
+        >
+          VOLTAR AO INÍCIO
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="home-page" style={{ paddingBottom: '100px' }}>
@@ -69,6 +103,60 @@ export function Profile() {
           </p>
         </section>
 
+        {deliverable && (
+          <section className="editorial-module" style={{ background: 'rgba(56, 189, 248, 0.03)', border: '1px solid rgba(56, 189, 248, 0.1)', padding: '24px', borderRadius: '16px', marginTop: '40px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <Activity size={16} color="#38BDF8" />
+              <span className="kicker" style={{ margin: 0, color: '#38BDF8' }}>Contexto Comportamental</span>
+            </div>
+            
+            <h2 className="module-title" style={{ color: 'var(--text-primary)', marginBottom: '16px' }}>
+              {deliverable.dominantDrivers.length > 0 ? FACTOR_LABELS[deliverable.dominantDrivers[0]] : 'Padrão multifatorial complexo'}
+            </h2>
+            
+            <p className="module-desc" style={{ marginBottom: '16px' }}>
+              Baseado na tua última auto-análise. <span style={{ color: '#94A3B8' }}>{deliverable.temporalProfile}</span>.
+            </p>
+
+            <div className="pattern-evidence" style={{ borderLeftColor: '#38BDF8', background: 'transparent', padding: '0 0 0 16px', margin: 0 }}>
+              <div className="evidence-row">
+                <span className="evidence-key" style={{ color: '#F8FAFC' }}>Confiança:</span>
+                <span className="evidence-val" style={{ color: '#38BDF8' }}>{deliverable.confidence}%</span>
+              </div>
+            </div>
+
+            {deliverable.flags.length > 0 && (
+              <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {deliverable.flags.map((flag, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#94A3B8' }}>
+                    <Info size={14} />
+                    <span>{flag}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {cycle && (
+          <section className="editorial-module" style={{ background: 'rgba(16, 185, 129, 0.03)', border: '1px solid rgba(16, 185, 129, 0.1)', padding: '24px', borderRadius: '16px', marginTop: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <CalendarClock size={16} color="#10B981" />
+              <span className="kicker" style={{ margin: 0, color: '#10B981', background: 'transparent', padding: 0 }}>Teste em curso (Fase 3)</span>
+            </div>
+            
+            <h2 className="module-title" style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '18px' }}>
+              {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.title || 'Teste de Hipótese'}
+            </h2>
+            
+            <p className="module-desc" style={{ marginBottom: '16px', fontSize: '13px' }}>
+              Estado: <span style={{ color: '#F8FAFC' }}>{cycle.status === 'active' ? 'Em observância' : `Concluído (${cycle.reviewState})`}</span>
+              <br/>
+              Adesão: {Object.keys(cycle.dailyCheckins).length} dias registados
+            </p>
+          </section>
+        )}
+
         <section className="editorial-module footer-module" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>
           <span className="kicker">Ainda a ganhar forma</span>
           <h3 className="trait-label" style={{ color: 'var(--text-muted)' }}>Recuperação percebida</h3>
@@ -89,7 +177,7 @@ export function Profile() {
             O teu perfil inicial já está formado.<br/>Podes avançar para a fase seguinte ou voltar ao início.
           </p>
           <div className="stack-btns">
-            <button className="primary-action-btn w-100" onClick={() => navigate('/phase2_entry')}>
+            <button className="primary-action-btn w-100" onClick={() => navigate('/phase2/entry')}>
               <span>Avançar para contexto e propostas</span>
               <ArrowRight size={16} strokeWidth={1.5} />
             </button>

@@ -38,7 +38,7 @@ export function Phase1Progress() {
         </div>
 
         <div className="bottom-action stack-btns">
-          <button className="primary-action-btn w-100" onClick={() => navigate('/phase2_entry')}>
+          <button className="primary-action-btn w-100" onClick={() => navigate('/phase2/entry')}>
             <span>Avançar para contexto e propostas</span>
             <ArrowRight size={16} strokeWidth={1.5} />
           </button>

@@ -14,15 +14,21 @@ import { Phase1Progress } from './pages/Phase1Progress';
 import { ActiveSession } from './pages/ActiveSession';
 import { Phase2Entry } from './pages/Phase2Entry';
 import { Phase2Questions } from './pages/Phase2Questions';
+import { Phase2Context } from './pages/Phase2Context';
 import { Phase2Proposals } from './pages/Phase2Proposals';
 import { Phase3Home } from './pages/Phase3Home';
 
+import { Phase2StoreProvider } from './store/Phase2ContextStore';
+import { Phase3StoreProvider } from './store/Phase3ContextStore';
+
 export default function App() {
   return (
-    <BrowserRouter>
-      <div className="app-container">
-        <main className="main-content">
-          <Routes>
+    <Phase2StoreProvider>
+      <Phase3StoreProvider>
+        <BrowserRouter>
+        <div className="app-container">
+          <main className="main-content">
+            <Routes>
             <Route path="/" element={<Auth />} />
             <Route path="/process_home" element={<ProcessHome />} />
             
@@ -38,9 +44,10 @@ export default function App() {
             <Route path="/settings" element={<Control />} />
             <Route path="/insight" element={<InsightDetail />} />
             
-            <Route path="/phase2_entry" element={<Phase2Entry />} />
-            <Route path="/phase2_questions" element={<Phase2Questions />} />
-            <Route path="/phase2_proposals" element={<Phase2Proposals />} />
+            <Route path="/phase2/entry" element={<Phase2Entry />} />
+            <Route path="/phase2/questions" element={<Phase2Questions />} />
+            <Route path="/phase2/context" element={<Phase2Context />} />
+            <Route path="/phase2/proposals" element={<Phase2Proposals />} />
             
             <Route path="/phase3_home" element={<Phase3Home />} />
           </Routes>
@@ -49,5 +56,7 @@ export default function App() {
         <BottomNav />
       </div>
     </BrowserRouter>
+    </Phase3StoreProvider>
+  </Phase2StoreProvider>
   );
 }

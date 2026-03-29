@@ -46,7 +46,7 @@ export function ProcessHome() {
 
         {/* Phase 2 */}
         <div 
-          onClick={() => phase1Done ? navigate('/phase2_entry') : undefined}
+          onClick={() => phase1Done ? navigate('/phase2/entry') : undefined}
           className={`stage-card ${phase1Done ? 'active highlight' : 'locked'}`}
         >
           <div className="stage-header">
