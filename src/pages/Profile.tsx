@@ -52,64 +52,38 @@ export function Profile() {
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/process_home')} />
         
         <header style={{ marginBottom: '40px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>A tua identidade<br />biológica.</h1>
+          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Perfil do teu sono.</h1>
           <p style={{ marginTop: '12px', fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
-            Baseado na análise silenciosa do teu ritmo natural.
+            Este é um perfil inicial em construção. À medida que avanças no processo, esta leitura ganha contexto, torna-se mais fiável e mais ajustada ao teu padrão real.
           </p>
           {localStorage.getItem('dataSourceType') && (
             <p style={{ marginTop: '16px', fontSize: '12px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#38BDF8' }} />
-              Fonte atual: {localStorage.getItem('dataSourceType') === 'manual' ? 'registo manual' : localStorage.getItem('dataSourceType')}
+              Baseado nos teus dados: {localStorage.getItem('dataSourceType') === 'manual' ? 'registo manual' : localStorage.getItem('dataSourceType')}
             </p>
           )}
         </header>
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          
-          <div className="editorial-card">
-            <h3 className="kicker">Proteção Inerente</h3>
-            <h2 className="module-title" style={{ marginTop: '4px', marginBottom: '8px' }}>Adormecimento rápido e denso</h2>
-            <p className="module-desc">
-              O momento em que adormeces mantém-se incrivelmente constante. Funciona como um bloco fundacional protetor do teu descanso.
-            </p>
-          </div>
 
-          <div className="editorial-card">
-            <h3 className="kicker" style={{ color: '#F59E0B' }}>Padrão Sensível</h3>
-            <h2 className="module-title" style={{ marginTop: '4px', marginBottom: '8px' }}>Reatividade à fricção tátil</h2>
-            <p className="module-desc">
-              Quando há quebras a meio da noite, a reentrada em estímulos digitais agrava severamente a continuidade das fases profundas subsequentes.
-            </p>
-          </div>
-
-          <div className="editorial-card">
-            <h3 className="kicker" style={{ color: '#EF4444' }}>Zona Instável</h3>
-            <h2 className="module-title" style={{ marginTop: '4px', marginBottom: '8px' }}>Pico de alerta na madrugada</h2>
-            <p className="module-desc">
-              Até agora, as horas entre as 03:00 e as 04:30 concentram quase toda a tua dispersão de sono contínuo de forma sistemática.
-            </p>
-          </div>
-
-        </section>
 
         {deliverable && (
           <section className="editorial-card contextual-layer" style={{ marginTop: '48px', padding: '24px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.03)', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
               <Sparkles size={14} color="#38BDF8" />
-              <span className="kicker" style={{ margin: 0, color: '#38BDF8' }}>Inferência Contextual</span>
+              <span className="kicker" style={{ margin: 0, color: '#38BDF8' }}>Leitura em Contexto</span>
             </div>
             
             <h2 className="module-title" style={{ color: '#F8FAFC', marginBottom: '12px', fontSize: '20px' }}>
-              {deliverable.dominantDrivers.length > 0 ? FACTOR_LABELS[deliverable.dominantDrivers[0]] : 'Arquitetura complexa mista'}
+              {deliverable.dominantDrivers.length > 0 ? FACTOR_LABELS[deliverable.dominantDrivers[0]] : 'Leitura distribuída sem predominância'}
             </h2>
             
             <p className="module-desc" style={{ marginBottom: '24px' }}>
-              {deliverable.temporalProfile}. {deliverable.flags.length > 0 ? `Foram identificados fatores de tensão transversais (Ex: ${deliverable.flags[0].toLowerCase()}).` : ""}
+              {deliverable.flags.length > 0 ? `Com os dados atuais registados, parecem surgir sinais de tensões (ex: ${deliverable.flags[0].toLowerCase()}) a requerer confirmação.` : "Até agora, não emergem grandes constrangimentos declarados adicionais."}
             </p>
 
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Robutez da inferência</span>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Fase desta leitura</span>
                 <span style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400 }}>{getConfidenceLabel(deliverable.confidence)}</span>
               </div>
             </div>

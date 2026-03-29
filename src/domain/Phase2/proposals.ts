@@ -21,23 +21,23 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
   let proposals: EnhancedProposal[] = [
     { 
       id: 'prop_ancora',
-      title: "Fixar a hora de despertar", 
-      why: "Acordar à mesma hora ajuda o corpo a prever e preparar o sono para a noite seguinte.", 
-      observe: "A dificuldade em sair da cama à hora marcada nos primeiros dias.",
-      whenNotTo: "O teu horário de trabalho for inconstante (turnos).",
+      title: "Manter a hora de despertar constante", 
+      why: "Acordar num horário regular pode ajudar o corpo a consolidar o momento do sono na noite seguinte.", 
+      observe: "A resistência inicial em manter a hora ao limite em dias de maior cansaço.",
+      whenNotTo: "Se o horário laboral fôr forçosamente imprevisível (ex: trabalho por turnos rotativos).",
       minWindow: "5 dias",
       minDays: 5,
-      future: "Estabelece um relógio biológico estável antes de tentar alterar hábitos noturnos."
+      future: "Estabelecer estabilidade no horário de despertar costuma ser o passo base inicial seguro."
     },
     { 
       id: 'prop_descomp',
-      title: "Reduzir estímulo antes de deitar", 
-      why: "Demasiado estímulo visual ou mental perto da hora de deitar pode dificultar a transição para o sono.",
-      observe: "A tendência para voltar ao telemóvel ou entrar em pensamento circular quando tudo acalma.",
-      whenNotTo: "O estímulo digital não parecer ter peso real no teu padrão atual.",
+      title: "Testar uma redução de estímulos antes da cama", 
+      why: "Evitar estímulos intensos (brilho, stress) pode ajudar na transição gradual para a fase orgânica de repouso.",
+      observe: "A tua eventual urgência de pegar no telemóvel ao apagar as luzes.",
+      whenNotTo: "Se os ecrãs já representam, pelo contrário, o teu mecanismo prático e consolidado de indução de sono funcional.",
       minWindow: "3 dias",
       minDays: 3,
-      future: "Cria uma base mais limpa para perceber se a ativação mental está a ser alimentada pelo ambiente."
+      future: "Ao remover interrupções visuais, testamos a hipótese da reatividade mecânica ser a agravadora indireta."
     }
   ];
 
@@ -45,13 +45,13 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
     if (deliverable.proposalConstraints.some(c => c.includes('Dor'))) {
       proposals.push({ 
         id: 'prop_ergo',
-        title: "Aliviar o desconforto físico", 
-        why: "A tensão corporal ou dor durante a noite provoca despertares frequentes que fragmentam o descanso.", 
-        observe: "Quantas vezes acordas especificamente para mudar de posição devido a desconforto.",
-        whenNotTo: "Tiveres indicação médica para manter uma posição específica a dormir.",
+        title: "Tentar alívio sintomático estrutural", 
+        why: "Antes de tentar alterar regras biológicas, focar na possível barreira corporal registada para mitigar microdespertares.", 
+        observe: "Quais os momentos da noite em que a posição influi de facto mais negativamente no conforto sentido.",
+        whenNotTo: "Existir uma direção primária concorrente liderada proativamente por um clínico ou suporte primário.",
         minWindow: "4 dias",
         minDays: 4,
-        future: "Resolve barreiras físicas óbvias antes de assumirmos que o problema é stress ou rotina."
+        future: "Diminuir atrito ergonómico é uma primeira tentativa lógica para excluir a cama em si desta tensão."
       });
     }
 
@@ -59,26 +59,26 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
       proposals = proposals.filter(p => p.id !== 'prop_ancora');
       proposals.unshift({ 
         id: 'prop_foco',
-        title: "Sair da cama quando o sono não vem", 
-        why: "Quando ficas deitado a tentar adormecer à força, o estado de alerta sobe e o sono tende a afastar-se ainda mais.", 
-        observe: "A dificuldade em sair da cama quando o sono não aparece ao fim de cerca de 20 minutos.",
-        whenNotTo: "A casa for insegura, demasiado fria, ou se te sentires mais estável sentado na cama do que a circular.",
+        title: "Levantar da cama perante demoras prolongadas", 
+        why: "A permanência acordada na cama parece condicionar o estado de alerta, sugerindo que a quebra ativa é uma defesa preferível.", 
+        observe: "As pequenas frustrações internas ao decidir forçosamente sair de debaixo dos lençóis.",
+        whenNotTo: "For fisicamente complexo transitar na moradia em segurança durante a noite fria.",
         minWindow: "7 dias",
         minDays: 7,
-        future: "Ajuda a quebrar a associação entre cama e estado de alerta antes de testar medidas mais exigentes."
+        future: "Este registo sugere interromper a correlação frustrante entre a almofada e a incerteza de conseguir fechar o ciclo."
       });
     }
 
     if (deliverable.flags.includes('Noctúria presente')) {
       proposals.push({ 
         id: 'prop_hidrica',
-        title: "Ajustar líquidos ao fim do dia", 
-        why: "Beber demasiado perto da hora de deitar pode fragmentar o sono logo na primeira metade da noite.", 
-        observe: "Despertares precoces ligados a idas à casa de banho ou sensação de bexiga ativa durante a noite.",
-        whenNotTo: "Tiveres muita sede ao fim do dia, actividade física tardia, ou medicação que altere claramente o padrão urinário.",
+        title: "Experimentar ajustar timing de líquidos", 
+        why: "Sendo um fator registado ativamente a meio das madrugadas passadas, este ajuste marginal sugere reduzir despertares fragmentadores práticos.", 
+        observe: "Pequenos padrões rotineiros de jantar muito volumosos ou hidratações concentradas em excesso apenas à noite.",
+        whenNotTo: "For explicitamente inviável medicamente e a tua sede diurna for incontornável.",
         minWindow: "3 dias",
         minDays: 3,
-        future: "Permite reduzir uma causa física simples de fragmentação antes de testar mudanças mais complexas."
+        future: "Pode ser tentado para excluir a pressão orgânica da bexiga das reais contagens mecânicas obstrutivas em Fase 1 madura."
       });
     }
   }
@@ -91,7 +91,7 @@ export function getPriorityTest(deliverable: AssessmentDeliverable): PriorityTes
     return {
       primaryProposalId: 'prop_ergo',
       priorityScore: 95,
-      selectionReason: 'A presença de dor física ativa assume sempre prioridade sobre otimizações cognitivas ou de rotina biológica.'
+      selectionReason: 'Como foi registada dor, a hipótese conservadora sugere priorizar a estabilidade material/física antes de mexer na conduta rítmica e horária.'
     };
   }
 
@@ -99,7 +99,7 @@ export function getPriorityTest(deliverable: AssessmentDeliverable): PriorityTes
     return {
       primaryProposalId: 'prop_foco',
       priorityScore: 90,
-      selectionReason: 'O medo crónico da noite bloqueia qualquer intervenção baseada em restrição ou fixação de horários.'
+      selectionReason: 'A preocupação em conseguir adormecer parece ser um sinal presente que aconselha a quebra momentânea fora da cama.'
     };
   }
 
@@ -107,7 +107,7 @@ export function getPriorityTest(deliverable: AssessmentDeliverable): PriorityTes
     return {
       primaryProposalId: 'prop_hidrica',
       priorityScore: 85,
-      selectionReason: 'Desobstrução primária do metabolismo de fluidos para limpar os ciclos fragmentados.'
+      selectionReason: 'Há indicativos baseados nos registos que suportam o teste da restrição precoce perante fracionamento claro.'
     };
   }
 
@@ -115,6 +115,6 @@ export function getPriorityTest(deliverable: AssessmentDeliverable): PriorityTes
   return {
     primaryProposalId: 'prop_ancora',
     priorityScore: 80,
-    selectionReason: 'Ausência de bloqueadores críticos. O caminho inicia-se pela fundação da estabilidade circadiana.'
+    selectionReason: 'Não existindo sinais determinantes contrários explícitos nestes dados, testar a âncora horária base do dia é recomendada na recolha inicial.'
   };
 }

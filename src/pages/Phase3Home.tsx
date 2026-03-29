@@ -66,9 +66,9 @@ export function Phase3Home() {
 
   const handleReview = (review: 'manter' | 'ajustar' | 'trocar') => {
     let rec = "";
-    if (review === 'manter') rec = "Sinal suficiente para manter esta direção. Há coerência entre o baseline limpo de perturbações e as interações observadas.";
-    else if (review === 'ajustar') rec = "A proposta atual revelou-se pouco compatível com o teu ritmo prático diário. Foi recomendada a redução de atrito.";
-    else rec = "O teste atingiu a janela de prova com estabilidade, mas sem alteração biológica clara no baseline da Fase 1. A abordagem será redirecionada.";
+    if (review === 'manter') rec = "Observável o comportamento positivo da tua execução, sugerindo valor em prolongar mais alguns dias a ação de teste atual para clarificar resultados na Fase 1 madura.";
+    else if (review === 'ajustar') rec = "Iremos rever as ações recomendadas num ângulo com menos atrito. Esta proposta atual gerou atrito logístico nas tuas opções concretas e de estilo prático.";
+    else rec = "Faltam provas na tua fase original de haver alteração contundente dos despertares com este trajeto específico. A escolha tática vai redirecionar-se.";
     
     submitReview(review, rec);
   };
@@ -153,31 +153,31 @@ export function Phase3Home() {
           <div style={{ marginTop: 'auto', marginBottom: '24px' }}>
             
             <div className="editorial-card" style={{ background: 'transparent', padding: 0, border: 'none', marginBottom: '32px' }}>
-              <h3 className="kicker" style={{ color: '#F8FAFC', marginBottom: '16px' }}>Leitura Parcial</h3>
+              <h3 className="kicker" style={{ color: '#F8FAFC', marginBottom: '16px' }}>Leitura Parcial Observada</h3>
               <p className="module-desc" style={{ marginBottom: '8px' }}>
-                <strong style={{ color: '#F8FAFC', fontWeight: 400 }}>{Math.round(adherenceRate * 100)}% de enquadramento prático.</strong>
+                <strong style={{ color: '#F8FAFC', fontWeight: 400 }}>{Math.round(adherenceRate * 100)}% de correspondência ao pedido inicial.</strong>
               </p>
               <p className="module-desc">
                 {trendMsg}.
               </p>
             </div>
 
-            <h3 className="kicker" style={{ color: '#64748B', marginBottom: '16px' }}>Decisão Estratégica</h3>
+            <h3 className="kicker" style={{ color: '#64748B', marginBottom: '16px' }}>Reflexo Final Sugerido</h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button onClick={() => handleReview('manter')} className="ritual-trigger" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '20px', borderRadius: '12px', borderLeftColor: '#F8FAFC' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Manter Rumo</span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Prolongar consolidacao. A estrutura atual deve maturar.</span>
+                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Pedir p/ Repetir o Trajeto</span>
+                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Gostaria de dar mais alguns dias a este caminho sem alterações drásticas.</span>
               </button>
               
               <button onClick={() => handleReview('ajustar')} className="ritual-trigger" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '20px', borderRadius: '12px', borderLeftColor: '#F59E0B' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Reduzir Atrito</span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>O plano tem exigência que a tua janela diária rejeita repetidamente.</span>
+                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Incompatível na Prática</span>
+                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Apesar de tentado, não sinto facilidade realista para os meus dias em cumprir isto.</span>
               </button>
               
               <button onClick={() => handleReview('trocar')} className="ritual-trigger" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '20px', borderRadius: '12px', borderLeftColor: '#EF4444' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Alterar Enfoque</span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Isolamento sintomático estéril. Procurar nova avenida transversal.</span>
+                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Trocar Caminho Inteiro</span>
+                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Os dias assinaram estéril nesta fase. Parecia bom, mas o sono não mudou em nada com a manobra.</span>
               </button>
             </div>
           </div>
@@ -186,9 +186,9 @@ export function Phase3Home() {
         {cycle.status !== 'active' && (
           <div style={{ marginTop: 'auto', marginBottom: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <MapPin size={32} color="#10B981" style={{ marginBottom: '24px', opacity: 0.8 }} strokeWidth={1.5} />
-            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Tática Assente</h3>
+            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Término do Teste</h3>
             <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '280px', fontWeight: 300 }}>
-              A direção {cycle.reviewState} foi mapeada com sucesso na tua identidade central. Podes fechar a aplicação em segurança.
+              O teste cumpriu o seu ciclo de observação inicial preestabelecido. A eficácia robusta precisa de muito mais noites avaliadas para fechar hipóteses. Pode fechar.
             </p>
           </div>
         )}

@@ -42,24 +42,24 @@ export function Phase2Context() {
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/phase2/entry')} />
         
         <header style={{ marginBottom: '40px' }}>
-          <span className="kicker" style={{ color: '#A855F7', marginBottom: '16px' }}>Inferência Contextual</span>
-          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Leitura<br />Comportamental.</h1>
+          <span className="kicker" style={{ color: '#A855F7', marginBottom: '16px' }}>Leitura Inicial</span>
+          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Contexto<br />Sugerido.</h1>
           <p style={{ marginTop: '12px', fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
-            {getConfidenceLabel(deliverable.confidence)}.
+            Baseado nas tuas noites e respostas. {getConfidenceLabel(deliverable.confidence)}.
           </p>
         </header>
 
         <section style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
           <div className="editorial-card">
-            <h3 className="kicker" style={{ color: '#F8FAFC' }}>O que está a pesar mais</h3>
+            <h3 className="kicker" style={{ color: '#F8FAFC' }}>Sinal mais consistente hoje</h3>
             <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '20px' }}>{primaryLabel}</h2>
             {primaryDesc && <p className="module-desc">{primaryDesc.weight}</p>}
           </div>
 
           {secondaryLabel && (
             <div className="editorial-card" style={{ background: 'transparent', border: 'none', borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '20px', paddingRight: 0, paddingBottom: 0, paddingTop: '8px' }}>
-              <h3 className="kicker" style={{ color: '#94A3B8' }}>O que pode estar a agravar</h3>
+              <h3 className="kicker" style={{ color: '#94A3B8' }}>Outros fatores presentes</h3>
               <h2 className="module-title" style={{ marginTop: '8px', marginBottom: '8px', fontSize: '18px', color: '#E2E8F0' }}>{secondaryLabel}</h2>
               {secondaryDesc && <p className="module-desc">{secondaryDesc.weight}</p>}
             </div>
@@ -67,15 +67,15 @@ export function Phase2Context() {
 
           {deliverable.hiddenFactorIndex > 1.4 && (
             <div className="editorial-card" style={{ background: 'rgba(56, 189, 248, 0.03)', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
-              <h3 className="kicker" style={{ color: '#38BDF8' }}>O que ainda não está claro</h3>
+              <h3 className="kicker" style={{ color: '#38BDF8' }}>Ainda não é claro</h3>
               <p className="module-desc" style={{ marginTop: '12px', color: '#94A3B8' }}>
-                Existem pequenos sinais de defesa nas tuas respostas. Pode haver um fator reativo escondido que ainda não compreendemos totalmente.
+                Ainda persistem incongruências face a algumas das repostas fornecidas. A leitura precisará de continuar com precaução enquanto recolhemos mais noites reais.
               </p>
             </div>
           )}
 
           <div style={{ marginTop: '16px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            <h3 className="kicker" style={{ color: '#94A3B8', marginBottom: '24px' }}>Direção Tática Recomendada</h3>
+            <h3 className="kicker" style={{ color: '#94A3B8', marginBottom: '24px' }}>Direção a considerar em teste</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {primaryDesc && (
                 <li style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
