@@ -16,6 +16,7 @@ export interface AppLocalSnapshot {
     sensingSessions: any[];
     telemetry: any[];
     betaFeedback: any[];
+    localState: any;
   };
 }
 
@@ -44,6 +45,10 @@ export function buildSnapshotPayload(): AppLocalSnapshot['payload'] {
   let learning = [];
   try { learning = JSON.parse(localStorage.getItem('deepsleep_learning_records') || '[]'); } catch(e) {}
 
+  let clockMode = localStorage.getItem('__beta_clock_mode');
+  let clockSimNow = localStorage.getItem('deepsleep_simulated_now');
+  let dataSource = localStorage.getItem('dataSourceType');
+
   return {
     manualLogs: getManualLogs(),
     profile,
@@ -52,6 +57,7 @@ export function buildSnapshotPayload(): AppLocalSnapshot['payload'] {
     sensingSessions: getSensingSessions(),
     telemetry: getTelemetryLogs(),
     betaFeedback: getBetaFeedbackRecords(),
+    localState: { clockMode, clockSimNow, dataSource }
   };
 }
 

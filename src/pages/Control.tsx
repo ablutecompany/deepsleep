@@ -300,9 +300,16 @@ export function Control() {
                <div style={{ fontSize: '16px', color: getBetaFeedbackRecords().length > 0 ? '#10B981' : '#F8FAFC' }}>{getBetaFeedbackRecords().length} <span style={{fontSize: '11px', color: '#64748B'}}>reps</span></div>
              </div>
           </div>
-          
+        </section>
+
+        <section className="editorial-module footer-module" style={{ borderTop: '2px dashed rgba(245, 158, 11, 0.4)', paddingTop: '32px', paddingBottom: '32px', paddingLeft: '24px', paddingRight: '24px', background: 'transparent' }}>
+          <span className="kicker" style={{ color: '#F59E0B', marginBottom: '8px' }}>Dados de Teste (Beta)</span>
+          <p style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 300, lineHeight: 1.5, marginBottom: '24px' }}>
+            Fotografia útil completa da sessão de teste. Inclui schema, versão, noites, baseline, telemetria acústica e feedback interno.
+          </p>
+
           <button onClick={handleExportFullTestSession} className="primary-btn" style={{ width: '100%', justifyContent: 'center', background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)', marginBottom: '16px' }}>
-            Descarregar Backup de Segurança Completo
+            Baixar Exportação Agregada (Beta)
           </button>
 
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', background: 'transparent', border: '1px dashed rgba(245, 158, 11, 0.3)', color: '#F59E0B', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>
