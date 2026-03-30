@@ -14,12 +14,12 @@ export interface CycleFeedbackRecord {
   proposalFamily: string;
   adherenceSummary: { totalDays: number; successDays: number; rate: number };
   cycleWindowDays: number;
-  userPerceivedOutcome: 'manter' | 'ajustar' | 'trocar';
-  observedChangeSummary: string;
-  finalDecision: 'KEEP_REFINING' | 'REJECT_AND_REOPTIMIZE';
-  proposalSuitability: 'HIGH' | 'LOW' | 'INCOMPATIBLE';
-  constraintsTriggered: string[];
-  nextRecommendation: string;
+  // Nova Estrutura de Decisão Longitudinal Ativa
+  decisionOutcome: string;
+  confidenceInLearning: string;
+  shouldInfluenceFutureSelection: boolean;
+  nextStepPhrase: string;
+
   eligibleForAnonymizedLearning: boolean;
   anonymizedLearningPayload?: string;
   userReviewAnswers?: {
@@ -42,12 +42,12 @@ export function saveLearningRecord(record: CycleFeedbackRecord) {
   window.dispatchEvent(new Event('deepsleep_profile_updated'));
 }
 
+import { evaluateCycleDecision } from './decisionEngine';
+
 export function generateLearningPayload(
   cycle: Phase3Cycle, 
-  deliverable: AssessmentDeliverable, 
-  userReview: 'manter' | 'ajustar' | 'trocar',
-  recommendation: string,
-  reviewAnswers?: { adesao: string; dificuldade: string; efeito: string }
+  deliverable: AssessmentDeliverable,
+  reviewAnswers: { adesao: string; dificuldade: string; efeito: string }
 ) {
   const logs = getManualLogs();
   
@@ -63,6 +63,15 @@ export function generateLearningPayload(
   const adherenceRate = checkinsList.length > 0 ? successCount / checkinsList.length : 0;
 
   const activeProp = getProposals(deliverable).find(p => p.id === cycle.proposalId);
+
+  // Instanciar o Motor Matemático
+  const decision = evaluateCycleDecision(
+    cycle.minDays,
+    successCount,
+    reviewAnswers.adesao,
+    reviewAnswers.dificuldade,
+    reviewAnswers.efeito
+  );
 
   const payload: CycleFeedbackRecord = {
     feedbackRecordId: 'lrn_' + Date.now(),
@@ -86,12 +95,13 @@ export function generateLearningPayload(
       rate: adherenceRate
     },
     cycleWindowDays: cycle.minDays,
-    userPerceivedOutcome: userReview,
-    observedChangeSummary: recommendation,
-    finalDecision: userReview === 'manter' ? 'KEEP_REFINING' : 'REJECT_AND_REOPTIMIZE',
-    proposalSuitability: userReview === 'manter' ? 'HIGH' : (userReview === 'ajustar' ? 'LOW' : 'INCOMPATIBLE'),
-    constraintsTriggered: userReview !== 'manter' ? ['Atribuição gerou atrito logístico ou ineficácia mecânica'] : [],
-    nextRecommendation: userReview === 'manter' ? 'Prosseguir aprofundamento ou isolar novos fatores se desejado.' : 'Sinalizar re-avaliação do contexto principal; recalcular Proposta Dominante.',
+    
+    // Injeção do Outcome Isolado
+    decisionOutcome: decision.status,
+    confidenceInLearning: decision.confidenceLevel,
+    shouldInfluenceFutureSelection: decision.shouldReoptimize,
+    nextStepPhrase: decision.nextStepPhrase,
+
     eligibleForAnonymizedLearning: true,
     userReviewAnswers: reviewAnswers
   };
@@ -102,8 +112,9 @@ export function generateLearningPayload(
     driverId: payload.contextualSnapshot.primaryContextFactor,
     proposalFamily: payload.proposalFamily,
     adherenceRate: payload.adherenceSummary.rate,
-    suitability: payload.proposalSuitability
+    status: decision.status
   }));
 
   saveLearningRecord(payload);
+  return decision; // Devolver a decisão purificada de volta p/ App UI Transition
 }

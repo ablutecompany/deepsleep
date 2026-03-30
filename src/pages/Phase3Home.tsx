@@ -71,16 +71,12 @@ export function Phase3Home() {
   else if (adherenceRate >= 0.7) trendMsg = "A ganhar tração e estabilidade tática";
   else if (adherenceRate <= 0.3) trendMsg = "Resistência massiva; incompatibilidade mecânica suspeita";
 
-  const handleReview = (review: 'manter' | 'ajustar' | 'trocar') => {
-    let rec = "";
-    if (review === 'manter') rec = "Observável o comportamento positivo da tua execução, sugerindo valor em prolongar mais alguns dias a ação de teste atual para clarificar resultados na Fase 1 madura.";
-    else if (review === 'ajustar') rec = "Iremos rever as ações recomendadas num ângulo com menos atrito. Esta proposta atual gerou atrito logístico nas tuas opções concretas e de estilo prático.";
-    else rec = "Faltam provas na tua fase original de haver alteração contundente dos despertares com este trajeto específico. A escolha tática vai redirecionar-se.";
+  const handleSubmitAnswers = () => {
+    // Gerar registo e obter decisão analítica do motor
+    const decision = generateLearningPayload(cycle, deliverable, { adesao, dificuldade, efeito });
     
-    // Gerar registo incremental vivo 
-    generateLearningPayload(cycle, deliverable, review, rec, { adesao, dificuldade, efeito });
-    
-    submitReview(review, rec);
+    // Fechar ciclo com a engine resolution prudente
+    submitReview(decision);
   };
 
   return (
@@ -278,53 +274,81 @@ export function Phase3Home() {
           <div className="fade-in" style={{ marginTop: 'auto', marginBottom: '24px' }}>
             <h3 className="kicker" style={{ color: '#64748B', marginBottom: '16px' }}>Passo Final</h3>
             <h2 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px', lineHeight: 1.3 }}>
-              Decisão de Ajuste
+              Confirmar Respostas
             </h2>
             <p style={{ fontSize: '14px', color: '#94A3B8', marginBottom: '24px', lineHeight: 1.5 }}>
-              Baseado na tua experiência (Adesão: {adesao.split(',')[0]} / Dificuldade: {dificuldade.split(' ')[0]} / Efeito: {efeito.split(' ')[0]}), o que preferes fazer a seguir?
+              Baseado na tua experiência logada (Adesão: {adesao.split(',')[0]} / Dificuldade: {dificuldade.split(' ')[0]} / Efeito: {efeito.split(' ')[0]}), vamos entregar a decisão ao motor.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button onClick={() => handleReview('manter')} className="ritual-trigger" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '20px', borderRadius: '12px', borderLeftColor: '#F8FAFC' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Manter: Pedir p/ Repetir o Trajeto</span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Ideal se o efeito for subtil ou positivo e quiser consolidá-lo mais dias sem mexer.</span>
-              </button>
-              
-              <button onClick={() => handleReview('ajustar')} className="ritual-trigger" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '20px', borderRadius: '12px', borderLeftColor: '#F59E0B' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Ajustar: Incompatível na Prática</span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Gerou demasiado atrito ou foi logísticamente inviável e precisamos de mudar de prisma.</span>
-              </button>
-              
-              <button onClick={() => handleReview('trocar')} className="ritual-trigger" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '20px', borderRadius: '12px', borderLeftColor: '#EF4444' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Trocar: Caminho Inteiro (Sem efeito)</span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Aplicaste bem as diretrizes mas não gerou qualquer tração de sono passivo. Trocar tática.</span>
+              <button onClick={handleSubmitAnswers} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '16px' }}>
+                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Processar Perfil</span>
               </button>
             </div>
           </div>
         )}
 
-        {cycle.status === 'completed' && (
+        {cycle.status === 'completed_keep' && cycle.decisionEngineOutcome && (
           <div style={{ marginTop: 'auto', marginBottom: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <MapPin size={32} color="#10B981" style={{ marginBottom: '24px', opacity: 0.8 }} strokeWidth={1.5} />
-            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Ciclo Prolongado com Sucesso</h3>
-            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '280px', fontWeight: 300, marginBottom: '24px' }}>
-              A direção será mantida nos registos futuros dada a eficácia. Continua a monitorizar o sono na Home.
+            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Direção Mantida</h3>
+            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '300px', fontWeight: 300, marginBottom: '24px' }}>
+              {cycle.decisionEngineOutcome.nextStepPhrase}
             </p>
             <button onClick={() => navigate('/process_home')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-               Voltar à Base Central
+               Continuar a Logar Noites
             </button>
           </div>
         )}
 
-        {cycle.status === 'adjusted' && (
+        {cycle.status === 'completed_adjust' && cycle.decisionEngineOutcome && (
           <div style={{ marginTop: 'auto', marginBottom: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <MapPin size={32} color="#F59E0B" style={{ marginBottom: '24px', opacity: 0.8 }} strokeWidth={1.5} />
-            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Ajuste Tático Necessário</h3>
-            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '280px', fontWeight: 300, marginBottom: '24px' }}>
-              A abordagem testada não produziu a tração base pretendida. O perfil atualizou os fatores ativos e precisamos de refinar o caminho tático.
+            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Ajuste Sinalizado</h3>
+            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '300px', fontWeight: 300, marginBottom: '24px' }}>
+              {cycle.decisionEngineOutcome.nextStepPhrase}
             </p>
             <button onClick={() => navigate('/phase2/proposals')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-               Procurar Novo Caminho
+               Afinar Nova Direcção Realística
+            </button>
+          </div>
+        )}
+
+        {cycle.status === 'completed_switch' && cycle.decisionEngineOutcome && (
+          <div style={{ marginTop: 'auto', marginBottom: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <MapPin size={32} color="#EF4444" style={{ marginBottom: '24px', opacity: 0.8 }} strokeWidth={1.5} />
+            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Rota Esgotada</h3>
+            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '300px', fontWeight: 300, marginBottom: '24px' }}>
+              {cycle.decisionEngineOutcome.nextStepPhrase}
+            </p>
+            <button onClick={() => navigate('/phase2/proposals')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+               Trocar Abordagem Base
+            </button>
+          </div>
+        )}
+
+        {cycle.status === 'active_hold' && cycle.decisionEngineOutcome && (
+          <div style={{ marginTop: 'auto', marginBottom: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <MapPin size={32} color="#6366F1" style={{ marginBottom: '24px', opacity: 0.8 }} strokeWidth={1.5} />
+            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Manutenção Prudente</h3>
+            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '300px', fontWeight: 300, marginBottom: '24px' }}>
+              {cycle.decisionEngineOutcome.nextStepPhrase}
+            </p>
+            <button onClick={() => navigate('/process_home')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+               Aceitar e Voltar à Home
+            </button>
+          </div>
+        )}
+
+        {cycle.status === 'pending_reassessment' && cycle.decisionEngineOutcome && (
+          <div style={{ marginTop: 'auto', marginBottom: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <MapPin size={32} color="#38BDF8" style={{ marginBottom: '24px', opacity: 0.8 }} strokeWidth={1.5} />
+            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Recolha Adicional</h3>
+            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '300px', fontWeight: 300, marginBottom: '24px' }}>
+              {cycle.decisionEngineOutcome.nextStepPhrase}
+            </p>
+            <button onClick={() => navigate('/process_home')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+               Validar com Mais Registos
             </button>
           </div>
         )}

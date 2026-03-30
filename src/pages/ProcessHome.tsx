@@ -71,114 +71,133 @@ export function ProcessHome() {
         A evolução baseia-se num sistema faseado rigoroso. Conclui a fase atual para desbloquear recursos avançados.
       </p>
 
-      {cycle && cycle.status === 'active' && deliverable && showPlanPanel && (
+      {cycle && deliverable && showPlanPanel && (
         <div className="fade-in" style={{ marginBottom: '48px' }}>
-          
-          <div style={{ borderLeft: '2px solid #38BDF8', paddingLeft: '16px', marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#38BDF8', fontWeight: 600 }}>
-                {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.badge || 'Direção Ativa'}
-              </span>
-              <span style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38BDF8', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 600 }}>
-                DIA {Object.keys(cycle.dailyCheckins).length + 1} DE {cycle.minDays}
-              </span>
-            </div>
-            <h3 style={{ fontSize: '22px', color: '#F8FAFC', fontWeight: 400, lineHeight: '1.3' }}>
-              {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.title || 'Teste em curso'}
-            </h3>
-          </div>
-
-          <div className="editorial-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
-            <p style={{ fontSize: '15px', color: '#E2E8F0', lineHeight: '1.6', fontWeight: 300, marginBottom: '24px' }}>
-               {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.actionToday}
-            </p>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '24px' }}>
-               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38BDF8', boxShadow: '0 0 8px rgba(56,189,248,0.5)', marginTop: '6px', flexShrink: 0 }}></div>
-                 <div>
-                   <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Observa</span>
-                   <span style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400, lineHeight: '1.4' }}>
-                     {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.observeWhat}
-                   </span>
-                 </div>
-               </div>
-               
-               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', opacity: 0.8 }}>
-                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'transparent', border: '1px solid #94A3B8', marginTop: '6px', flexShrink: 0 }}></div>
-                 <div>
-                   <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Depois diz-nos</span>
-                   <span style={{ fontSize: '14px', color: '#E2E8F0', fontWeight: 300, lineHeight: '1.4' }}>
-                     {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.reportQuestion}
-                   </span>
-                 </div>
-               </div>
-
-               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', opacity: 0.6 }}>
-                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'transparent', border: '1px solid #94A3B8', marginTop: '6px', flexShrink: 0 }}></div>
-                 <div>
-                   <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Check-in esperado</span>
-                   <span style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.4' }}>
-                     {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.checkInLabel}
-                   </span>
-                 </div>
-               </div>
-            </div>
-            
-            {/* O removed Bell row because it's already in the main header now */}
-          </div>
-
-          {!cycle.dailyCheckins[todayStr] ? (
+          {cycle.status === 'active' || cycle.status === 'active_hold' ? (
             <div>
-              <h4 style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400, marginBottom: '20px', textAlign: 'center', lineHeight: 1.4, padding: '0 12px' }}>
-                {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.reportQuestion || "Foi fácil manter a orientação hoje?"}
-              </h4>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => { checkInToday('success'); setShowPlanPanel(false); }}
-                  style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10B981', cursor: 'pointer' }}
-                >
-                  <CheckCircle2 size={20} strokeWidth={1.5} />
-                  <span style={{ fontSize: '12px', fontWeight: 500 }}>Alinhado</span>
-                </button>
-                <button
-                  onClick={() => { checkInToday('failed'); setShowPlanPanel(false); }}
-                  style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#EF4444', cursor: 'pointer' }}
-                >
-                  <XCircle size={20} strokeWidth={1.5} />
-                  <span style={{ fontSize: '12px', fontWeight: 500 }}>Falhou</span>
-                </button>
-                <button
-                  onClick={() => { checkInToday('incerto'); setShowPlanPanel(false); }}
-                  style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', cursor: 'pointer' }}
-                >
-                  <HelpCircle size={20} strokeWidth={1.5} />
-                  <span style={{ fontSize: '12px', fontWeight: 500 }}>Incerto</span>
-                </button>
+              <div style={{ borderLeft: '2px solid #38BDF8', paddingLeft: '16px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#38BDF8', fontWeight: 600 }}>
+                    {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.badge || 'Direção Ativa'}
+                  </span>
+                  <span style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38BDF8', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 600 }}>
+                    DIA {Object.keys(cycle.dailyCheckins).length + 1} DE {cycle.minDays}
+                  </span>
+                </div>
+                <h3 style={{ fontSize: '22px', color: '#F8FAFC', fontWeight: 400, lineHeight: '1.3' }}>
+                  {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.title || 'Teste em curso'}
+                </h3>
               </div>
+
+              {cycle.status === 'active_hold' && cycle.decisionEngineOutcome && (
+                 <div style={{ marginTop: '16px', marginBottom: '24px', padding: '12px', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '8px' }}>
+                   <p style={{ fontSize: '12px', color: '#818cf8', fontWeight: 600, marginBottom: '4px' }}>ESTATUTO: MANUTENÇÃO PRUDENTE</p>
+                   <p style={{ fontSize: '13px', color: '#c7d2fe', lineHeight: 1.4 }}>{cycle.decisionEngineOutcome.nextStepPhrase}</p>
+                 </div>
+              )}
+
+              <div className="editorial-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
+                <p style={{ fontSize: '15px', color: '#E2E8F0', lineHeight: '1.6', fontWeight: 300, marginBottom: '24px' }}>
+                   {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.actionToday}
+                </p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '24px' }}>
+                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38BDF8', boxShadow: '0 0 8px rgba(56,189,248,0.5)', marginTop: '6px', flexShrink: 0 }}></div>
+                     <div>
+                       <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Observa</span>
+                       <span style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400, lineHeight: '1.4' }}>
+                         {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.observeWhat}
+                       </span>
+                     </div>
+                   </div>
+                   
+                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', opacity: 0.8 }}>
+                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'transparent', border: '1px solid #94A3B8', marginTop: '6px', flexShrink: 0 }}></div>
+                     <div>
+                       <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Depois diz-nos</span>
+                       <span style={{ fontSize: '14px', color: '#E2E8F0', fontWeight: 300, lineHeight: '1.4' }}>
+                         {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.reportQuestion}
+                       </span>
+                     </div>
+                   </div>
+
+                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', opacity: 0.6 }}>
+                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'transparent', border: '1px solid #94A3B8', marginTop: '6px', flexShrink: 0 }}></div>
+                     <div>
+                       <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Check-in esperado</span>
+                       <span style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.4' }}>
+                         {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.checkInLabel}
+                       </span>
+                     </div>
+                   </div>
+                </div>
+              </div>
+
+              {!cycle.dailyCheckins[todayStr] ? (
+                <div>
+                  <h4 style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400, marginBottom: '20px', textAlign: 'center', lineHeight: 1.4, padding: '0 12px' }}>
+                    {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.reportQuestion || "Foi fácil manter a orientação hoje?"}
+                  </h4>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => { checkInToday('success'); setShowPlanPanel(false); }} style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10B981', cursor: 'pointer' }}>
+                      <CheckCircle2 size={20} strokeWidth={1.5} />
+                      <span style={{ fontSize: '12px', fontWeight: 500 }}>Alinhado</span>
+                    </button>
+                    <button onClick={() => { checkInToday('failed'); setShowPlanPanel(false); }} style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#EF4444', cursor: 'pointer' }}>
+                      <XCircle size={20} strokeWidth={1.5} />
+                      <span style={{ fontSize: '12px', fontWeight: 500 }}>Falhou</span>
+                    </button>
+                    <button onClick={() => { checkInToday('incerto'); setShowPlanPanel(false); }} style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', cursor: 'pointer' }}>
+                      <HelpCircle size={20} strokeWidth={1.5} />
+                      <span style={{ fontSize: '12px', fontWeight: 500 }}>Incerto</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '16px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+                  <span style={{ fontSize: '13px', color: '#94A3B8', display: 'block', marginBottom: '12px' }}>Dia já registado. O trajeto continua amanhã.</span>
+                  <button onClick={() => navigate('/phase3_home')} style={{ background: 'transparent', color: '#F8FAFC', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 24px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', display: 'inline-block' }}>
+                    {Object.keys(cycle.dailyCheckins).length >= cycle.minDays ? "Revisão Final Obrigatória Pendente" : "Avaliar Janela / Ver Plano"}
+                  </button>
+                </div>
+              )}
+              
+              {!cycle.dailyCheckins[todayStr] && Object.keys(cycle.dailyCheckins).length >= cycle.minDays && (
+                <button onClick={() => navigate('/phase3_home')} className="text-btn" style={{ width: '100%', justifyContent: 'center', marginTop: '24px', color: '#38BDF8', fontWeight: 500 }}>
+                  Janela expirou. Fazer Revisão Final Obrigatória
+                </button>
+              )}
+
+              {!cycle.dailyCheckins[todayStr] && Object.keys(cycle.dailyCheckins).length < cycle.minDays && (
+                <button onClick={() => navigate('/phase3_home')} className="text-btn" style={{ width: '100%', justifyContent: 'center', marginTop: '24px', opacity: 0.5 }}>
+                  Ver plano completo ou Finalizar
+                </button>
+              )}
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '16px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '8px' }}>
-              <span style={{ fontSize: '13px', color: '#94A3B8', display: 'block', marginBottom: '12px' }}>Dia já registado. O trajeto continua amanhã.</span>
-              <button 
-                onClick={() => navigate('/phase3_home')}
-                style={{ background: 'transparent', color: '#F8FAFC', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 24px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', display: 'inline-block' }}
-              >
-                Avaliar Janela / Ver Plano
-              </button>
+            <div style={{ padding: '32px 16px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38BDF8', marginBottom: '8px' }}>
+                <CheckCircle2 size={24} />
+              </div>
+              <h3 style={{ fontSize: '20px', color: '#F8FAFC', fontWeight: 300 }}>Status: {cycle.status.split('_')[1]?.toUpperCase() || 'CONCLUÍDO'}</h3>
+              <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: 1.5, maxWidth: '280px' }}>
+                O desfecho analítico desta rota foi guardado no teu perfil de sono. {cycle.decisionEngineOutcome?.nextStepPhrase}
+              </p>
+              {cycle.status === 'completed_keep' ? (
+                 <button onClick={() => navigate('/patterns')} className="primary-btn" style={{ width: '100%', marginTop: '16px' }}>Ver Perfil Atualizado</button>
+              ) : (
+                 <button onClick={() => navigate('/phase2/proposals')} className="primary-btn" style={{ width: '100%', marginTop: '16px' }}>Afinar Nova Orientação</button>
+              )}
+              
+              <button onClick={() => {
+                if (window.confirm("Queres descartar este plano e voltar a zero temporariamente?")) {
+                  localStorage.removeItem('deepsleep_phase3_cycle');
+                  window.location.reload();
+                }
+              }} className="text-btn" style={{ opacity: 0.5 }}>Descartar</button>
             </div>
           )}
-          
-          {!cycle.dailyCheckins[todayStr] && (
-            <button 
-               onClick={() => navigate('/phase3_home')}
-               className="text-btn"
-               style={{ width: '100%', justifyContent: 'center', marginTop: '24px', opacity: 0.5 }}
-            >
-              Ver plano completo ou Finalizar
-            </button>
-          )}
-
         </div>
       )}
 

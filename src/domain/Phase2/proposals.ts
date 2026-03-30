@@ -265,7 +265,7 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
   const learningRecords = getLearningRecords();
   if (learningRecords.length > 0 && deliverable) {
     const rejectedIds = learningRecords
-      .filter(r => r.linkedAssessmentId === deliverable.assessmentId && r.finalDecision === 'REJECT_AND_REOPTIMIZE')
+      .filter(r => r.linkedAssessmentId === deliverable.assessmentId && r.shouldInfluenceFutureSelection && (r.decisionOutcome === 'switch' || r.decisionOutcome === 'adjust'))
       .map(r => r.activeProposalId);
 
     if (rejectedIds.length > 0) {
