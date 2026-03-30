@@ -2,8 +2,9 @@ import type { Phase3Cycle } from '../../store/Phase3ContextStore';
 import type { AssessmentDeliverable } from '../Phase2/engine';
 import { getManualLogs } from '../Phase1/manualLogStore';
 import { getProposals } from '../Phase2/proposals';
+import type { SyncableBaseEntity } from '../CloudSync/contracts';
 
-export interface CycleFeedbackRecord {
+export interface CycleFeedbackRecord extends SyncableBaseEntity {
   feedbackRecordId: string;
   linkedAssessmentId: string;
   linkedCycleId: string;

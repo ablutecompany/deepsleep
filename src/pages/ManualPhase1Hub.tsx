@@ -1,15 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Activity, Calendar, FilePlus, Trash2, Moon, Sun } from 'lucide-react';
-import { getManualLogs, deleteManualLog, type ManualAppLog } from '../domain/Phase1/manualLogStore';
+import { getManualLogs, type ManualAppLog } from '../domain/Phase1/manualLogStore';
+import { getSensingSessions } from '../domain/Sensing/store';
+import { evaporateNightCascade } from '../domain/DataGovernance/manager';
+import { Ear } from 'lucide-react';
 
 export function ManualPhase1Hub() {
   const navigate = useNavigate();
   const [logs, setLogs] = useState<ManualAppLog[]>([]);
   const target = 5;
 
+  const [sensingSessions, setSensingSessions] = useState<any[]>([]);
+
   useEffect(() => {
-    const handleUpdate = () => setLogs(getManualLogs());
+    const handleUpdate = () => {
+      setLogs(getManualLogs());
+      setSensingSessions(getSensingSessions());
+    };
     handleUpdate();
     window.addEventListener('deepsleep_simulated_change', handleUpdate);
     return () => window.removeEventListener('deepsleep_simulated_change', handleUpdate);
@@ -29,10 +37,14 @@ export function ManualPhase1Hub() {
         return;
       }
     }
-    
-    deleteManualLog(log.id);
+    evaporateNightCascade(log.id);
     setLogs(getManualLogs());
+    setSensingSessions(getSensingSessions());
   };
+
+  // Deteção Matinal de Pendência
+  // Verifica se há alguma observação acústica não consumida por um Manual Log
+  const unlinkedSensing = sensingSessions.find(s => !logs.some(l => l.dateStr === s.linkedNightId));
 
   return (
     <div className="home-page fade-in" style={{ background: 'var(--bg-core)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -54,24 +66,71 @@ export function ManualPhase1Hub() {
 
         <section style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, paddingBottom: '90px' }}>
           
+          {unlinkedSensing ? (
+            <button 
+              onClick={() => navigate(`/manual_log_form?fromSensing=true&sessionId=${unlinkedSensing.id}`)}
+              style={{ 
+                background: 'rgba(56, 189, 248, 0.15)', 
+                border: '1px solid rgba(56, 189, 248, 0.4)', 
+                borderRadius: '8px', 
+                padding: '20px', 
+                display: 'flex', 
+                flexDirection: 'column',
+                gap: '8px',
+                color: '#38BDF8',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Ear size={20} color="#38BDF8" />
+                <span style={{ fontWeight: 600, fontSize: '15px', color: '#F8FAFC' }}>Pendência Matinal Encontrada</span>
+              </div>
+              <p style={{ fontSize: '13px', color: '#CBD5E1', lineHeight: '1.4' }}>
+                 Possuis uma observação acústica de hoje terminada. Falta anexares a tua própria percepção lógica da noite para fechar a correlação analítica.
+              </p>
+              <span style={{ fontSize: '14px', fontWeight: 500, marginTop: '8px' }}>Completar Registo da Noite →</span>
+            </button>
+          ) : (
+            <button 
+              onClick={() => navigate('/manual_log_form')}
+              className="text-btn"
+              style={{ 
+                background: '#0a0a0c', 
+                border: '1px solid rgba(255,255,255,0.1)', 
+                borderRadius: '8px', 
+                padding: '16px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: '12px',
+                color: '#38BDF8'
+              }}
+            >
+              <FilePlus size={18} />
+              <span>Adicionar Novo Registo Manual</span>
+            </button>
+          )}
+          
           <button 
-            onClick={() => navigate('/manual_log_form')}
+            onClick={() => navigate('/sensing')}
             className="text-btn"
             style={{ 
-              background: '#0a0a0c', 
-              border: '1px solid rgba(255,255,255,0.1)', 
+              background: 'transparent',
+              border: '1px dashed rgba(56, 189, 248, 0.3)', 
               borderRadius: '8px', 
-              padding: '16px', 
+              padding: '12px', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center', 
-              gap: '12px',
-              color: '#38BDF8',
+              gap: '10px',
+              color: '#94A3B8',
+              fontSize: '13px',
               marginBottom: '16px'
             }}
           >
-            <FilePlus size={18} />
-            <span>Adicionar Novo Registo</span>
+            <Ear size={14} color="#38BDF8" />
+            <span>Observação Acústica Automática <span style={{ opacity: 0.5, fontSize: '11px', textTransform: 'uppercase', marginLeft: '6px' }}>Beta</span></span>
           </button>
 
           {logs.length === 0 && (
@@ -143,6 +202,40 @@ export function ManualPhase1Hub() {
                       <span style={{ fontSize: '13px', color: '#E2E8F0' }}>{log.perceivedRestoration}</span>
                     </div>
                   )}
+
+                  {(() => {
+                    if (isNap) return null;
+                    const linkedSensing = sensingSessions.find(s => s.linkedNightId === log.dateStr);
+                    if (!linkedSensing) {
+                       return (
+                         <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                           <Ear size={14} color="#64748B" opacity={0.5} />
+                           <span style={{ fontSize: '12px', color: '#64748B', opacity: 0.5 }}>Sem observação acústica local</span>
+                         </div>
+                       );
+                    }
+                    const isUsable = linkedSensing.qualityState !== 'unusable';
+                    
+                    return (
+                      <div style={{ marginTop: '4px', background: 'rgba(56, 189, 248, 0.05)', padding: '12px', borderRadius: '6px', border: '1px dashed rgba(56, 189, 248, 0.2)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                          <Ear size={14} color="#38BDF8" />
+                          <span style={{ fontSize: '13px', color: '#38BDF8', fontWeight: 500 }}>
+                             {isUsable ? 'Observação Acústica (Beta)' : 'Sessão Acústica Insuficiente'}
+                          </span>
+                        </div>
+                        {isUsable && linkedSensing.summary?.dominantDisturbance ? (
+                          <div style={{ fontSize: '12px', color: '#94A3B8', paddingLeft: '20px', lineHeight: '1.4' }}>
+                           <strong>Sinal:</strong> {linkedSensing.summary.dominantDisturbance}
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: '12px', color: '#94A3B8', paddingLeft: '20px' }}>
+                            Amostra corrompida ({linkedSensing.contaminationReasons?.[0] || 'ruído/curta'})
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}

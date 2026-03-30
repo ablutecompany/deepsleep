@@ -1,11 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 import { usePhase2Store } from '../store/Phase2ContextStore';
-import { getManualLogs, deleteManualLog } from '../domain/Phase1/manualLogStore';
+import { getManualLogs } from '../domain/Phase1/manualLogStore';
 import { appClock } from '../utils/appClock';
+import { getTelemetryLogs } from '../domain/Telemetry/tracker';
+import { getSensingSessions } from '../domain/Sensing/store';
+import { evaporateNightCascade, wipeEntireProfile } from '../domain/DataGovernance/manager';
+import { getBetaFeedbackRecords } from '../domain/Telemetry/betaFeedbackStore';
 
 export function Control() {
   const navigate = useNavigate();
   const { deliverable } = usePhase2Store();
+  const sensingSessions = getSensingSessions();
+  const sensingUsable = sensingSessions.filter(s => s.qualityState !== 'unusable').length;
+  const sensingErrors = sensingSessions.filter(s => s.qualityState === 'unusable').length;
 
   const downloadFile = (filename: string, text: string) => {
     const element = document.createElement('a');
@@ -32,13 +39,61 @@ export function Control() {
       learning = JSON.parse(localStorage.getItem('deepsleep_learning_records') || '[]');
     } catch (e) {}
     
-    if (logs.length === 0 && learning.length === 0) {
+    let phase3 = null;
+    try {
+      phase3 = JSON.parse(localStorage.getItem('deepsleep_phase3_cycle') || 'null');
+    } catch(e) {}
+    
+    if (logs.length === 0 && learning.length === 0 && !phase3) {
       alert("Não há dados de histórico ou aprendizagem retidos.");
       return;
     }
     
-    const exportData = { raw_logs: logs, learning_records: learning };
+    const exportData = { 
+      raw_logs: logs, 
+      learning_records: learning,
+      active_cycle: phase3 ? {
+        cycleId: phase3.cycleId,
+        proposalId: phase3.proposalId,
+        status: phase3.status,
+        dailyCheckins: phase3.dailyCheckins || {},
+        dailyFeedback: phase3.dailyFeedback || {} // Incluído o micro-feedback diário explicitamente
+      } : null
+    };
     downloadFile(`deepsleep_historico_${appClock.todayStr()}.json`, JSON.stringify(exportData, null, 2));
+  };
+
+  const handleExportFullTestSession = () => {
+    let phase3 = null;
+    try { phase3 = JSON.parse(localStorage.getItem('deepsleep_phase3_cycle') || 'null'); } catch(e) {}
+    let learning = [];
+    try { learning = JSON.parse(localStorage.getItem('deepsleep_learning_records') || '[]'); } catch(e) {}
+
+    const data = {
+      beta_export_timestamp: new Date().toISOString(),
+      beta_simulated_clock: appClock.todayStr(),
+      tester_feedback: getBetaFeedbackRecords(),
+      raw_logs: getManualLogs(),
+      profile: deliverable,
+      active_cycle: phase3,
+      learning_records: learning,
+      sensing_sessions: getSensingSessions(),
+      telemetry: getTelemetryLogs(),
+    };
+    downloadFile(`deepsleep_agg_beta_test_${appClock.todayStr()}.json`, JSON.stringify(data, null, 2));
+  };
+
+  const handleExportTelemetry = () => {
+    const data = getTelemetryLogs();
+    downloadFile(`deepsleep_telemetria_${appClock.todayStr()}.json`, JSON.stringify(data, null, 2));
+  };
+
+  const handleExportSensing = () => {
+    let data = [];
+    try {
+      data = JSON.parse(localStorage.getItem('deepsleep_sensing_sessions') || '[]');
+    } catch(e) {}
+    downloadFile(`deepsleep_acustica_${appClock.todayStr()}.json`, JSON.stringify(data, null, 2));
   };
 
   const handleDeleteToday = () => {
@@ -51,17 +106,17 @@ export function Control() {
       return;
     }
     
-    if (window.confirm(`Vais apagar permanentemente o registo desta noite (${today}).\n\nIsto forçará o recálculo da tua janela de observação. Confirmas ação destrutiva?`)) {
-      deleteManualLog(todaysLog.id);
-      alert("Registo diário limpo com sucesso.");
+    if (window.confirm(`Vais apagar permanentemente o registo desta noite (${today}).\n\nEste recálculo irá remover contextualmente quaisquer observações acústicas ligadas a esta noite e pode suspender o teu plano diário se passares abaixo do limite de baseline. Confirmas ação destrutiva?`)) {
+      evaporateNightCascade(todaysLog.id);
+      alert("Registo diário evaporado. Recálculo efetuado com sucesso.");
       navigate('/');
     }
   };
 
   const handleHardReset = () => {
-    if (window.confirm("⚠️ ATENÇÃO EXTREMA ⚠️\n\nVais destruir todo o teu perfil, base matemática e sessões em curso. A aplicação regressará ao estaca zero.\n\nConfirmas?")) {
-      if (window.confirm("Ação irreversível. O teu telemóvel irá limpar a retenção agora.")) {
-        localStorage.clear();
+    if (window.confirm("⚠️ APAGAMENTO PERMANENTE DE PERFIL ⚠️\n\nVais destruir e reinicializar:\n- Diário basal\n- Interpretações do motor\n- Decisões ativas (Fase 3)\n- Gravações locais do Microfone\n\nAs tuas exportações locais de histórico também ficarão órfãs. Confirmas limpar tudo?")) {
+      if (window.confirm("Ação destrutiva final. A tua app irá suspender num ecrã em branco e reinicializar.")) {
+        wipeEntireProfile();
         window.location.href = '/';
       }
     }
@@ -144,13 +199,69 @@ export function Control() {
           </div>
         </section>
 
+        <section className="editorial-module">
+          <span className="kicker">Dados Recolhidos Observacionais</span>
+          <p className="module-desc" style={{ marginBottom: '16px' }}>
+            Histórico opcional das tuas sessões acústicas de observação de sinal local, cruzadas e acopladas ao teu diário manual.
+          </p>
+          <ul className="retention-list" style={{ marginTop: 0 }}>
+            <li className="retention-item">
+              <span className="retention-key">Sessões Totais</span>
+              <span className="retention-val">{sensingSessions.length} sessões</span>
+            </li>
+            <li className="retention-item">
+              <span className="retention-key">Validadas p/ Histórico</span>
+              <span className="retention-val" style={{ color: '#10B981' }}>{sensingUsable} capturas legíveis</span>
+            </li>
+            {sensingErrors > 0 && (
+              <li className="retention-item">
+                <span className="retention-key">Interrupções / Corrompidas</span>
+                <span className="retention-val" style={{ color: '#EF4444' }}>{sensingErrors} falhas</span>
+              </li>
+            )}
+          </ul>
+        </section>
+
+        <section className="editorial-module footer-module" style={{ borderTop: '2px dashed rgba(245, 158, 11, 0.4)', paddingTop: '32px', background: 'rgba(245, 158, 11, 0.02)', padding: '24px', borderRadius: '12px' }}>
+          <span className="kicker" style={{ color: '#F59E0B', marginBottom: '16px' }}>[Beta] Painel Operacional de Sessão</span>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
+               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Noites Válidas</div>
+               <div style={{ fontSize: '16px', color: '#F8FAFC' }}>{getManualLogs().filter(l => l.sleepType === 'NIGHT' && l.countsForBaseline).length} / 5</div>
+             </div>
+             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
+               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Baseline Motor</div>
+               <div style={{ fontSize: '16px', color: deliverable ? '#10B981' : '#F59E0B' }}>{deliverable ? 'Pronta' : 'Pendente'}</div>
+             </div>
+             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
+               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Telemetria Ativa</div>
+               <div style={{ fontSize: '16px', color: '#F8FAFC' }}>{getTelemetryLogs().length} <span style={{fontSize: '11px', color: '#64748B'}}>evts</span></div>
+             </div>
+             <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
+               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Fricção Registada</div>
+               <div style={{ fontSize: '16px', color: '#F8FAFC' }}>{getBetaFeedbackRecords().length} <span style={{fontSize: '11px', color: '#64748B'}}>reps</span></div>
+             </div>
+          </div>
+          
+          <button onClick={handleExportFullTestSession} className="primary-btn" style={{ width: '100%', justifyContent: 'center', background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+            Baixar Exportação Agregada (Beta)
+          </button>
+        </section>
+
         <section className="editorial-module footer-module" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>
           <span className="kicker" style={{ color: '#38BDF8' }}>Beta Labs (Testes Locais)</span>
           <div className="action-list" style={{ marginTop: '16px', marginBottom: '32px' }}>
             <button onClick={() => navigate('/sensing')} className="primary-btn action-link" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38BDF8', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
               Testar Observação Acústica
             </button>
-            <p style={{ marginTop: '8px', fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>
+            <button onClick={handleExportSensing} className="text-btn action-link" style={{ marginTop: '16px', color: '#94A3B8' }}>
+              Exportar registos acústicos
+            </button>
+            <button onClick={handleExportTelemetry} className="text-btn action-link" style={{ marginTop: '16px', color: '#94A3B8' }}>
+              Exportar telemetria local
+            </button>
+            <p style={{ marginTop: '24px', fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>
               Spike técnico para cálculo de decibéis ambiente. O ecrã ficará preso em modo nocturno de alto-contraste. Sem envio para cloud.
             </p>
           </div>

@@ -4,20 +4,27 @@ import { usePhase3Store } from '../store/Phase3ContextStore';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { getProposals, getPriorityTest } from '../domain/Phase2/proposals';
 import { generateLearningPayload } from '../domain/Phase3/learningStore';
+import { REVIEW_BANK } from '../domain/Questions/adaptive';
 import { appClock } from '../utils/appClock';
-import { ArrowLeft, CheckCircle2, XCircle, HelpCircle, MapPin } from 'lucide-react';
+import { trackEvent } from '../domain/Telemetry/tracker';
+import { ArrowLeft, CheckCircle2, XCircle, MapPin } from 'lucide-react';
 
 export function Phase3Home() {
   const navigate = useNavigate();
   const { deliverable } = usePhase2Store();
-  const { cycle, todayStr, startCycle, checkInToday, submitReview } = usePhase3Store();
+  const { cycle, todayStr, startCycle, checkInToday, submitReview, skipReviewBeta } = usePhase3Store();
 
   const [reviewStep, setReviewStep] = useState(0);
   const [adesao, setAdesao] = useState('');
   const [dificuldade, setDificuldade] = useState('');
   const [efeito, setEfeito] = useState('');
+
+  const [dailyStep, setDailyStep] = useState(0);
+  const [dailyAdherence, setDailyAdherence] = useState<'success' | 'failed' | 'incerto' | null>(null);
   
   const activeProposal = cycle && deliverable ? getProposals(deliverable).find(p => p.id === cycle.proposalId) : null;
+  const familyKey = activeProposal?.id ? activeProposal.id.toUpperCase() : 'DEFAULT';
+  const adaptiveSet = REVIEW_BANK[familyKey] || REVIEW_BANK['DEFAULT'];
 
   useEffect(() => {
     if (deliverable && !cycle) {
@@ -33,6 +40,8 @@ export function Phase3Home() {
           matchedProposal.minDays
         );
       }
+    } else if (cycle && cycle.status === 'active') {
+      trackEvent('active_guidance_viewed', { linkedCycleId: cycle.cycleId, linkedGuidanceId: cycle.proposalId });
     }
   }, [deliverable, cycle, startCycle]);
 
@@ -136,59 +145,90 @@ export function Phase3Home() {
               Posição Hoje ({todayStr.slice(5)})
             </h3>
             
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                onClick={() => checkInToday('success')}
-                className="ritual-trigger"
-                style={{
-                  flex: 1, padding: '24px 16px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                  background: todayValue === 'success' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.02)',
-                  borderColor: todayValue === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255,255,255,0.08)',
-                  borderLeft: todayValue === 'success' ? '2px solid #10B981' : '1px solid rgba(255,255,255,0.08)',
-                  color: todayValue === 'success' ? '#10B981' : '#F8FAFC'
-                }}
-              >
-                <CheckCircle2 size={24} strokeWidth={1.5} />
-                <span style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.5px' }}>Alinhado</span>
-              </button>
-              
-              <button
-                onClick={() => checkInToday('failed')}
-                className="ritual-trigger"
-                style={{
-                  flex: 1, padding: '24px 16px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                  background: todayValue === 'failed' ? 'rgba(239, 68, 68, 0.05)' : 'rgba(255,255,255,0.02)',
-                  borderColor: todayValue === 'failed' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255,255,255,0.08)',
-                  borderLeft: todayValue === 'failed' ? '2px solid #EF4444' : '1px solid rgba(255,255,255,0.08)',
-                  color: todayValue === 'failed' ? '#EF4444' : '#F8FAFC'
-                }}
-              >
-                <XCircle size={24} strokeWidth={1.5} />
-                <span style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.5px' }}>Desalinhado</span>
-              </button>
-              
-              <button
-                onClick={() => checkInToday('incerto')}
-                className="ritual-trigger"
-                style={{
-                  flex: 1, padding: '24px 16px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                  background: todayValue === 'incerto' ? 'rgba(245, 158, 11, 0.05)' : 'rgba(255,255,255,0.02)',
-                  borderColor: todayValue === 'incerto' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(255,255,255,0.08)',
-                  borderLeft: todayValue === 'incerto' ? '2px solid #F59E0B' : '1px solid rgba(255,255,255,0.08)',
-                  color: todayValue === 'incerto' ? '#F59E0B' : '#F8FAFC'
-                }}
-              >
-                <HelpCircle size={24} strokeWidth={1.5} />
-                <span style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.5px' }}>Incerto</span>
-              </button>
-            </div>
+            {dailyStep === 0 && !todayValue && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+                <p style={{ color: '#F8FAFC', fontSize: '15px', fontWeight: 300, marginBottom: '8px' }}>Seguiste a orientação da proposta?</p>
+                <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+                  <button
+                    onClick={() => { setDailyAdherence('success'); setDailyStep(1); }}
+                    className="ritual-trigger"
+                    style={{ flex: 1, padding: '16px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.02)', borderLeft: '2px solid transparent' }}
+                  >
+                    <CheckCircle2 size={24} color="#10B981" strokeWidth={1.5} />
+                    <span style={{ fontSize: '14px', color: '#F8FAFC' }}>Sim, consegui</span>
+                  </button>
+                  <button
+                    onClick={() => { setDailyAdherence('failed'); setDailyStep(1); }}
+                    className="ritual-trigger"
+                    style={{ flex: 1, padding: '16px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.02)', borderLeft: '2px solid transparent' }}
+                  >
+                    <XCircle size={24} color="#EF4444" strokeWidth={1.5} />
+                    <span style={{ fontSize: '14px', color: '#F8FAFC' }}>Não consegui</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {dailyStep === 1 && !todayValue && (
+              <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+                <p style={{ color: '#F8FAFC', fontSize: '15px', fontWeight: 300, marginBottom: '8px' }}>
+                  {dailyAdherence === 'success' ? 'Foi fácil de executar?' : 'O que impediu a execução?'}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                  {dailyAdherence === 'success' ? (
+                    <>
+                      <button onClick={() => { 
+                          trackEvent('proposal_execution_ease_selected', { payload: { ease: 'natural' } });
+                          checkInToday('success', { executionEase: 'natural' }); 
+                          setDailyStep(0); 
+                      }} className="ritual-trigger" style={{ padding: '16px', borderRadius: '8px', color: '#F8FAFC', textAlign: 'left' }}>Foi natural e não custou</button>
+                      
+                      <button onClick={() => { 
+                          trackEvent('proposal_execution_ease_selected', { payload: { ease: 'effort' } });
+                          checkInToday('success', { executionEase: 'effort' }); 
+                          setDailyStep(0); 
+                      }} className="ritual-trigger" style={{ padding: '16px', borderRadius: '8px', color: '#F8FAFC', textAlign: 'left' }}>Exigiu algum esforço</button>
+                      
+                      <button onClick={() => { 
+                          trackEvent('proposal_execution_ease_selected', { payload: { ease: 'very_difficult' } });
+                          checkInToday('success', { executionEase: 'very_difficult' }); 
+                          setDailyStep(0); 
+                      }} className="ritual-trigger" style={{ padding: '16px', borderRadius: '8px', color: '#F8FAFC', textAlign: 'left' }}>Foi muito difícil forçar</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => { 
+                          trackEvent('proposal_non_execution_reason_selected', { payload: { reason: 'forgot' } });
+                          checkInToday('failed', { nonExecutionReason: 'forgot' }); 
+                          setDailyStep(0); 
+                      }} className="ritual-trigger" style={{ padding: '16px', borderRadius: '8px', color: '#F8FAFC', textAlign: 'left' }}>Esqueci-me completamente</button>
+                      
+                      <button onClick={() => { 
+                          trackEvent('proposal_non_execution_reason_selected', { payload: { reason: 'no_conditions' } });
+                          checkInToday('failed', { nonExecutionReason: 'no_conditions' }); 
+                          setDailyStep(0); 
+                      }} className="ritual-trigger" style={{ padding: '16px', borderRadius: '8px', color: '#F8FAFC', textAlign: 'left' }}>Não tive condições hoje</button>
+                      
+                      <button onClick={() => { 
+                          trackEvent('proposal_non_execution_reason_selected', { payload: { reason: 'intentional' } });
+                          checkInToday('failed', { nonExecutionReason: 'intentional' }); 
+                          setDailyStep(0); 
+                      }} className="ritual-trigger" style={{ padding: '16px', borderRadius: '8px', color: '#F8FAFC', textAlign: 'left' }}>Decidi intencionalmente não fazer</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
             
             {todayValue && (
               <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
                 <p style={{ fontSize: '13px', color: '#64748B', textAlign: 'center', fontWeight: 300 }}>
                   Posição guardada sileciosamente. O trajeto continua amanhã.
                 </p>
-                <button onClick={() => appClock.addDays(1)} className="secondary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center', borderColor: 'rgba(245, 158, 11, 0.5)', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.05)' }}>
+                <button onClick={() => {
+                   trackEvent('beta_simulate_tomorrow_used');
+                   appClock.addDays(1);
+                }} className="secondary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center', borderColor: 'rgba(245, 158, 11, 0.5)', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.05)' }}>
                   [Beta] Simular Amanhã
                 </button>
                 <button onClick={() => navigate('/process_home')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
@@ -219,8 +259,14 @@ export function Phase3Home() {
               </p>
             </div>
             
-            <button onClick={() => setReviewStep(1)} className="primary-btn" style={{ width: '100%', justifyContent: 'center' }}>
+            <button onClick={() => setReviewStep(1)} className="primary-btn" style={{ width: '100%', justifyContent: 'center', marginBottom: '16px' }}>
               Iniciar Avaliação de Janela
+            </button>
+            <button onClick={() => {
+               trackEvent('beta_review_skipped');
+               skipReviewBeta();
+            }} className="secondary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center', borderColor: 'rgba(245, 158, 11, 0.5)', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.05)' }}>
+              [Beta] Simular Amanhã (Saltar Review)
             </button>
           </div>
         )}
@@ -229,10 +275,10 @@ export function Phase3Home() {
           <div className="fade-in" style={{ marginTop: 'auto', marginBottom: '24px' }}>
             <h3 className="kicker" style={{ color: '#38BDF8', marginBottom: '16px' }}>Passo 1 de 4</h3>
             <h2 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '24px', lineHeight: 1.3 }}>
-              {activeProposal?.reviewQuestions?.adesao || 'Conseguiste seguir esta orientação na maioria dos dias?'}
+              {adaptiveSet.questions[0].prompt}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {['Sim, sem falhas', 'Parcialmente / Custo esforço', 'Muito pouco / Quase nada'].map(opt => (
+              {adaptiveSet.questions[0].options.map(opt => (
                 <button key={opt} onClick={() => { setAdesao(opt); setReviewStep(2); }} className="ritual-trigger" style={{ justifyContent: 'flex-start', padding: '20px', borderRadius: '12px', color: '#F8FAFC' }}>
                   {opt}
                 </button>
@@ -245,10 +291,10 @@ export function Phase3Home() {
           <div className="fade-in" style={{ marginTop: 'auto', marginBottom: '24px' }}>
             <h3 className="kicker" style={{ color: '#38BDF8', marginBottom: '16px' }}>Passo 2 de 4</h3>
             <h2 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '24px', lineHeight: 1.3 }}>
-              {activeProposal?.reviewQuestions?.dificuldade || 'Foi fácil, difícil ou muito difícil de manter na prática?'}
+              {adaptiveSet.questions[1].prompt}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {['Fácil de encaixar', 'Exigiu alguma adaptação', 'Demasiado difícil fisicamente/logisticamente'].map(opt => (
+              {adaptiveSet.questions[1].options.map(opt => (
                 <button key={opt} onClick={() => { setDificuldade(opt); setReviewStep(3); }} className="ritual-trigger" style={{ justifyContent: 'flex-start', padding: '20px', borderRadius: '12px', color: '#F8FAFC' }}>
                   {opt}
                 </button>
@@ -261,10 +307,10 @@ export function Phase3Home() {
           <div className="fade-in" style={{ marginTop: 'auto', marginBottom: '24px' }}>
             <h3 className="kicker" style={{ color: '#38BDF8', marginBottom: '16px' }}>Passo 3 de 4</h3>
             <h2 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '24px', lineHeight: 1.3 }}>
-              {activeProposal?.reviewQuestions?.efeito || 'Notaste alguma diferença útil no sono ou no despertar?'}
+              {adaptiveSet.questions[2].prompt}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {['Sim, diferença clara e positiva', 'Talvez algo subtil mas inconclusivo', 'Nenhuma diferença notória', 'Piorou a situação'].map(opt => (
+              {adaptiveSet.questions[2].options.map(opt => (
                 <button key={opt} onClick={() => { setEfeito(opt); setReviewStep(4); }} className="ritual-trigger" style={{ justifyContent: 'flex-start', padding: '20px', borderRadius: '12px', color: '#F8FAFC' }}>
                   {opt}
                 </button>

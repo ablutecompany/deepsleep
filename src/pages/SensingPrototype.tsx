@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mic, AlertTriangle, CheckCircle, Moon } from 'lucide-react';
 import { AcousticSensingEngine } from '../domain/Sensing/recorder';
 import type { SleepObservationSession } from '../domain/Sensing/types';
+import { saveSensingSession } from '../domain/Sensing/store';
 
 export function SensingPrototype() {
   const navigate = useNavigate();
@@ -40,11 +41,7 @@ export function SensingPrototype() {
     if (!engineRef.current) return;
     const finalSession = engineRef.current.stopSession('user_stopped');
     
-    // Persist localy
-    const stored = localStorage.getItem('deepsleep_sensing_sessions');
-    const allSessions = stored ? JSON.parse(stored) : [];
-    allSessions.unshift(finalSession);
-    localStorage.setItem('deepsleep_sensing_sessions', JSON.stringify(allSessions));
+    saveSensingSession(finalSession);
 
     setResult(finalSession);
     setStatus('finished');
@@ -117,28 +114,42 @@ export function SensingPrototype() {
         <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', paddingBottom: '24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
              <CheckCircle color="#10B981" size={24} />
-             <p style={{ fontSize: '16px', color: '#F8FAFC' }}>Sessão guardada com sucesso no telemóvel.</p>
+             <p style={{ fontSize: '18px', color: '#F8FAFC' }}>Bom dia. Sessão acústica terminada.</p>
            </div>
 
            <div>
-             <h3 className="kicker" style={{ color: '#94A3B8', marginBottom: '8px' }}>Resultado Paramétrico</h3>
-             <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-               <li style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px' }}>
-                 <p style={{ fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', color: '#64748B', marginBottom: '4px' }}>Canal de Observação</p>
-                 <p style={{ fontSize: '16px', color: '#E2E8F0' }}>{result.qualityState === 'pristine' ? 'Totalmente Audível' : (result.qualityState === 'degraded' ? 'Degradado / Interrompido' : 'Inválido / Pobre')}</p>
+             <h3 className="kicker" style={{ color: '#94A3B8', marginBottom: '8px' }}>Resumo (Experimental)</h3>
+             <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+               <li style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', borderLeft: '2px solid #38BDF8' }}>
+                 <p style={{ fontSize: '14px', color: '#E2E8F0' }}>
+                   {result.qualityState === 'pristine' ? 'Canal limpo e estável.' : (result.qualityState === 'degraded' ? 'Canal degradado. Existiram perturbações externas.' : 'Canal ruidoso/inválido. Não utilizável.')}
+                 </p>
                </li>
                <li style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px' }}>
-                 <p style={{ fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', color: '#64748B', marginBottom: '4px' }}>Distúrbio e Estabilidade</p>
-                 <p style={{ fontSize: '16px', color: '#E2E8F0' }}>{result.summary?.dominantDisturbance}</p>
-                 <p style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>
-                   * Detetados {result.derivedFeatures?.suspectedFragmentationEvents || 0} picos/súbditos fora do padrão contínuo.
+                 <p style={{ fontSize: '14px', color: '#E2E8F0' }}>
+                   {result.derivedFeatures?.suspectedFragmentationEvents ? `Foram registados ${result.derivedFeatures.suspectedFragmentationEvents} picos sonoros fora da base do silêncio.` : 'Nenhum pico agressivo de som captado.'}
                  </p>
                </li>
              </ul>
+             <p style={{ fontSize: '13px', color: '#64748B', marginTop: '16px', lineHeight: '1.4' }}>
+               Esta leitura é apenas um fragmento da noite. A verdadeira avaliação biológica despende da tua sensação matinal. Vamos fundir a informação.
+             </p>
            </div>
            
-           <button onClick={() => navigate('/control')} className="secondary-btn" style={{ marginTop: '24px' }}>
-             Sair para as Definições
+           <button 
+             onClick={() => navigate(`/manual_log_form?fromSensing=true&sessionId=${result.id}`)} 
+             className="primary-btn" 
+             style={{ marginTop: '24px', justifyContent: 'center', padding: '16px', fontSize: '16px', background: '#38BDF8', color: '#0F172A' }}
+           >
+             Completar Registo da Noite
+           </button>
+           
+           <button 
+             onClick={() => navigate('/')} 
+             className="text-btn" 
+             style={{ justifyContent: 'center', color: '#64748B' }}
+           >
+             Deixar dados pendentes na grelha
            </button>
         </div>
       )}

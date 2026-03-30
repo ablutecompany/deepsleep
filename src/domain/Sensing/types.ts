@@ -1,3 +1,5 @@
+import type { SyncableBaseEntity } from '../CloudSync/contracts';
+
 export type PermissionState = 'granted' | 'denied' | 'needs_user_action' | 'restricted' | 'not_determined';
 export type CapabilityState = 'available' | 'unavailable' | 'battery_blocked' | 'hardware_degraded';
 export type SignalQuality   = 'pristine' | 'degraded' | 'unusable';
@@ -15,11 +17,11 @@ export interface SleepObservationSummary {
   dominantDisturbance: string | null;
 }
 
-export interface SleepObservationSession {
+export interface SleepObservationSession extends SyncableBaseEntity {
   id: string;
   source: 'phone' | 'wearable';
-  startAt: string;
-  endAt: string | null;
+  startedAt: string;
+  endedAt: string | null;
   mode: CaptureMode;
   
   permissionState: PermissionState;
@@ -34,4 +36,5 @@ export interface SleepObservationSession {
   
   linkedNightId: string | null; // Acoplamento a ManualLog se aplicável
   createdAt: string;
+  endedReason?: string;
 }

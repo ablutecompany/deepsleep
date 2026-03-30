@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
+import { trackEvent } from '../domain/Telemetry/tracker';
 
 export function Phase2Entry() {
   const navigate = useNavigate();
   const { deliverable, setAnswersDraft, setDeliverable } = usePhase2Store();
 
   const handleStart = (mode: 10 | 25) => {
+    trackEvent('reading_started', { payload: { mode } });
     if (deliverable) {
       if (window.confirm("Queres mesmo apagar a tua leitura atual e refazer o questionário? O teu plano ativo, se existir, não será afetado, mas perderás o contexto.")) {
         setAnswersDraft({}); // Clear draft when forcing new

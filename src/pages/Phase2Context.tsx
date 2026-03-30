@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { FACTOR_LABELS, FACTOR_DESCRIPTIONS } from '../domain/Phase2/interpreter';
 import { Home } from 'lucide-react';
+import { REASSESSMENT_BANK } from '../domain/Questions/adaptive';
 import type { ResonanceLevel, DisagreementReason } from '../domain/Phase2/engine';
 
 function getConfidenceLabel(confidence: number): string {
@@ -16,10 +17,10 @@ function getConfidenceLabel(confidence: number): string {
 export function Phase2Context() {
   const navigate = useNavigate();
   const { deliverable, submitResonanceFeedback } = usePhase2Store();
-  
   const [resonanceStep, setResonanceStep] = useState<0 | 1 | 2>(() => {
     return deliverable?.resonanceFeedback ? 2 : 0;
   });
+  const [reassessStep, setReassessStep] = useState(0);
   const [selectedLevel, setSelectedLevel] = useState<ResonanceLevel | null>(null);
 
   const handleLevelSelect = (level: ResonanceLevel) => {
@@ -171,13 +172,24 @@ export function Phase2Context() {
 
           {resonanceStep === 1 && (
             <div className="fade-in">
-              <h3 style={{ fontSize: '15px', color: '#F8FAFC', fontWeight: 400, marginBottom: '16px' }}>O que te parece menos certo aqui?</h3>
+              <h3 style={{ fontSize: '15px', color: '#F8FAFC', fontWeight: 400, marginBottom: '16px' }}>{REASSESSMENT_BANK.questions[reassessStep].prompt}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <button onClick={() => handleDisagreementSubmit('primary_reason')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>O motivo principal</button>
-                <button onClick={() => handleDisagreementSubmit('sub_motives')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Os sub-motivos apurados</button>
-                <button onClick={() => handleDisagreementSubmit('wording')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>A forma como está descrito</button>
-                <button onClick={() => handleDisagreementSubmit('missing_context')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Falta mais contexto</button>
-                <button onClick={() => handleDisagreementSubmit('unsure')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Não tenho a certeza</button>
+                {REASSESSMENT_BANK.questions[reassessStep].options.map((opt, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => {
+                       if (reassessStep < REASSESSMENT_BANK.questions.length - 1) {
+                          setReassessStep(reassessStep + 1);
+                       } else {
+                          // Concluiu as perguntas da mini-reavaliação
+                          handleDisagreementSubmit('wording');
+                       }
+                    }} 
+                    style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2sease' }}
+                  >
+                    {opt}
+                  </button>
+                ))}
               </div>
             </div>
           )}

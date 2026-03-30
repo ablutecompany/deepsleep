@@ -5,6 +5,8 @@ import { usePhase2Store } from '../store/Phase2ContextStore';
 import { usePhase3Store } from '../store/Phase3ContextStore';
 import { getProposals } from '../domain/Phase2/proposals';
 import { appClock } from '../utils/appClock';
+import { getSensingSessions } from '../domain/Sensing/store';
+import { getManualLogs } from '../domain/Phase1/manualLogStore';
 
 export function ProcessHome() {
   const navigate = useNavigate();
@@ -14,6 +16,9 @@ export function ProcessHome() {
 
   const hasPendingAction = cycle?.status === 'active' && !cycle.dailyCheckins[todayStr];
   const phase1Done = nightCount >= 5;
+
+  // Deteção inteligente da "Manhã"
+  const unlinkedSensing = getSensingSessions().find(s => !getManualLogs().some(l => l.dateStr === s.linkedNightId));
 
   return (
     <div className="process-home fade-in" style={{ padding: '24px', paddingBottom: '120px' }}>
@@ -35,6 +40,28 @@ export function ProcessHome() {
 
       {/* RENDERIZAÇÃO ESTREITA E OPERACIONAL (Sem painéis globais) */}
       {(() => {
+        
+        // --- CASO 0: ROTEAMENTO INTELIGENTE MATINAL (WAKE FLOW) ---
+        if (unlinkedSensing) {
+          return (
+            <div className="fade-in" style={{ padding: '24px', background: 'rgba(56, 189, 248, 0.05)', borderRadius: '12px', border: '1px solid rgba(56, 189, 248, 0.2)', marginBottom: '24px' }}>
+               <h3 style={{ fontSize: '20px', color: '#F8FAFC', fontWeight: 300, marginBottom: '8px', lineHeight: 1.3 }}>
+                 A tua manhã está pendente
+               </h3>
+               <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: 1.5, marginBottom: '24px', fontWeight: 300 }}>
+                 Terminaste a tua gravação local silenciosa mas não fechaste a componente manual necessária para extrair o teu basal. Completa agora.
+               </p>
+               <button 
+                 onClick={() => navigate(`/manual_log_form?fromSensing=true&sessionId=${unlinkedSensing.id}`)}
+                 className="primary-btn" 
+                 style={{ width: '100%', justifyContent: 'center', background: '#38BDF8', color: '#0F172A', fontWeight: 500 }}
+               >
+                 Completar Diário e Resumo Matinal
+               </button>
+            </div>
+          );
+        }
+
         // --- CASO 1: Existe um Ciclo em curso ou concluído ---
         if (cycle && deliverable) {
           const proposal = getProposals(deliverable).find(p => p.id === cycle.proposalId);

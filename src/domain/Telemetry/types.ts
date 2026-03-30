@@ -7,6 +7,8 @@ export type EventType =
   | 'window_review_started' | 'window_review_completed'
   | 'decision_outcome_generated' 
   | 'disagreement_with_reading' | 'destructive_action_triggered'
+  | 'proposal_execution_ease_selected' | 'proposal_non_execution_reason_selected'
+  | 'beta_simulate_tomorrow_used' | 'beta_review_skipped'
   | 'baseline_invalidated' | 'reset_beta_triggered' | 'time_simulation_used';
 
 export interface UsageEvidenceRecord {

@@ -1,5 +1,15 @@
 export type EngineDecisionStatus = 'maintain' | 'adjust' | 'switch' | 'reassess' | 'hold';
 
+export interface DailyProposalFeedback {
+  id: string;
+  dayKey: string;
+  adherenceStatus: 'followed' | 'not_followed';
+  executionEase?: 'natural' | 'effort' | 'very_difficult' | null;
+  nonExecutionReason?: 'forgot' | 'no_conditions' | 'intentional' | null;
+  submittedAt: string;
+  isBetaSimulatedDay: boolean;
+}
+
 export interface DecisionOutcome {
   status: EngineDecisionStatus;
   reasonCodes: string[];
@@ -19,10 +29,34 @@ export function evaluateCycleDecision(
   successCheckins: number,
   adesaoAns: string,
   dificuldadeAns: string,
-  efeitoAns: string
+  efeitoAns: string,
+  dailyFeedback: DailyProposalFeedback[] = []
 ): DecisionOutcome {
-  // Parsing literário das respostas para dimensões lógicas
-  let adherenceEvidence = totalDaysInCycle > 0 ? successCheckins / totalDaysInCycle : 0;
+  // Processar histórico micro-diário primeiro
+  let unavoidableFails = 0;
+  let intentionalResistances = 0;
+  let highEffortDays = 0;
+
+  dailyFeedback.forEach(fb => {
+    if (fb.adherenceStatus === 'not_followed' && fb.nonExecutionReason === 'no_conditions') {
+      unavoidableFails++;
+    }
+    if (fb.adherenceStatus === 'not_followed' && fb.nonExecutionReason === 'intentional') {
+      intentionalResistances++;
+    }
+    if (fb.adherenceStatus === 'followed' && fb.executionEase === 'very_difficult') {
+      highEffortDays++;
+    }
+  });
+
+  // Adesão base + perdões justificados
+  let adherenceEvidence = totalDaysInCycle > 0 
+    ? (successCheckins + unavoidableFails) / totalDaysInCycle 
+    : 0;
+  
+  if (intentionalResistances > 0) {
+    adherenceEvidence -= 0.2; // Penalização por resistência declarada
+  }
   
   // Reforçar adherence baseada no input verbal final (Adesão auto-reportada)
   if (adesaoAns.includes('Muito pouco')) {
@@ -34,6 +68,11 @@ export function evaluateCycleDecision(
   let tolerability: 'GOOD' | 'MODERATE' | 'POOR' = 'MODERATE';
   if (dificuldadeAns.includes('Fácil') || dificuldadeAns.includes('Boa')) tolerability = 'GOOD';
   if (dificuldadeAns.includes('Demasiado difícil') || dificuldadeAns.includes('impossível') || dificuldadeAns.includes('Dor')) tolerability = 'POOR';
+  
+  // Override diário de tolerabilidade
+  if (highEffortDays >= 3) {
+    tolerability = 'POOR';
+  }
 
   let perceivedOutcomeEvidence: 'CLEAR_BENEFIT' | 'SUBTLE' | 'NONE' | 'WORSENED' | 'UNKNOWN' = 'UNKNOWN';
   if (efeitoAns.includes('diferença clara')) perceivedOutcomeEvidence = 'CLEAR_BENEFIT';

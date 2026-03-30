@@ -1,9 +1,21 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { appClock } from '../utils/appClock';
 
+import type { SyncableBaseEntity } from '../domain/CloudSync/contracts';
+
 export type CheckinValue = 'success' | 'failed' | 'skipped' | 'incerto';
 
-export interface Phase3Cycle {
+export interface DailyProposalFeedback extends SyncableBaseEntity {
+  id: string;
+  dayKey: string;
+  adherenceStatus: 'followed' | 'not_followed';
+  executionEase?: 'natural' | 'effort' | 'very_difficult' | null;
+  nonExecutionReason?: 'forgot' | 'no_conditions' | 'intentional' | null;
+  submittedAt: string;
+  isBetaSimulatedDay: boolean;
+}
+
+export interface Phase3Cycle extends SyncableBaseEntity {
   cycleId: string;
   proposalId: string;
   priorityScore: number;
@@ -12,7 +24,8 @@ export interface Phase3Cycle {
   startedAt: string;
   minDays: number;
   dailyCheckins: Record<string, CheckinValue>; // Date string (YYYY-MM-DD): value
-  status: 'active' | 'active_review_due' | 'completed_keep' | 'completed_adjust' | 'completed_switch' | 'active_hold' | 'pending_reassessment';
+  dailyFeedback?: Record<string, DailyProposalFeedback>;
+  status: 'active' | 'active_review_due' | 'completed_keep' | 'completed_adjust' | 'completed_switch' | 'active_hold' | 'pending_reassessment' | 'review_skipped_beta';
   reviewState?: 'manter' | 'ajustar' | 'trocar';
   finalRecommendation?: string;
   decisionEngineOutcome?: any; // To store full semantic results
@@ -22,8 +35,9 @@ interface Phase3ContextType {
   cycle: Phase3Cycle | null;
   todayStr: string;
   startCycle: (proposalId: string, priorityScore: number, selectionReason: string, linkedAssessmentId: string, minDays: number) => void;
-  checkInToday: (val: CheckinValue) => void;
+  checkInToday: (val: CheckinValue, feedbackObj?: Partial<DailyProposalFeedback>) => void;
   submitReview: (decision: any) => void;
+  skipReviewBeta: () => void;
 }
 
 const Phase3StoreContext = createContext<Phase3ContextType | undefined>(undefined);
@@ -89,17 +103,33 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
       startedAt: appClock.now().toISOString(), // Keeping fallback ISO if not defined but driven by offset
       minDays,
       dailyCheckins: {},
+      dailyFeedback: {},
       status: 'active'
     };
     saveCycle(newCycle);
   };
 
-  const checkInToday = (val: CheckinValue) => {
+  const checkInToday = (val: CheckinValue, feedbackObj?: Partial<DailyProposalFeedback>) => {
     if (!cycle) return;
     const currentToday = appClock.todayStr();
+    
+    let builtFeedback = { ...(cycle.dailyFeedback || {}) };
+    if (feedbackObj) {
+      builtFeedback[currentToday] = {
+        id: `fdbk_${Date.now()}`,
+        dayKey: currentToday,
+        adherenceStatus: val === 'success' ? 'followed' : 'not_followed',
+        executionEase: feedbackObj.executionEase || null,
+        nonExecutionReason: feedbackObj.nonExecutionReason || null,
+        submittedAt: new Date().toISOString(),
+        isBetaSimulatedDay: appClock.isSimulated(),
+      };
+    }
+    
     saveCycle({
       ...cycle,
-      dailyCheckins: { ...cycle.dailyCheckins, [currentToday]: val }
+      dailyCheckins: { ...cycle.dailyCheckins, [currentToday]: val },
+      dailyFeedback: builtFeedback
     });
   };
 
@@ -120,8 +150,17 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const skipReviewBeta = () => {
+    if (!cycle) return;
+    saveCycle({
+      ...cycle,
+      status: 'review_skipped_beta',
+      decisionEngineOutcome: null
+    });
+  };
+
   return (
-    <Phase3StoreContext.Provider value={{ cycle, todayStr, startCycle, checkInToday, submitReview }}>
+    <Phase3StoreContext.Provider value={{ cycle, todayStr, startCycle, checkInToday, submitReview, skipReviewBeta }}>
       {children}
     </Phase3StoreContext.Provider>
   );

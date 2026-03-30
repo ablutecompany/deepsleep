@@ -128,8 +128,9 @@ export class AcousticSensingEngine {
     const session: SleepObservationSession = {
       id: 'sns_' + endTime,
       source: 'phone',
-      startAt: new Date(this.startTime).toISOString(),
-      endAt: new Date(endTime).toISOString(),
+      startedAt: new Date(this.startTime).toISOString(),
+      endedAt: new Date(endTime).toISOString(),
+      endedReason: stopReason,
       mode: 'acoustic_only',
       permissionState: 'granted',
       capabilityState: 'available',

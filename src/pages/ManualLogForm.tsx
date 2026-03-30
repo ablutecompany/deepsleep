@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Moon } from 'lucide-react';
 import { appClock } from '../utils/appClock';
 import { saveManualLog, type SleepDurationEstimate, type ReSleepDifficulty, type IntensityScale, ENVIRONMENT_OPTIONS } from '../domain/Phase1/manualLogStore';
+import { trackEvent, startTimer, endTimer } from '../domain/Telemetry/tracker';
+import { useLocation } from 'react-router-dom';
+import { getSensingSessions, saveSensingSession } from '../domain/Sensing/store';
 
 export function ManualLogForm() {
   const navigate = useNavigate();
@@ -14,6 +17,11 @@ export function ManualLogForm() {
   const [bedTime, setBedTime] = useState('22:30');
   const [wakeTime, setWakeTime] = useState('06:30');
   const [outOfBedTime, setOutOfBedTime] = useState('06:45');
+  
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const fromSensing = queryParams.get('fromSensing') === 'true';
+  const sessionId = queryParams.get('sessionId');
 
   // Estimativas
   const [sleepOnset, setSleepOnset] = useState<SleepDurationEstimate | ''>('');
@@ -41,6 +49,38 @@ export function ManualLogForm() {
     setSelectedEnv(prev => prev.includes(env) ? prev.filter(e => e !== env) : [...prev, env]);
   };
 
+  useEffect(() => {
+    trackEvent('manual_log_started');
+    startTimer('manual_log');
+    
+    if (fromSensing && sessionId) {
+      const allSensing = getSensingSessions();
+      const session = allSensing.find(s => s.id === sessionId);
+      if (session) {
+        // Hydrate times logically
+        const startD = new Date(session.startedAt);
+        const endD = session.endedAt ? new Date(session.endedAt) : null;
+        
+        const formatTime = (d: Date) => {
+          const hh = d.getHours().toString().padStart(2, '0');
+          const mm = d.getMinutes().toString().padStart(2, '0');
+          return `${hh}:${mm}`;
+        };
+        
+        setBedTime(formatTime(startD));
+        if (endD) {
+          setWakeTime(formatTime(endD));
+          setOutOfBedTime(formatTime(endD));
+        }
+      }
+    }
+  }, []);
+
+  const handleBack = () => {
+    trackEvent('manual_log_abandoned');
+    navigate('/manual_log_hub');
+  };
+
   const handleSave = () => {
     if (sleepType === 'NIGHT') {
       saveManualLog({
@@ -61,6 +101,17 @@ export function ManualLogForm() {
         disturbingDreams,
         environmentIssues: selectedEnv
       });
+      
+      // LIGAÇÃO INOXIDÁVEL: Amarrar o sensing à entidade criada agora
+      if (fromSensing && sessionId) {
+         const allSensing = getSensingSessions();
+         const targetIdx = allSensing.findIndex(s => s.id === sessionId);
+         if (targetIdx !== -1) {
+            allSensing[targetIdx].linkedNightId = dateStr;
+            localStorage.setItem('deepsleep_sensing_sessions', JSON.stringify(allSensing));
+         }
+      }
+      
     } else {
       saveManualLog({
         dateStr,
@@ -69,6 +120,10 @@ export function ManualLogForm() {
         napDurationEstimate: napDuration || undefined
       });
     }
+    
+    const durationMs = endTimer('manual_log');
+    trackEvent('manual_log_completed', { durationMs });
+    
     navigate('/manual_log_hub');
   };
 
@@ -107,7 +162,7 @@ export function ManualLogForm() {
       <div className="home-content" style={{ position: 'relative', zIndex: 10, paddingTop: '40px', paddingLeft: '24px', paddingRight: '24px', flex: 1, paddingBottom: '120px' }}>
         
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '32px' }}>
-          <ArrowLeft size={24} color="#F8FAFC" style={{ cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/manual_log_hub')} />
+          <ArrowLeft size={24} color="#F8FAFC" style={{ cursor: 'pointer', opacity: 0.6 }} onClick={handleBack} />
           <h1 style={{ marginLeft: '16px', fontSize: '20px', fontWeight: 300, color: '#F8FAFC' }}>Novo Registo</h1>
         </div>
 

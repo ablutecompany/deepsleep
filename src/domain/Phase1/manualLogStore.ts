@@ -1,10 +1,11 @@
 import { appClock } from '../../utils/appClock';
+import type { SyncableBaseEntity } from '../CloudSync/contracts';
 
 export type SleepDurationEstimate = '< 15m' | '15-30m' | '30-60m' | '> 60m' | 'Não sei bem';
 export type ReSleepDifficulty = 'Fácil' | 'Algum esforço' | 'Muito difícil' | 'Não voltei a dormir';
 export type IntensityScale = 'Nenhuma' | 'Leve' | 'Alta';
 
-export type ManualAppLog = {
+export interface ManualAppLog extends SyncableBaseEntity {
   id: string;
   dateStr: string;
   createdAt: string;
@@ -24,6 +25,9 @@ export type ManualAppLog = {
   reSleepDifficulty?: ReSleepDifficulty;
   perceivedRestoration?: 'Fraca' | 'Razoável' | 'Boa' | 'Excelente';
   tensionAtBedtime?: IntensityScale;
+
+  // --- METADADOS DE SINCRONIZAÇÃO E GESTÃO ---
+  syncEligible?: boolean;
   
   // Condições biológicas / contexto binário
   physicalDiscomfort?: boolean;

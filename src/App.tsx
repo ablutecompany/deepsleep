@@ -22,10 +22,21 @@ import { Phase3Home } from './pages/Phase3Home';
 import { Phase2StoreProvider } from './store/Phase2ContextStore';
 import { Phase3StoreProvider } from './store/Phase3ContextStore';
 import { SensingPrototype } from './pages/SensingPrototype';
+import { trackEvent } from './domain/Telemetry/tracker';
+import { verifyHydrationIntegrity } from './domain/DataGovernance/manager';
+import { BetaFeedbackPanel } from './components/BetaFeedbackPanel';
 
-function ScrollToTop() {
+function AnalyticsTracker() {
   const { pathname } = useLocation();
+  
   useEffect(() => {
+    verifyHydrationIntegrity();
+    trackEvent('app_open');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    trackEvent('route_view', { route: pathname });
     window.scrollTo(0, 0);
   }, [pathname]);
   return null;
@@ -36,7 +47,8 @@ export default function App() {
     <Phase2StoreProvider>
       <Phase3StoreProvider>
         <BrowserRouter>
-          <ScrollToTop />
+          <AnalyticsTracker />
+          <BetaFeedbackPanel />
         <div className="app-container">
           <main className="main-content">
             <Routes>
