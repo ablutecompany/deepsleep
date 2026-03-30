@@ -1,4 +1,71 @@
+import { useNavigate } from 'react-router-dom';
+import { usePhase2Store } from '../store/Phase2ContextStore';
+import { getManualLogs, deleteManualLog } from '../domain/Phase1/manualLogStore';
+import { appClock } from '../utils/appClock';
+
 export function Control() {
+  const navigate = useNavigate();
+  const { deliverable } = usePhase2Store();
+
+  const downloadFile = (filename: string, text: string) => {
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const handleExportProfile = () => {
+    if (!deliverable) {
+      alert("Ainda não tens um perfil mecânico estabilizado para exportar.");
+      return;
+    }
+    downloadFile(`deepsleep_perfil_${appClock.todayStr()}.json`, JSON.stringify(deliverable, null, 2));
+  };
+
+  const handleExportMetrics = () => {
+    const logs = getManualLogs();
+    let learning = [];
+    try {
+      learning = JSON.parse(localStorage.getItem('deepsleep_learning_records') || '[]');
+    } catch (e) {}
+    
+    if (logs.length === 0 && learning.length === 0) {
+      alert("Não há dados de histórico ou aprendizagem retidos.");
+      return;
+    }
+    
+    const exportData = { raw_logs: logs, learning_records: learning };
+    downloadFile(`deepsleep_historico_${appClock.todayStr()}.json`, JSON.stringify(exportData, null, 2));
+  };
+
+  const handleDeleteToday = () => {
+    const today = appClock.todayStr();
+    const logs = getManualLogs();
+    const todaysLog = logs.find(l => l.dateStr === today);
+    
+    if (!todaysLog) {
+      alert(`Não existem registos mecânicos associados a hoje (${today}).`);
+      return;
+    }
+    
+    if (window.confirm(`Vais apagar permanentemente o registo desta noite (${today}).\n\nIsto forçará o recálculo da tua janela de observação. Confirmas ação destrutiva?`)) {
+      deleteManualLog(todaysLog.id);
+      alert("Registo diário limpo com sucesso.");
+      navigate('/');
+    }
+  };
+
+  const handleHardReset = () => {
+    if (window.confirm("⚠️ ATENÇÃO EXTREMA ⚠️\n\nVais destruir todo o teu perfil, base matemática e sessões em curso. A aplicação regressará ao estaca zero.\n\nConfirmas?")) {
+      if (window.confirm("Ação irreversível. O teu telemóvel irá limpar a retenção agora.")) {
+        localStorage.clear();
+        window.location.href = '/';
+      }
+    }
+  };
   return (
     <div className="home-page">
       <div className="home-content">
@@ -81,10 +148,10 @@ export function Control() {
           <span className="kicker">Exportação e Apagamento</span>
           
           <div className="action-list">
-            <button className="text-btn action-link">Exportar perfil atual</button>
-            <button className="text-btn action-link">Exportar métricas de histórico</button>
-            <button className="text-btn action-link" style={{ marginTop: '16px' }}>Apagar sessão desta noite</button>
-            <button className="text-btn action-link" style={{ color: 'var(--text-muted)' }}>Apagar permanentemente o perfil</button>
+            <button onClick={handleExportProfile} className="text-btn action-link">Exportar perfil atual</button>
+            <button onClick={handleExportMetrics} className="text-btn action-link">Exportar métricas de histórico</button>
+            <button onClick={handleDeleteToday} className="text-btn action-link" style={{ marginTop: '16px' }}>Apagar sessão desta noite</button>
+            <button onClick={handleHardReset} className="text-btn action-link" style={{ color: 'var(--text-muted)' }}>Apagar permanentemente o perfil</button>
           </div>
         </section>
       </div>
