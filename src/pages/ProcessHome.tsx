@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, CheckCircle2, XCircle, HelpCircle, Bell, ArrowRight, Activity, Calendar } from 'lucide-react';
+import { User, Settings, CheckCircle2, XCircle, HelpCircle, Bell, ArrowRight, Activity, Calendar, FastForward } from 'lucide-react';
 import { useNightCount } from '../hooks/useNightCount';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { usePhase3Store } from '../store/Phase3ContextStore';
 import { getProposals } from '../domain/Phase2/proposals';
+import { appClock } from '../utils/appClock';
 
 export function ProcessHome() {
   const navigate = useNavigate();
@@ -41,71 +42,52 @@ export function ProcessHome() {
           if (cycle.status === 'active' || cycle.status === 'active_hold') {
             return (
               <div className="fade-in">
-                <div style={{ borderLeft: '2px solid #38BDF8', paddingLeft: '16px', marginBottom: '24px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#38BDF8', fontWeight: 600 }}>
-                      {proposal?.badge || 'Direção Ativa'}
-                    </span>
-                    <span style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38BDF8', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 600 }}>
-                      DIA {Object.keys(cycle.dailyCheckins).length + 1} DE {cycle.minDays}
-                    </span>
-                  </div>
-                  <h3 style={{ fontSize: '22px', color: '#F8FAFC', fontWeight: 400, lineHeight: '1.3' }}>
-                    {proposal?.title || 'Teste em curso'}
-                  </h3>
-                </div>
-
-                {cycle.status === 'active_hold' && cycle.decisionEngineOutcome && (
-                   <div style={{ marginTop: '16px', marginBottom: '24px', padding: '16px', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '8px' }}>
-                     <p style={{ fontSize: '12px', color: '#818cf8', fontWeight: 600, marginBottom: '8px', letterSpacing: '0.05em' }}>MANUTENÇÃO PRUDENTE</p>
-                     <p style={{ fontSize: '14px', color: '#E2E8F0', lineHeight: 1.5, marginBottom: '16px' }}>
-                       Ainda não há peso mecânico suficiente para mudarmos de direção com clareza clínica. Vamos continuar a testar este prisma mais algumas noites antes de ajustar.
-                     </p>
-                     <p style={{ fontSize: '13px', color: '#94A3B8' }}>{cycle.decisionEngineOutcome.nextStepPhrase}</p>
-                   </div>
-                )}
-
-                <div className="editorial-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
-                  <p style={{ fontSize: '15px', color: '#E2E8F0', lineHeight: '1.6', fontWeight: 300, marginBottom: '24px' }}>
-                     {proposal?.actionToday}
-                  </p>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '24px' }}>
-                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38BDF8', boxShadow: '0 0 8px rgba(56,189,248,0.5)', marginTop: '6px', flexShrink: 0 }}></div>
-                       <div>
-                         <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Observa</span>
-                         <span style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400, lineHeight: '1.4' }}>
-                           {proposal?.observeWhat}
-                         </span>
-                       </div>
-                     </div>
+                {/* ESTADO 1: JÁ HÁ UM CHECK-IN GUARDADO HOJE, OU O CICLO ESTÁ COMPLETO E PRONTO A REVER */}
+                {cycle.dailyCheckins[todayStr] && Object.keys(cycle.dailyCheckins).length < cycle.minDays ? (
+                   <div style={{ textAlign: 'center', padding: '16px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '8px', marginBottom: '24px' }}>
+                     <span style={{ fontSize: '13px', color: '#94A3B8', display: 'block', marginBottom: '12px' }}>Registo guardado. Voltamos amanhã para continuar.</span>
                      
-                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', opacity: 0.8 }}>
-                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'transparent', border: '1px solid #94A3B8', marginTop: '6px', flexShrink: 0 }}></div>
-                       <div>
-                         <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Depois diz-nos</span>
-                         <span style={{ fontSize: '14px', color: '#E2E8F0', fontWeight: 300, lineHeight: '1.4' }}>
-                           {proposal?.reportQuestion}
-                         </span>
-                       </div>
-                     </div>
-                  </div>
-                </div>
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                       <button onClick={() => navigate('/phase3_home')} style={{ background: 'transparent', color: '#F8FAFC', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 24px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', width: '100%' }}>
+                         Rever plano completo
+                       </button>
 
-                {!cycle.dailyCheckins[todayStr] ? (
-                  <div style={{ paddingTop: '8px' }}>
-                    <h4 style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400, marginBottom: '20px', textAlign: 'center', lineHeight: 1.4, padding: '0 12px' }}>
-                      Hoje precisamos deste registo:
-                    </h4>
+                       {/* TEMPORARY INTERNAL BETA TIME-TRAVEL BUTTON */}
+                       {appClock.isSimulated() && (
+                         <button 
+                           onClick={() => appClock.addDays(1)} 
+                           style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '10px 24px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', width: '100%', justifyContent: 'center', marginTop: '4px' }}
+                           title="Apenas visível num ambiente de Teste Simulado"
+                         >
+                           <FastForward size={14} /> 
+                           <span>Passar para o dia seguinte (Beta Teste)</span>
+                         </button>
+                       )}
+                     </div>
+                   </div>
+                ) : !cycle.dailyCheckins[todayStr] ? (
+                  /* ESTADO 2: CHECK-IN PENDENTE (OU A DECORRER HOJE) */
+                  <div className="editorial-card" style={{ background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.2)', padding: '24px', borderRadius: '12px', marginBottom: '24px' }}>
+                    <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#38BDF8', fontWeight: 600, display: 'block', marginBottom: '16px' }}>
+                      Check-in de hoje
+                    </span>
+                    
+                    <h3 style={{ fontSize: '20px', color: '#F8FAFC', fontWeight: 300, lineHeight: '1.4', marginBottom: '8px' }}>
+                      {proposal?.reviewQuestions?.adesao || proposal?.reportQuestion || "Cumpriste a tua diretriz na noite passada?"}
+                    </h3>
+                    
+                    <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: 1.5, marginBottom: '24px', fontWeight: 300 }}>
+                      {proposal?.reportQuestion}
+                    </p>
+
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => checkInToday('success')} style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10B981', cursor: 'pointer' }}>
                         <CheckCircle2 size={20} strokeWidth={1.5} />
-                        <span style={{ fontSize: '12px', fontWeight: 500 }}>Alinhado</span>
+                        <span style={{ fontSize: '12px', fontWeight: 500 }}>Cumpri</span>
                       </button>
                       <button onClick={() => checkInToday('failed')} style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#EF4444', cursor: 'pointer' }}>
                         <XCircle size={20} strokeWidth={1.5} />
-                        <span style={{ fontSize: '12px', fontWeight: 500 }}>Falhou</span>
+                        <span style={{ fontSize: '12px', fontWeight: 500 }}>Falhei</span>
                       </button>
                       <button onClick={() => checkInToday('incerto')} style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', cursor: 'pointer' }}>
                         <HelpCircle size={20} strokeWidth={1.5} />
@@ -113,18 +95,44 @@ export function ProcessHome() {
                       </button>
                     </div>
                   </div>
-                ) : (
-                  <div style={{ textAlign: 'center', padding: '16px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '8px' }}>
-                    <span style={{ fontSize: '13px', color: '#94A3B8', display: 'block', marginBottom: '12px' }}>Registo guardado. Voltamos amanhã para continuar.</span>
-                    <button onClick={() => navigate('/phase3_home')} style={{ background: 'transparent', color: '#F8FAFC', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 24px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>
-                      {Object.keys(cycle.dailyCheckins).length >= cycle.minDays ? "Avançar para Revisão Final" : "Rever janela"}
-                    </button>
+                ) : null}
+
+                {/* VISUALIZAÇÃO DA DIREÇÃO ATIVA SEMPRE PRESENTE EM FORMATO COMPACTO E DICTADO (Seja pós-checkin ou hold) */}
+                <div className="editorial-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '24px', borderRadius: '12px', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                    <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#10B981', fontWeight: 600 }}>
+                      Direção Ativa · Dia {Math.max(1, Object.keys(cycle.dailyCheckins).length + (cycle.dailyCheckins[todayStr] ? 0 : 1))} de {cycle.minDays}
+                    </span>
                   </div>
-                )}
-                
+
+                  <h3 style={{ fontSize: '22px', color: '#F8FAFC', fontWeight: 300, lineHeight: '1.4', marginBottom: '24px' }}>
+                    {proposal?.actionToday}
+                  </h3>
+
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ width: '4px', height: '16px', borderRadius: '2px', background: '#38BDF8', marginTop: '4px' }}></div>
+                    <span style={{ fontSize: '15px', color: '#E2E8F0', fontWeight: 300, lineHeight: '1.5' }}>
+                      <strong style={{ color: '#94A3B8', fontWeight: 500, marginRight: '6px' }}>Observa:</strong> 
+                      {proposal?.observeWhat}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <div style={{ width: '4px', height: '16px', borderRadius: '2px', background: 'transparent', border: '1px solid #64748B', marginTop: '4px' }}></div>
+                    <span style={{ fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
+                      <strong style={{ color: '#64748B', fontWeight: 400, marginRight: '6px' }}>Amanhã:</strong> 
+                      Vamos pedir-te que digas se cumpriste e se notaste diferença.
+                    </span>
+                  </div>
+
+                  <button onClick={() => navigate('/phase3_home')} style={{ background: 'transparent', color: '#38BDF8', border: 'none', padding: 0, fontSize: '13px', cursor: 'pointer', marginTop: '32px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    Ver plano completo <ArrowRight size={14} />
+                  </button>
+                </div>
+
                 {!cycle.dailyCheckins[todayStr] && Object.keys(cycle.dailyCheckins).length >= cycle.minDays && (
                   <button onClick={() => navigate('/phase3_home')} className="primary-btn" style={{ width: '100%', justifyContent: 'center', marginTop: '24px' }}>
-                    Esta janela está pronta para revisão
+                    Esta janela está pronta para a revisão técnica
                   </button>
                 )}
               </div>
