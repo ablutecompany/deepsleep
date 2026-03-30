@@ -20,8 +20,10 @@ export function Profile() {
   const { deliverable } = usePhase2Store();
   const { cycle } = usePhase3Store();
   const logs = getManualLogs();
+  const validNights = logs.filter(l => l.sleepType === 'NIGHT' && l.countsForBaseline);
+  const totalNaps = logs.filter(l => l.sleepType === 'NAP').length;
   const learningRecords = getLearningRecords();
-  const nightCount = logs.length;
+  const nightCount = validNights.length;
 
   if (nightCount < 3) {
     return (
@@ -31,54 +33,60 @@ export function Profile() {
           Ouve primeiro.
         </h2>
         <p style={{ color: '#64748B', fontSize: '14px', lineHeight: '22px', maxWidth: '280px', fontWeight: 300 }}>
-          O Perfil não gera relatórios fictícios. Precisamos de observar o teu sono mecânico por mais {Math.max(0, 3 - nightCount)} noites para criar a tua baseline.
+          O Perfil não gera relatórios fictícios. Precisamos de observar o teu sono mecânico por mais {Math.max(0, 3 - nightCount)} noites válidas para extrair um perfil verdadeiro.
         </p>
         <button 
           onClick={() => navigate('/manual_log_hub')}
           className="text-btn"
           style={{ marginTop: '40px', color: '#38BDF8' }}
         >
-          Voltar as noites
+          Ir para os registos
         </button>
       </div>
     );
   }
 
-  // Baseline extraction from pure real data
-  let avgLatency = 0;
+  // Estatísticas e Modas
+  const countFrequencies = (arr: any[]) => arr.reduce((acc, curr) => { acc[curr] = (acc[curr] || 0) + 1; return acc; }, {});
+  const getMode = (arr: any[], fallback: string) => {
+    const valid = arr.filter(Boolean);
+    if (!valid.length) return fallback;
+    const freqs = countFrequencies(valid);
+    return Object.keys(freqs).reduce((a, b) => freqs[a] > freqs[b] ? a : b);
+  };
+
   let avgAwakenings = 0;
-  let avgAwakeTime = 0;
   let avgDurationMin = 0;
   let markerCounts = {} as Record<string, number>;
-  const sumRecovery = { 'Má': 1, 'Razoável': 2, 'Boa': 3, 'Excelente': 4 };
-  let avgRecScore = 0;
-  let totalNaps = 0;
+  
+  const latencies: string[] = [];
+  const restorations: string[] = [];
 
-  logs.forEach(l => {
-     avgLatency += l.timeToSleepMin;
-     avgAwakenings += l.awakenings;
-     avgAwakeTime += l.awakeTimeMin;
-     avgRecScore += sumRecovery[l.recovery];
-     l.markers.forEach(m => { markerCounts[m] = (markerCounts[m] || 0) + 1; });
+  validNights.forEach(l => {
+     if (l.sleepOnsetEstimate) latencies.push(l.sleepOnsetEstimate);
+     if (l.perceivedRestoration) restorations.push(l.perceivedRestoration);
+     if (l.awakeningsCount !== undefined) avgAwakenings += l.awakeningsCount;
      
-     if (l.nap?.tookNap) totalNaps++;
+     if (l.environmentIssues) {
+         l.environmentIssues.forEach((m: string) => { markerCounts[m] = (markerCounts[m] || 0) + 1; });
+     }
      
-     const [bH, bM] = l.bedTime.split(':').map(Number);
-     const [wH, wM] = l.wakeTime.split(':').map(Number);
-     let bMin = bH * 60 + bM;
-     let wMin = wH * 60 + wM;
-     if (wMin < bMin) wMin += 24 * 60; // crossed midnight
-     avgDurationMin += Math.max(0, wMin - bMin);
+     if (l.bedTime && l.wakeTime) {
+         const [bH, bM] = l.bedTime.split(':').map(Number);
+         const [wH, wM] = l.wakeTime.split(':').map(Number);
+         let bMin = bH * 60 + bM;
+         let wMin = wH * 60 + wM;
+         if (wMin < bMin) wMin += 24 * 60;
+         avgDurationMin += Math.max(0, wMin - bMin);
+     }
   });
   
-  avgLatency = Math.round(avgLatency / nightCount);
+  const modalLatency = getMode(latencies, '--');
+  const modalRec = getMode(restorations, 'Não registado');
   avgAwakenings = Math.round((avgAwakenings / nightCount)*10)/10;
-  avgAwakeTime = Math.round(avgAwakeTime / nightCount);
   avgDurationMin = Math.round(avgDurationMin / nightCount);
-  avgRecScore = Math.round(avgRecScore / nightCount);
 
-  const recLabel = Object.keys(sumRecovery).find(k => sumRecovery[k as keyof typeof sumRecovery] === avgRecScore) || 'Razoável';
-  const formatHrs = (mins: number) => `${Math.floor(mins / 60)}h${(mins % 60).toString().padStart(2, '0')}`;
+  const formatHrs = (mins: number) => mins ? `${Math.floor(mins / 60)}h${(mins % 60).toString().padStart(2, '0')}` : '--';
   const frequentMarkers = Object.entries(markerCounts).filter(([_, count]) => count >= nightCount / 2).map(([m]) => m);
 
   return (
@@ -94,11 +102,13 @@ export function Profile() {
         <header style={{ marginBottom: '40px' }}>
           <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Perfil do teu sono.</h1>
           <p style={{ marginTop: '12px', fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
-            Este é um perfil em construção. À medida que avanças nas Fases 2 e 3, ganhamos contexto e o retrato estabiliza de acordo com o teu padrão real.
+            {nightCount < 5 
+              ? 'O teu perfil orgânico está em construção. Quantas mais noites válidas inserires, mais forte se tornará este ecrã base.' 
+              : 'O teu perfil orgânico superou a barreira dos 5 registos basais. Estamos a utilizar a nossa arquitetura para traduzir a norma do teu sono.'}
           </p>
           <p style={{ marginTop: '16px', fontSize: '12px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#38BDF8' }} />
-            Baseado fisicamente nos teus últimos {nightCount} registos válidos.
+            Baseado estatisticamente nos teus últimos {nightCount} registos.
           </p>
         </header>
 
@@ -111,25 +121,21 @@ export function Profile() {
                <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginTop: '8px' }}>{formatHrs(avgDurationMin)}</h3>
              </div>
              <div className="editorial-card" style={{ padding: '20px' }}>
-               <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Velocidade Adormecer</span>
-               <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginTop: '8px' }}>{avgLatency} <span style={{ fontSize: '14px', color: '#64748B' }}>min</span></h3>
+               <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Tempo a Adormecer</span>
+               <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginTop: '8px' }}>{modalLatency}</h3>
              </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-             <div className="editorial-card" style={{ padding: '20px' }}>
-               <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Despertares Isolados</span>
-               <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginTop: '8px' }}>{avgAwakenings}</h3>
-             </div>
-             <div className="editorial-card" style={{ padding: '20px' }}>
-               <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Tempo a lutar a meio</span>
-               <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginTop: '8px' }}>{avgAwakeTime} <span style={{ fontSize: '14px', color: '#64748B' }}>min</span></h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '24px' }}>
+             <div className="editorial-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+               <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Média de Despertares</span>
+               <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC' }}>{avgAwakenings} / noite</h3>
              </div>
           </div>
           
           <div className="editorial-card">
             <h3 className="kicker" style={{ color: '#F8FAFC' }}>Coesão da Retoma Mecânica</h3>
-            <p className="module-desc" style={{ marginBottom: '12px' }}>A tua recuperação matinal auto-avaliada está fixada em <span style={{ color: '#F8FAFC' }}>{recLabel}</span>. Os factores noturnos que se cruzam na maioria das tuas noites registadas e que mais probabilidade têm de ditar esta energia são:</p>
+            <p className="module-desc" style={{ marginBottom: '12px' }}>A tua recuperação matinal auto-avaliada típica tem sido <span style={{ color: '#F8FAFC' }}>{modalRec}</span>. Os factores noturnos sistémicos registados com maior frequência são:</p>
             {frequentMarkers.length > 0 ? (
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {frequentMarkers.map(m => (
@@ -137,7 +143,7 @@ export function Profile() {
                 ))}
               </div>
             ) : (
-               <span style={{ fontStyle: 'italic', fontSize: '13px', color: '#64748B' }}>Não emergiram padrões de atividade marcantes até ao momento.</span>
+               <span style={{ fontStyle: 'italic', fontSize: '13px', color: '#64748B' }}>Não emergiram condicionantes regulares até ao momento.</span>
             )}
           </div>
           

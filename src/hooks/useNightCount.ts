@@ -11,7 +11,11 @@ export function useNightCount() {
     };
 
     window.addEventListener('deepsleep_simulated_change', handleUpdate);
-    return () => window.removeEventListener('deepsleep_simulated_change', handleUpdate);
+    window.addEventListener('deepsleep_baseline_invalidated', handleUpdate);
+    return () => {
+      window.removeEventListener('deepsleep_simulated_change', handleUpdate);
+      window.removeEventListener('deepsleep_baseline_invalidated', handleUpdate);
+    };
   }, []);
 
   return nightCount;

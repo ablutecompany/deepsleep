@@ -224,18 +224,18 @@ export function ProcessHome() {
           );
         }
 
-        // --- CASO 4: Faltam noites
+        // --- CASO 4: Faltam noites (Base Perdida/Nova)
         return (
           <div className="fade-in" style={{ padding: '24px 16px', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center' }}>
             <Calendar size={28} color="#94A3B8" style={{ marginBottom: '20px', margin: '0 auto' }} />
             <h3 style={{ fontSize: '22px', color: '#F8FAFC', fontWeight: 300, marginBottom: '12px', lineHeight: 1.3 }}>
-              Tens {nightCount} de 5 registos exigidos.
+              Base matemática pendente ({nightCount}/5).
             </h3>
             <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: 1.6, marginBottom: '32px', fontWeight: 300 }}>
-              Para impedir falsos positivos no motor de cálculo, exigimos um basal prudente de 5 dias observados antes da intervenção.
+              Para impedir falsos positivos no motor, exigimos um basal prudente de 5 dias. Sempre que os teus registos descem deste limite, todas as propostas ativas são suspensas até restabeleceres a estabilidade basal.
             </p>
             <button onClick={() => navigate('/manual_log_hub')} className="primary-btn" style={{ width: '100%', justifyContent: 'center' }}>
-              Submeter noite passada
+             Ver / Adicionar Registos
             </button>
           </div>
         );

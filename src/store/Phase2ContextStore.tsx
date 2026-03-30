@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { AssessmentDeliverable } from '../domain/Phase2/engine';
 
 interface Phase2ContextType {
@@ -39,6 +39,13 @@ export function Phase2StoreProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('deepsleep_phase2_deliverable');
     }
   };
+  useEffect(() => {
+    const handleInvalidation = () => {
+      setDeliverableState(null);
+    };
+    window.addEventListener('deepsleep_baseline_invalidated', handleInvalidation);
+    return () => window.removeEventListener('deepsleep_baseline_invalidated', handleInvalidation);
+  }, []);
 
   const setAnswersDraft = (d: Record<string, string[]>) => {
     setAnswersDraftState(d);

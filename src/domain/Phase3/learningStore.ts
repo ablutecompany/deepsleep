@@ -54,8 +54,15 @@ export function generateLearningPayload(
   // Quick snapshot of current baseline
   let latency = 0, awakenings = 0, duration = 0;
   if(logs.length) {
-    latency = Math.round(logs.reduce((acc, l) => acc + l.timeToSleepMin, 0) / logs.length);
-    awakenings = logs.reduce((acc, l) => acc + l.awakenings, 0) / logs.length;
+    let rawLat = 0, rawAwake = 0;
+    logs.forEach(l => {
+       if (l.sleepOnsetEstimate === '> 60m' || l.sleepOnsetEstimate === '30-60m') rawLat += 45;
+       else if (l.sleepOnsetEstimate === '15-30m') rawLat += 20;
+       else rawLat += 10;
+       rawAwake += l.awakeningsCount || 0;
+    });
+    latency = Math.round(rawLat / logs.length);
+    awakenings = rawAwake / logs.length;
   }
 
   const checkinsList = Object.values(cycle.dailyCheckins);

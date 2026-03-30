@@ -230,15 +230,23 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
 
   if (numLogs > 0) {
     logs.forEach(l => {
-      avgLatency += l.timeToSleepMin;
-      avgAwakenings += l.awakenings;
-      avgAwakeTime += l.awakeTimeMin;
-      if (l.nap?.tookNap) {
+      if (l.sleepOnsetEstimate === '> 60m' || l.sleepOnsetEstimate === '30-60m') avgLatency += 45;
+      else if (l.sleepOnsetEstimate === '15-30m') avgLatency += 20;
+      else avgLatency += 10;
+      
+      avgAwakenings += l.awakeningsCount || 0;
+      avgAwakeTime += 30; // Deprecated detailed parsing to keep engine simple
+
+      if (l.sleepType === 'NAP') {
         markerUsage['$Nap'] = (markerUsage['$Nap'] || 0) + 1;
       }
-      l.markers.forEach(m => {
-        markerUsage[m] = (markerUsage[m] || 0) + 1;
-      });
+      
+      if (l.environmentIssues) {
+         l.environmentIssues.forEach((m: string) => {
+           markerUsage[m] = (markerUsage[m] || 0) + 1;
+         });
+      }
+      
       // Injeta variáveis primitivas no array de marcadores lidos pelo engine
       if (l.disturbingDreams) markerUsage['Pesadelos'] = (markerUsage['Pesadelos'] || 0) + 1;
       if (l.nicotineNearBedtime) markerUsage['Cigarro / Nicotina'] = (markerUsage['Cigarro / Nicotina'] || 0) + 1;

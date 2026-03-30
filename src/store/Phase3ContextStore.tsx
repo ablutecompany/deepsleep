@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 export type CheckinValue = 'success' | 'failed' | 'skipped' | 'incerto';
 
@@ -61,6 +61,14 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('deepsleep_phase3_cycle');
     }
   };
+
+  useEffect(() => {
+    const handleInvalidation = () => {
+      setCycleState(null);
+    };
+    window.addEventListener('deepsleep_baseline_invalidated', handleInvalidation);
+    return () => window.removeEventListener('deepsleep_baseline_invalidated', handleInvalidation);
+  }, []);
 
   const startCycle = (proposalId: string, priorityScore: number, selectionReason: string, linkedAssessmentId: string, minDays: number) => {
     const newCycle: Phase3Cycle = {
