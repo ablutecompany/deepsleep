@@ -15,7 +15,7 @@ export function BottomNav() {
   }, [location.pathname]);
 
   // Allow visibility in the stable tabs plus the active plan home and context areas
-  if (!['/process_home', '/manual_log_hub', '/phase2/context', '/phase2/entry', '/phase2/proposals', '/profile', '/phase3_home'].includes(location.pathname)) {
+  if (!['/process_home', '/manual_log_hub', '/patterns', '/phase2/context', '/phase2/entry', '/phase2/proposals', '/profile', '/phase3_home'].includes(location.pathname)) {
     return null;
   }
 
@@ -29,7 +29,7 @@ export function BottomNav() {
   const tabs = [
     { to: '/process_home', icon: Home, label: 'Início' },
     { to: '/manual_log_hub', icon: MoonStar, label: 'Noite' },
-    { to: '/phase2/context', icon: Activity, label: 'Padrões' },
+    { to: '/patterns', icon: Activity, label: 'Padrões' },
     { to: '/profile', icon: User, label: 'Perfil' }
   ];
 

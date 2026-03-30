@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Activity, Calendar, FilePlus, ArrowRight, Trash2 } from 'lucide-react';
+import { ArrowLeft, Clock, Activity, Calendar, FilePlus, Trash2 } from 'lucide-react';
 import { getManualLogs, deleteManualLog, type ManualNightLog } from '../domain/Phase1/manualLogStore';
 
 export function ManualPhase1Hub() {
@@ -102,17 +102,7 @@ export function ManualPhase1Hub() {
           </div>
         </section>
 
-        {done && (
-          <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            <button 
-              onClick={() => navigate('/phase2/entry')}
-              className="primary-btn"
-            >
-              <span>Avançar para interpretação</span>
-              <ArrowRight size={16} />
-            </button>
-          </div>
-        )}
+
 
       </div>
     </div>

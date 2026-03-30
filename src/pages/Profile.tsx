@@ -219,32 +219,54 @@ export function Profile() {
           <section className="editorial-card" style={{ marginTop: '24px', padding: '24px', borderRadius: '12px', background: 'transparent', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <h3 className="kicker" style={{ color: '#F59E0B', marginBottom: '16px' }}>Histórico Evolutivo</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {learningRecords.map((rec, i) => (
-                <div key={i} style={{ padding: '12px', borderLeft: rec.finalDecision === 'KEEP_REFINING' ? '2px solid #10B981' : '2px solid #EF4444', background: 'rgba(255,255,255,0.02)' }}>
-                   <p style={{ fontSize: '11px', color: '#64748B', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                     {rec.createdAt.split('T')[0]} · Ciclo Tático {rec.cycleWindowDays} noites
-                   </p>
-                   <p style={{ fontSize: '14px', color: '#E2E8F0', marginBottom: '8px' }}>
-                     Decisão: <span style={{ color: rec.finalDecision === 'KEEP_REFINING' ? '#10B981' : '#F59E0B' }}>
-                       {rec.userPerceivedOutcome.toUpperCase()}
-                     </span>
-                   </p>
-                   <p style={{ fontSize: '13px', color: '#94A3B8', lineHeight: '1.5' }}>
-                     {rec.observedChangeSummary}
-                   </p>
-                </div>
-              ))}
+              {learningRecords.map((rec, i) => {
+                 let tagColor = '#64748B';
+                 let tagText = 'AVALIAÇÃO HISTÓRICA';
+                 
+                 if (rec.decisionOutcome === 'completed_keep') { tagColor = '#10B981'; tagText = 'DIREÇÃO CONSOLIDADA'; }
+                 else if (rec.decisionOutcome === 'completed_adjust') { tagColor = '#F59E0B'; tagText = 'FOCO REFORMULADO'; }
+                 else if (rec.decisionOutcome === 'completed_switch') { tagColor = '#38BDF8'; tagText = 'MUDANÇA TÁTICA'; }
+                 // Fallback para os legados na máquina do utente
+                 else if ((rec as any).finalDecision === 'KEEP_REFINING') { tagColor = '#10B981'; tagText = 'DIREÇÃO CONSOLIDADA (LEGADO)'; }
+
+                 return (
+                  <div key={i} style={{ padding: '12px', borderLeft: `2px solid ${tagColor}`, background: 'rgba(255,255,255,0.02)' }}>
+                     <p style={{ fontSize: '11px', color: '#64748B', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                       {rec.createdAt.split('T')[0]} · Ciclo Tático {rec.cycleWindowDays} noites
+                     </p>
+                     <p style={{ fontSize: '14px', color: '#E2E8F0', marginBottom: '8px', fontWeight: 500 }}>
+                       Evolução: <span style={{ color: tagColor }}>{tagText}</span>
+                     </p>
+                     <p style={{ fontSize: '13px', color: '#94A3B8', lineHeight: '1.5' }}>
+                       {rec.nextStepPhrase || (rec as any).observedChangeSummary || 'Registo arquivado.'}
+                     </p>
+                  </div>
+                 );
+              })}
             </div>
           </section>
         )}
 
-        <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
             <button 
               onClick={() => navigate(deliverable ? '/phase2/proposals' : '/phase2/entry')}
               style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#F8FAFC', padding: '16px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
             >
               <Map size={16} />
-              {deliverable ? 'Ver Propostas Guardadas' : 'Avancar para Contexto Inicial'}
+              {deliverable ? 'Ver Propostas Guardadas' : 'Avançar para Interpretação'}
+            </button>
+            
+            <button 
+              className="text-btn" 
+              style={{ opacity: 0.3 }}
+              onClick={() => { 
+                if (window.confirm("Atenção: vais apagar todo o teu histórico, noites registadas e evolução aprendida. Queres recomeçar o processo clínico a partir do zero?")) {
+                  localStorage.clear(); 
+                  window.location.href = '/'; 
+                }
+              }}
+            >
+              Reiniciar Beta
             </button>
         </div>
 

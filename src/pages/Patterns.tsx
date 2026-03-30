@@ -88,15 +88,6 @@ export function Patterns() {
           </div>
         </section>
 
-        <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingBottom: '32px' }}>
-          <button 
-            onClick={() => window.location.href = '/phase2/proposals'}
-            className="primary-btn"
-            style={{ width: '100%', justifyContent: 'center' }}
-          >
-            <span>Procurar Nova Direção</span>
-          </button>
-        </div>
       </div>
     </div>
   );
