@@ -3,12 +3,20 @@ import { getLearningRecords } from '../Phase3/learningStore';
 
 export type EnhancedProposal = {
   id: string;
+  family: string;
+  badge: string;
+  
   title: string;
-  why: string;
+  actionToday: string;
   observe: string;
+  observeWhat: string;
+  reportQuestion: string;
+  checkInLabel: string;
+  
+  why: string;
   whenNotTo: string;
-  minWindow: string; // ex: "5 dias letivos seguidos"
-  minDays: number;   // numeric for Phase 3 engine (ex: 5)
+  minWindow: string;
+  minDays: number;
   future: string;
 };
 
@@ -18,133 +26,223 @@ export type PriorityTest = {
   selectionReason: string;
 };
 
+// --- DICIONÁRIO COMPOSICIONAL DE MICRO-AÇÕES ---
+const ACTION_LIBRARY: Record<string, EnhancedProposal> = {
+  TIMING_LIQUIDOS: {
+    id: 'timing_liquidos',
+    family: 'Fisiologia / Urgência',
+    badge: 'Fator Mecânico Diário',
+    title: 'Limita os líquidos a partir do jantar',
+    actionToday: 'Evita sumos, chás, água ou sopa nas 2 horas finais antes de te deitares.',
+    observe: 'Se acordas menos vezes durante a madrugada.',
+    observeWhat: 'Repara se a típica ida à casa de banho deixa de quebrar o meio da tua noite e se os despertares diminuem.',
+    reportQuestion: 'Houve menos interrupções pelo teu próprio corpo?',
+    checkInLabel: 'Amanhã de manhã',
+    why: 'Os rins continuam a processar líquidos de noite. De bexiga cheia, o teu corpo acorda forçadamente, cortando a tua arquitetura de sono.',
+    whenNotTo: 'Se tens medicação que força essa hidratação noturna ou outra indicação clínica contrária.',
+    minWindow: '4 noites',
+    minDays: 4,
+    future: 'Remover o obstáculo mecânico primário antes de analisar stress subjacente.'
+  },
+  PRESSAO_DORMIR: {
+    id: 'pressao_dormir',
+    family: 'Vigilância / Ansiedade',
+    badge: 'Abrandamento de Expectativa',
+    title: 'Não tentes adormecer mais cedo à força',
+    actionToday: 'Atrasa voluntariamente a hora de deitar. Fica a ler no sofá com luz fraca até os olhos pesarem. Não te deites apenas "por ser hora".',
+    observe: 'A sensação de alerta quando a luz do quarto apaga.',
+    observeWhat: 'Observa se a tua mente lutou menos ao encostar a cabeça na almofada. Procura o cansaço passivo, não o esforço de descansar.',
+    reportQuestion: 'Sentiste-te menos preocupado ou forçado ao deitar?',
+    checkInLabel: 'Ao final do dia seguinte',
+    why: 'Adormecer não é um ato de esforço muscular. Lutar para dormir treina o teu cérebro a ligar a cama a um palco de missão de stress.',
+    whenNotTo: 'Se sentires sinais de tontura extrema, não prolongues o estar em pé.',
+    minWindow: '5 noites',
+    minDays: 5,
+    future: 'Aprender a distinguir "estar exausto mas alerta" de "pressão real de sono".'
+  },
+  CONTROLO_TEMPERATURA: {
+    id: 'controlo_temp',
+    family: 'Ambiente Térmico',
+    badge: 'Constrição Biológica',
+    title: 'Arrefece ativamente o ar do quarto na hora de deitar',
+    actionToday: 'Abre a janela 10 minutos antes de deitar ou baixa o radiador. O quarto deve estar frio, mas o foco devem ser meias ou edredão para aquecimento focal.',
+    observe: 'A fragmentação na segunda metade da noite.',
+    observeWhat: 'Repara se o teu corpo acorda a transpirar levemente pelas 3h-4h da manhã, quando o calor central se liberta.',
+    reportQuestion: 'A noite decorreu de forma mais constante até de manhã?',
+    checkInLabel: 'Depois da noite passada',
+    why: 'Para os processos de sono profundo iniciarem (melatonina), o teu núcleo térmico tem obrigatoriamente de conseguir descartar calor para o ar frio circundante.',
+    whenNotTo: 'Noites de frio extremo onde o ar refrequeça excessivamente as vias respiratórias provocando tosse.',
+    minWindow: '3 noites',
+    minDays: 3,
+    future: 'Criar as rampas fisiológicas naturais de dissipação de calor orgânico.'
+  },
+  DESCOMPRESSAO_MENTAL: {
+    id: 'descompressao_mental',
+    family: 'Carga Cognitiva',
+    badge: 'Zona Tampão Passiva',
+    title: 'Substitui tarefas urgentes por inércia neutra',
+    actionToday: 'Corta com o e-mail, redes polarizantes, ou limpezas intensas às 22h. Foca-te apenas em desarrumar a mente num livro, música suave ou alongamento repetitivo.',
+    observe: 'A velocidade (ou ritmo cardíaco) percebida no peito quando fechas os olhos.',
+    observeWhat: 'Nesta fase não tentes perceber se adormeces; apenas nota se a "rádio" cerebral toca muito alto face à quietude do quarto.',
+    reportQuestion: 'O teu batimento ao deitar esteve desacelerado perante as noites de ontem?',
+    checkInLabel: 'Amanhã de manhã',
+    why: 'Passar dos 100km/h diários para 0 numa fração de segundo choca mecanicamente e resulta sempre numa reentrada imediata em alerta.',
+    whenNotTo: 'Emergências e semanas atípicas inevitáveis onde falhes a janela por força maior de vida.',
+    minWindow: '3 noites',
+    minDays: 3,
+    future: 'Apoiará todo o sistema quando entrarmos em técnicas avançadas de relaxamento muscular passivo.'
+  },
+  IRREGULARIDADE_LEVANTAR: {
+    id: 'irar_levantar',
+    family: 'Âncora Circadiana',
+    badge: 'Bloqueio de Relógio',
+    title: 'Fixar radicalmente a hora de saída da cama',
+    actionToday: 'Amanhã o alarme toca à hora definida e o pé tem de tocar imediatamente no chão frio. Quer tenhas dormido 4 horas ou 8 horas.',
+    observe: 'A fadiga extrema nas manhãs iniciais.',
+    observeWhat: 'Nota que o primeiro dia vai doer. No terceiro as tuas horas de sono noturno vão estabilizar porque a pressão vespertina acumulará inevitavelmente.',
+    reportQuestion: 'Toleraste o toque do alarme sem resvalar noites inteiras passadas na cama sem dormir?',
+    checkInLabel: 'No final dos 5 dias de estabilização',
+    why: 'O ritmo do homem não se define pela hora a que nos tentamos obrigar a dormir, mas com a precisão pela qual o relógio central apanha luz à mesma hora exata, matinalmente.',
+    whenNotTo: 'Turnos instáveis. Sob fadiga impeditiva como motorista ou em controlo de maquinaria pesada.',
+    minWindow: '5 noites',
+    minDays: 5,
+    future: 'Sem âncora final, todas as outras táticas fisiológicas serão ilusões passageiras.'
+  },
+  REENTRADA_DESPERTOS: {
+    id: 'reent_despertos',
+    family: 'Condicionamento de Quarto',
+    badge: 'Quebra de Estímulo',
+    title: 'Sai da cama aos primeiros sinais de frustração',
+    actionToday: 'Acordaste a meio da noite. Passaram 15-20 mnts? Sentes irritação ou rodas? Sai imediatamente. Vai à sala e faz uma leitura chata sob luz ténue.',
+    observe: 'O abrandamento passivo fora da cama face à ansiedade entre o colchão e os lençóis.',
+    observeWhat: 'Presta estrita atenção na distinção entre estar exausto de corpo leve ou estar com pensamento afunilado pela insónia na cama.',
+    reportQuestion: 'A frustração diminuiu fora do quarto?',
+    checkInLabel: 'A cada despertar substancial',
+    why: 'Se ficares na cama a batalhar o sono dezenas de vezes nas madrugadas, o cérebro liga as paredes do quarto involuntariamente à guerra do despertar.',
+    whenNotTo: 'Idade senil, pisos escorregadios fracos no aspeto quedas ao levantar de rompante. Risco térmico de hipotermia grave.',
+    minWindow: '7 noites',
+    minDays: 7,
+    future: 'É a base mais clínica e robusta na quebra de insónias psicofisiológicas clássicas que se alimentam a si mesmas.'
+  },
+  SESTAS_TARDES: {
+    id: 'sestas_pressao',
+    family: 'Mecânica de Pressão',
+    badge: 'Geração de Pressão',
+    title: 'Elimina ou encerra os encostos diurnos',
+    actionToday: 'Se fores dominado pelo cansaço entre as 16h-20h, caminha, apanha vento frio, fala. Sob hipótese alguma "encostes" os olhos dez minutos.',
+    observe: 'A solidez de sono perante essas abstinências.',
+    observeWhat: 'Ao manteres a fatiga acumulada ao longo da corrente do dia, as hormonas densificam. Verifica se os teus despertares diminuem.',
+    reportQuestion: 'Sentiste uma quebra no meio da noite menos pronunciada ou mais sólida?',
+    checkInLabel: 'No 3º dia consecutivo',
+    why: 'As sestas tardias e curtas operam puramente furtando e libertando o teu bolso de Adenosina — a moeda da pressão química central — arruinando a madrugada.',
+    whenNotTo: 'Na obrigatoriedade total de segurança operacional se conduzires por quilómetros contínuos.',
+    minWindow: '3 noites',
+    minDays: 3,
+    future: 'É vital reconstruir uma parede biológica unificada de "fome de sono" para os nossos rituais base de madrugada resultarem.'
+  },
+  ALCOOL_NOTURNO: {
+    id: 'alcool_rebote',
+    family: 'Tóxicos e Supressores',
+    badge: 'Isolamento Químico',
+    title: 'Retira completamente a bebida alcoólica vespertina',
+    actionToday: 'A abstenção absoluta de álcool nas 4 a 6 horas distantes de deitar é requerida esta semana.',
+    observe: 'A qualidade dos teus sonhos e a fragmentação no bloco das 3 da manhã.',
+    observeWhat: 'Podes conseguir adormecer até rápido e pesado pelo etanol, mas irás notar um efeito ressalto na qual a mente levanta ansiosa brutalmente a meio do ciclo celular.',
+    reportQuestion: 'A tua perceção do acordar matinal pareceu minimamente mais nítida hoje e menos difusa/inquinada?',
+    checkInLabel: 'Depois da primeira isenção',
+    why: 'Os soníferos da categoria de barbitúricos ou do álcool sedam instintivamente os lobos cerebrais na entrada, destapando logo atrás distúrbios, arritmias e sonhos tóxicos na fase de repouso orgânico.',
+    whenNotTo: 'Esta ação não prevê interações, a não ser dependência puramente clínica onde o despiste do alcool não deve ser travado abruptamente sem acompanhamento geral de psiquiatria.',
+    minWindow: '5 noites',
+    minDays: 5,
+    future: 'Isolamento de um dos maiores falsos amigos da sonolência rápida antes de julgar a capacidade cerebral basal individual.'
+  }
+};
+
+
 export function getProposals(deliverable: AssessmentDeliverable | null): EnhancedProposal[] {
   let proposals: EnhancedProposal[] = [];
 
+  // Fallback se não há deliverable base ativo ou dados em cruzeiro de segurança insuficiente
   if (!deliverable) {
-    proposals.push({
-      id: 'prop_ancora',
-      title: "Acordar sempre à mesma hora",
-      why: "Como ainda não temos os teus dados completos, o passo mais testado e seguro é criares um horário inegociável para sair da cama. Isso força o teu relógio biológico a regular aos poucos.",
-      observe: "A resistência inicial em sair da cama. O cansaço a meio do dia.",
-      whenNotTo: "Se trabalhas por turnos ou se a fadiga colocar em risco a tua segurança na condução.",
-      minWindow: "5 noites",
-      minDays: 5,
-      future: "Garante que o relógio interno estabiliza antes de testarmos o resto do ambiente."
-    });
-    return proposals;
+    return [{
+      ...ACTION_LIBRARY.IRREGULARIDADE_LEVANTAR,
+      id: 'prop_ancora'
+    }];
   }
 
-  // 1. REGRA 3: Tratar Funcionalmente as Famílias com base na árvore da Fase 1
+  // Composição Contextual do Engine Fase 2 -> Extração Dinâmica com base num pool central expandido em ACTION_LIBRARY
   switch (deliverable.primarySleepPattern) {
     case 'COMPONENTE_ORGANICA':
-      if (deliverable.flags.some(f => f.includes('Noctúria'))) {
-        proposals.push({
-          id: 'prop_hidrica',
-          title: "Ajustar líquidos ao fim do dia",
-          why: "O teu registo diz que acordas muitas vezes. Isso pode ser provocado pela simples vontade de ir à casa de banho, o que corta ciclos vitais do sono. Bebe mais de dia e menos depois de jantar.",
-          observe: "Presta atenção a despertares logo após acabares ciclos ou depois de jantar.",
-          whenNotTo: "Se o teu médico recomendou de forma estrita, ou tens medicação que força esse consumo de noite.",
-          minWindow: "4 noites",
-          minDays: 4,
-          future: "Reduz idas desnecessárias à casa de banho que fragmentam a noite mecanicamente."
-        });
+      if (deliverable.flags.some(f => f.includes('Noctúria') || f.includes('Bexiga') || f.includes('Líquidos'))) {
+        proposals.push(ACTION_LIBRARY.TIMING_LIQUIDOS);
       }
-      if (deliverable.proposalConstraints.some(c => c.includes('Dor'))) {
-        proposals.push({
-          id: 'prop_ergo',
-          title: "Controlar desconforto físico",
-          why: "Sinalizaste dores como entrave grave no teu histórico de noites. O teu corpo acorda para evitar dor pela posição ou colchão errados. Foca nesta correção de posição e suporte base.",
-          observe: "A relação entre as tuas posturas ao deitar e o momento preciso em que acordas a meio.",
-          whenNotTo: "Se tens um limite rigoroso imposto por ortopedista ou médico para certas posturas.",
-          minWindow: "3 noites",
-          minDays: 3,
-          future: "Previne que seja o teu corpo a forçar a interrupção biológica a meio da noite."
-        });
+      if (deliverable.flags.some(f => f.includes('Álcool') || f.includes('Alcool'))) {
+        proposals.push(ACTION_LIBRARY.ALCOOL_NOTURNO);
+      }
+      if (proposals.length === 0) {
+        proposals.push(ACTION_LIBRARY.CONTROLO_TEMPERATURA); // organic default
       }
       break;
 
     case 'REENTRADA_DESPERTAR':
+      proposals.push(ACTION_LIBRARY.REENTRADA_DESPERTOS);
+      break;
+      
     case 'FRAGMENTACAO_MANUTENCAO':
-      proposals.push({
-        id: 'prop_levantar',
-        title: "Levantar da cama se não adormecer",
-        why: "Estar na cama acordado a lutar contra os pensamentos treina o teu cérebro a ligar o quarto ao stress. Se passaram 20 minutos e não dormes, levanta-te e lê num lugar com pouca luz até teres sono.",
-        observe: "Tenta perceber em que ponto a tua tentativa de dormir vira irritação e frustração real.",
-        whenNotTo: "Se ao levantares acordares familiares ou se houver risco sério de quedas.",
-        minWindow: "5 noites",
-        minDays: 5,
-        future: "Quebra a associação tóxica entre a tua própria almofada e estado de alerta acelerado."
-      });
+      if (deliverable.flags.some(f => f.includes('Sestas'))) {
+        proposals.push(ACTION_LIBRARY.SESTAS_TARDES);
+      } else {
+         proposals.push(ACTION_LIBRARY.REENTRADA_DESPERTOS);
+      }
       break;
 
     case 'IRREGULARIDADE_HORARIOS':
-      proposals.push({
-        id: 'prop_ancora_horaria',
-        title: "Impor uma hora restrita para deitar",
-        why: "A ausência total de ritmo bloqueia a libertação de substâncias naturais. Tenta respeitar um horário âncora de encerramento, para o teu corpo perceber que o dia finalmente acabou.",
-        observe: "Sê franco a perceber o número de noites onde a hora final esticou sem razão útil real.",
-        whenNotTo: "Se estás confinado a turnos dinâmicos por trabalho que não podes evitar.",
-        minWindow: "7 noites",
-        minDays: 7,
-        future: "Deixa o teu corpo ter um alvo físico diário onde programar o cansaço."
-      });
+      proposals.push(ACTION_LIBRARY.IRREGULARIDADE_LEVANTAR);
       break;
 
     case 'DIFICULDADE_ADORMECIMENTO':
     default:
       if (deliverable.dominantDrivers.includes('P1') || deliverable.dominantDrivers.includes('P2')) {
-        proposals.push({
-          id: 'prop_foco_passivo',
-          title: "Não lutes: substitui o telemóvel por algo neutro",
-          why: "Se precisas do ecrã para atuar contra o aborrecimento, tenta pelo menos não alimentar conversas, ou ler notícias ansiosas. Troca tudo por um e-reader fixo ou documentário longo aborrecido.",
-          observe: "Avalia a tua ansiedade de querer dar sempre 'só mais um scroll' ou responder mensagens tarde.",
-          whenNotTo: "Se o simples pegar num ecrã já disparar dor de cabeça intensa ou se isso perturbar o sono grave.",
-          minWindow: "3 noites",
-          minDays: 3,
-          future: "Abrandar radicalmente a estimulação ativa, e focar em conteúdos passivos que causem tédio ou paz."
-        });
+        proposals.push(ACTION_LIBRARY.PRESSAO_DORMIR); // Expectativa e ansiedade
+      } else {
+        proposals.push(ACTION_LIBRARY.DESCOMPRESSAO_MENTAL); // Carga pesada e luz/telas
       }
       break;
   }
 
+  // Prevenir que um fallback em arrays fique vazio
   if (proposals.length === 0) {
-    proposals.push({
-      id: 'prop_descompressao',
-      title: "Cortar tarefas a meia-luz antes de deitar",
-      why: "Tenta não saltar de limpezas profundas, e-mails de trabalho ou stress agudo direto para dentro dos lençóis numa fração de segundo. Isso nunca resulta. Define 30 minutos de paz forçada, com luz fraca.",
-      observe: "A velocidade e stress mental que levas quando dás por ti a deitar, o chamado 'acelerar até parar'.",
-      whenNotTo: "Semanas atípicas onde não tiveste rigorosamente margem nas 24 horas por razões incontornáveis.",
-      minWindow: "3 noites",
-      minDays: 3,
-      future: "O abrandamento passivo treina quimicamente o cansaço."
-    });
+    proposals.push(ACTION_LIBRARY.DESCOMPRESSAO_MENTAL);
   }
 
-  // 2. Re-Otimização Viva com base nos Ciclos Concluídos (Aprendizagem Longitudinal)
+  // Re-Otimização Longitudinal Viva
   const learningRecords = getLearningRecords();
   if (learningRecords.length > 0 && deliverable) {
-    // Propostas que o utilizador já reportou como ineficazes ou impossíveis ("ajustar" ou "trocar")
     const rejectedIds = learningRecords
       .filter(r => r.linkedAssessmentId === deliverable.assessmentId && r.finalDecision === 'REJECT_AND_REOPTIMIZE')
       .map(r => r.activeProposalId);
 
     if (rejectedIds.length > 0) {
-      // Filtrar propostas rejeitadas, exceto se for a única que resta (fallback)
       const validProposals = proposals.filter(p => !rejectedIds.includes(p.id));
       if (validProposals.length > 0) {
         proposals = validProposals;
       } else {
-        // Se todas as listadas esgotaram, fazemos fallback de contingência
+        // Fallback blindado se todas falharam - Fallback regenerativo
         proposals = [{
           id: 'prop_fallback_regenerativo',
-          title: "Bloquear a luz no quarto escuro",
-          why: "Todos os testes anteriores foram incompatíveis com o teu estilo. O passo base irredutivel e irrejeitável que nos resta é tapar todas as frinchas e luzes azuis agressivas de carregadores e tentar dormir em paz térmica e visual pura.",
-          observe: "Olha para os leds ou candeeiros de rua que cortaram a escuridão enquanto esticavas as noites.",
-          whenNotTo: "Se for de todo impossível desligar equipamento médico com pequenas luzes no recinto ou se tiveres fobias extremas impeditivas.",
-          minWindow: "4 noites",
+          family: 'Limpeza Básica de Base',
+          badge: 'Nível Zero Regenerativo',
+          title: 'Bloquear as luzes e deitar em vácuo escuro puro',
+          actionToday: 'Desliga todas as luzes azuis, esconde telemóveis, apaga fios led nos carregadores, trinta minutos antes e mergulha a divisão em escuridão tátil sem distração sensorial nenhuma prévia.',
+          observe: 'Se o cansaço volta ao fim de três dias num espaço sensório isolado vazio.',
+          observeWhat: 'Nota de quebra basal nas noites sem a presença residual agressiva de interações com telemóvel disfuncionais que nos impediu nos testes precedentes na tuas reações rebotadas.',
+          reportQuestion: 'O teu batimento cardíaco ou reatividade relaxou substancialmente com o apagar precoce visual face a dias logados onde havias tentado meditações intermédias?',
+          checkInLabel: 'A cada 2 madrugadas',
+          why: 'Sempre que tudo falha perante um cronossistema alterado na pessoa, a ciência basea-se primariamente numa única solução: restaurar o primitivo da fisiologia pelo silêncio, frio restrito e ausência de fotões sobre a retina até se criar desespero químico por descompressão nas noites tardias.',
+          whenNotTo: 'Extinto para as pessoas que dependem medicamente de controlos de aparelhagem sensíveis com avisadores nos blocos perto do campo da almofada em que reagem em dormência perante interrupções de vida base do seu quadro patológico.',
+          minWindow: '4 noites',
           minDays: 4,
-          future: "Recria o vazio inicial do quarto puro para rever a base, antes dos constrangimentos que forçamos antigamente."
+          future: 'Sem voltar ao passo natural biológico basal primordial não conseguiremos injetar mais carga tática isolada.'
         }];
       }
     }
@@ -154,13 +252,12 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
 }
 
 export function getPriorityTest(deliverable: AssessmentDeliverable): PriorityTest {
-  // Always map exactly what we dynamically generated in proposals to ensure sync
   const proposals = getProposals(deliverable);
   const top = proposals[0];
 
   return {
     primaryProposalId: top.id,
     priorityScore: 90,
-    selectionReason: `A matriz de Fase 1 assinala o padrão primordial "${deliverable.primarySleepPattern}", enquanto os teus contextos de Fase 2 validam uma tática da classe funcional adequada.`
+    selectionReason: `A fase de contexto revelou um padrão do tipo "${deliverable.primarySleepPattern}", ligando mecanicamente ao teste primordial.`
   };
 }

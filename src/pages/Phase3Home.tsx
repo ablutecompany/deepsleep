@@ -100,8 +100,21 @@ export function Phase3Home() {
         </header>
 
         <section className="editorial-card" style={{ marginBottom: '32px' }}>
-          <h2 className="module-title" style={{ fontSize: '20px', marginBottom: '12px', color: '#F8FAFC' }}>{currentProposal.title}</h2>
-          <p className="module-desc" style={{ marginBottom: '24px' }}>{cycle.selectionReason}</p>
+          <div style={{ marginBottom: '12px' }}>
+            <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#38BDF8', fontWeight: 600 }}>
+              {currentProposal.badge}
+            </span>
+          </div>
+          <h2 className="module-title" style={{ fontSize: '20px', marginBottom: '16px', color: '#F8FAFC' }}>{currentProposal.title}</h2>
+          
+          <p className="module-desc" style={{ marginBottom: '24px', color: '#E2E8F0', lineHeight: 1.6, fontWeight: 300 }}>
+            {currentProposal.actionToday}
+          </p>
+
+          <div style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', marginBottom: '24px', borderLeft: '2px solid rgba(56, 189, 248, 0.4)' }}>
+             <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94A3B8', display: 'block', marginBottom: '4px' }}>Racional Biológico</span>
+             <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: 1.5, fontWeight: 300 }}>{currentProposal.why}</p>
+          </div>
           
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

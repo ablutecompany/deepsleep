@@ -75,46 +75,57 @@ export function ProcessHome() {
         <div className="fade-in" style={{ marginBottom: '48px' }}>
           
           <div style={{ borderLeft: '2px solid #38BDF8', paddingLeft: '16px', marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#38BDF8', fontWeight: 600 }}>
-                Direção Ativa
+                {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.badge || 'Direção Ativa'}
               </span>
               <span style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38BDF8', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 600 }}>
                 DIA {Object.keys(cycle.dailyCheckins).length + 1} DE {cycle.minDays}
               </span>
             </div>
-            <h3 style={{ fontSize: '22px', color: '#F8FAFC', fontWeight: 400, lineHeight: '1.2' }}>
+            <h3 style={{ fontSize: '22px', color: '#F8FAFC', fontWeight: 400, lineHeight: '1.3' }}>
               {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.title || 'Teste em curso'}
             </h3>
           </div>
 
           <div className="editorial-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
-            <p style={{ fontSize: '14px', color: '#E2E8F0', lineHeight: '1.6', fontWeight: 300 }}>
-               <strong style={{ color: '#94A3B8', fontWeight: 500, display: 'block', marginBottom: '4px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>O que observar hoje:</strong> 
-               {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.observe}
+            <p style={{ fontSize: '15px', color: '#E2E8F0', lineHeight: '1.6', fontWeight: 300, marginBottom: '24px' }}>
+               {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.actionToday}
             </p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '24px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '24px' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38BDF8', boxShadow: '0 0 8px rgba(56,189,248,0.5)' }}></div>
-                 <span style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400 }}>Hoje: Observação diária</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '24px' }}>
+               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38BDF8', boxShadow: '0 0 8px rgba(56,189,248,0.5)', marginTop: '6px', flexShrink: 0 }}></div>
+                 <div>
+                   <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Observa</span>
+                   <span style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400, lineHeight: '1.4' }}>
+                     {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.observeWhat}
+                   </span>
+                 </div>
                </div>
                
-               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6 }}>
-                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'transparent', border: '1px solid #94A3B8' }}></div>
-                 <span style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 300 }}>Próximos dias: Consolidar sinal</span>
+               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', opacity: 0.8 }}>
+                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'transparent', border: '1px solid #94A3B8', marginTop: '6px', flexShrink: 0 }}></div>
+                 <div>
+                   <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Depois diz-nos</span>
+                   <span style={{ fontSize: '14px', color: '#E2E8F0', fontWeight: 300, lineHeight: '1.4' }}>
+                     {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.reportQuestion}
+                   </span>
+                 </div>
                </div>
 
-               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: 0.6 }}>
-                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'transparent', border: '1px solid #94A3B8' }}></div>
-                 <span style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 300 }}>Revisão Final: Após {cycle.minDays} noites</span>
+               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', opacity: 0.6 }}>
+                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'transparent', border: '1px solid #94A3B8', marginTop: '6px', flexShrink: 0 }}></div>
+                 <div>
+                   <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>Check-in esperado</span>
+                   <span style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.4' }}>
+                     {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.checkInLabel}
+                   </span>
+                 </div>
                </div>
             </div>
             
-            <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.4)', padding: '12px', borderRadius: '8px' }}>
-              <Bell size={14} color="#64748B" />
-              <span style={{ fontSize: '11px', color: '#64748B', letterSpacing: '0.02em' }}>Notificações de ciclo ligadas no dispositivo.</span>
-            </div>
+            {/* O removed Bell row because it's already in the main header now */}
           </div>
 
           {!cycle.dailyCheckins[todayStr] ? (

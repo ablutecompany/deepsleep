@@ -29,20 +29,27 @@ export function Phase2Proposals() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', flex: 1 }}>
         {proposals.map((p, i) => (
           <div key={i} className="editorial-card" style={{ padding: '0 0 24px 0', borderBottom: i === proposals.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: '20px' }}>
               <span className="kicker" style={{ color: i === 0 ? '#38BDF8' : '#64748B', marginBottom: '8px' }}>
-                PRIORIDADE {i + 1}
+                PRIORIDADE {i + 1} • {p.badge}
               </span>
-              <h3 className="module-title" style={{ fontSize: '20px', color: '#F8FAFC', marginBottom: '8px' }}>{p.title}</h3>
-              <p className="module-desc" style={{ color: '#E2E8F0', fontSize: '15px' }}>{p.why}</p>
+              <h3 className="module-title" style={{ fontSize: '20px', color: '#F8FAFC', marginBottom: '12px' }}>{p.title}</h3>
+              <p className="module-desc" style={{ color: '#E2E8F0', fontSize: '15px' }}>{p.actionToday}</p>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '16px' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '4px' }}>
+                <p style={{ fontSize: '13px', color: '#94A3B8', lineHeight: '1.5', fontWeight: 300 }}>
+                  <span style={{ color: '#64748B', display: 'block', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em', marginBottom: '2px' }}>Base:</span>
+                  {p.why}
+                </p>
+              </div>
+
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                 <Eye size={14} color="#64748B" style={{ marginTop: '3px', flexShrink: 0 }} />
                 <p style={{ fontSize: '13px', color: '#94A3B8', lineHeight: '1.5', fontWeight: 300 }}>
                   <span style={{ color: '#64748B', display: 'block', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em', marginBottom: '2px' }}>Presta atenção a:</span>
-                  {p.observe}
+                  {p.observeWhat}
                 </p>
               </div>
 
