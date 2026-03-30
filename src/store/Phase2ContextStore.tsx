@@ -1,9 +1,10 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { AssessmentDeliverable } from '../domain/Phase2/engine';
+import type { AssessmentDeliverable, ReadingResonanceFeedback } from '../domain/Phase2/engine';
 
 interface Phase2ContextType {
   deliverable: AssessmentDeliverable | null;
   setDeliverable: (d: AssessmentDeliverable | null) => void;
+  submitResonanceFeedback: (feedback: ReadingResonanceFeedback) => void;
   answersDraft: Record<string, string[]>;
   setAnswersDraft: (d: Record<string, string[]>) => void;
   clearDraft: () => void;
@@ -57,8 +58,24 @@ export function Phase2StoreProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('deepsleep_phase2_draft');
   };
 
+  const submitResonanceFeedback = (feedback: ReadingResonanceFeedback) => {
+    setDeliverableState(prev => {
+      if (!prev) return null;
+      const updated = { ...prev, resonanceFeedback: feedback };
+      
+      if (feedback.resonanceLevel === 'none' || feedback.resonanceLevel === 'low') {
+         updated.patternConfidence = Math.max(0, updated.patternConfidence - 20);
+      } else if (feedback.resonanceLevel === 'partial') {
+         updated.patternConfidence = Math.max(0, updated.patternConfidence - 10);
+      }
+
+      localStorage.setItem('deepsleep_phase2_deliverable', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
-    <Phase2StoreContext.Provider value={{ deliverable, setDeliverable, answersDraft, setAnswersDraft, clearDraft }}>
+    <Phase2StoreContext.Provider value={{ deliverable, setDeliverable, submitResonanceFeedback, answersDraft, setAnswersDraft, clearDraft }}>
       {children}
     </Phase2StoreContext.Provider>
   );

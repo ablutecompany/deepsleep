@@ -21,6 +21,7 @@ import { Phase3Home } from './pages/Phase3Home';
 
 import { Phase2StoreProvider } from './store/Phase2ContextStore';
 import { Phase3StoreProvider } from './store/Phase3ContextStore';
+import { SensingPrototype } from './pages/SensingPrototype';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -56,8 +57,9 @@ export default function App() {
             <Route path="/phase2/questions" element={<Phase2Questions />} />
             <Route path="/phase2/context" element={<Phase2Context />} />
             <Route path="/phase2/proposals" element={<Phase2Proposals />} />
-            
             <Route path="/phase3_home" element={<Phase3Home />} />
+            
+            <Route path="/sensing" element={<SensingPrototype />} />
           </Routes>
         </main>
         {/* <BottomNav /> - Temporarily hidden during guided flow testing if wanted, but left here for global structure */}

@@ -188,6 +188,9 @@ export function Phase3Home() {
                 <p style={{ fontSize: '13px', color: '#64748B', textAlign: 'center', fontWeight: 300 }}>
                   Posição guardada sileciosamente. O trajeto continua amanhã.
                 </p>
+                <button onClick={() => appClock.addDays(1)} className="secondary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center', borderColor: 'rgba(245, 158, 11, 0.5)', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.05)' }}>
+                  [Beta] Simular Amanhã
+                </button>
                 <button onClick={() => navigate('/process_home')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                   Voltar ao Início
                 </button>

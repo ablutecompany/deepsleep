@@ -7,9 +7,13 @@ export function Phase2Entry() {
   const { deliverable, setAnswersDraft, setDeliverable } = usePhase2Store();
 
   const handleStart = (mode: 10 | 25) => {
-    if (window.confirm("Queres mesmo apagar a tua leitura atual e refazer o questionário? O teu plano ativo, se existir, não será afetado, mas perderás o contexto.")) {
-      setAnswersDraft({}); // Clear draft when forcing new
-      setDeliverable(null);
+    if (deliverable) {
+      if (window.confirm("Queres mesmo apagar a tua leitura atual e refazer o questionário? O teu plano ativo, se existir, não será afetado, mas perderás o contexto.")) {
+        setAnswersDraft({}); // Clear draft when forcing new
+        setDeliverable(null);
+        navigate(`/phase2/questions?mode=${mode}`);
+      }
+    } else {
       navigate(`/phase2/questions?mode=${mode}`);
     }
   };

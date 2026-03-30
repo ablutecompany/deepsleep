@@ -8,8 +8,8 @@ export function DataSourceSelection() {
     localStorage.setItem('dataSourceType', 'manual');
     localStorage.setItem('dataSourceChosenAt', Date.now().toString());
     
-    // Limpeza de estado falso herdado da demo sensorial
-    const logs = localStorage.getItem('manualNightLogs');
+    // Garante que iniciamos uma contagem real e limpa de zero se não houver diátios ativos.
+    const logs = localStorage.getItem('deepsleep_manual_logs');
     if (!logs || JSON.parse(logs).length === 0) {
       localStorage.setItem('nightCount', '0');
     }

@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { FACTOR_LABELS, FACTOR_DESCRIPTIONS } from '../domain/Phase2/interpreter';
 import { Home } from 'lucide-react';
+import type { ResonanceLevel, DisagreementReason } from '../domain/Phase2/engine';
 
 function getConfidenceLabel(confidence: number): string {
   if (confidence < 60) return "Leitura inicial";
@@ -13,7 +15,40 @@ function getConfidenceLabel(confidence: number): string {
 
 export function Phase2Context() {
   const navigate = useNavigate();
-  const { deliverable } = usePhase2Store();
+  const { deliverable, submitResonanceFeedback } = usePhase2Store();
+  
+  const [resonanceStep, setResonanceStep] = useState<0 | 1 | 2>(() => {
+    return deliverable?.resonanceFeedback ? 2 : 0;
+  });
+  const [selectedLevel, setSelectedLevel] = useState<ResonanceLevel | null>(null);
+
+  const handleLevelSelect = (level: ResonanceLevel) => {
+    setSelectedLevel(level);
+    if (level === 'high') {
+      submitResonanceFeedback({
+        id: 'res_' + Date.now(),
+        linkedAssessmentId: deliverable!.assessmentId,
+        linkedPattern: deliverable!.primarySleepPattern,
+        resonanceLevel: level,
+        submittedAt: new Date().toISOString()
+      });
+      setResonanceStep(2);
+    } else {
+      setResonanceStep(1);
+    }
+  };
+
+  const handleDisagreementSubmit = (reason: DisagreementReason) => {
+    submitResonanceFeedback({
+      id: 'res_' + Date.now(),
+      linkedAssessmentId: deliverable!.assessmentId,
+      linkedPattern: deliverable!.primarySleepPattern,
+      resonanceLevel: selectedLevel!,
+      disagreementReason: reason,
+      submittedAt: new Date().toISOString()
+    });
+    setResonanceStep(2);
+  };
 
   if (!deliverable) {
     return (
@@ -120,14 +155,55 @@ export function Phase2Context() {
           </div>
         </section>
 
-        <div style={{ marginTop: '64px', marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <button 
-            onClick={() => navigate('/phase2/proposals')}
-            className="primary-btn"
-          >
-            <span>Ver propostas de ação</span>
-            <ArrowRight size={16} />
-          </button>
+        {/* MODULO READING RESONANCE FEEDBACK */}
+        <div style={{ marginTop: '40px', padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+          {resonanceStep === 0 && (
+            <div className="fade-in">
+              <h3 style={{ fontSize: '15px', color: '#F8FAFC', fontWeight: 400, marginBottom: '16px' }}>Isto revê-se em ti?</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <button onClick={() => handleLevelSelect('high')} style={{ padding: '8px 16px', borderRadius: '20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Sim, bastante</button>
+                <button onClick={() => handleLevelSelect('partial')} style={{ padding: '8px 16px', borderRadius: '20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Em parte</button>
+                <button onClick={() => handleLevelSelect('low')} style={{ padding: '8px 16px', borderRadius: '20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Não muito</button>
+                <button onClick={() => handleLevelSelect('none')} style={{ padding: '8px 16px', borderRadius: '20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Nada disto</button>
+              </div>
+            </div>
+          )}
+
+          {resonanceStep === 1 && (
+            <div className="fade-in">
+              <h3 style={{ fontSize: '15px', color: '#F8FAFC', fontWeight: 400, marginBottom: '16px' }}>O que te parece menos certo aqui?</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button onClick={() => handleDisagreementSubmit('primary_reason')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>O motivo principal</button>
+                <button onClick={() => handleDisagreementSubmit('sub_motives')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Os sub-motivos apurados</button>
+                <button onClick={() => handleDisagreementSubmit('wording')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>A forma como está descrito</button>
+                <button onClick={() => handleDisagreementSubmit('missing_context')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Falta mais contexto</button>
+                <button onClick={() => handleDisagreementSubmit('unsure')} style={{ textAlign: 'left', padding: '12px 16px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', fontSize: '14px', cursor: 'pointer' }}>Não tenho a certeza</button>
+              </div>
+            </div>
+          )}
+
+          {resonanceStep === 2 && (
+            <div className="fade-in" style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 8px rgba(16, 185, 129, 0.5)', flexShrink: 0, marginTop: '6px' }}></div>
+              <span style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 300, lineHeight: 1.5 }}>Obrigado. Calibração interna guardada para os próximos ciclos. O motor de inferência foi reajustado.</span>
+            </div>
+          )}
+        </div>
+
+        <div style={{ marginTop: '40px', marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {resonanceStep === 2 ? (
+            <button 
+              onClick={() => navigate('/phase2/proposals')}
+              className="primary-btn fade-in"
+            >
+              <span>Ver propostas de ação</span>
+              <ArrowRight size={16} />
+            </button>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '16px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '8px', color: '#64748B', fontSize: '13px' }}>
+              Partilha a tua leitura acima para avançar
+            </div>
+          )}
           
           <button 
             onClick={() => navigate('/process_home')}

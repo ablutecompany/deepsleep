@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { QUESTIONS_BANK, getQuestionsForMode } from '../domain/Phase2/questions';
 import { evaluateAssessment } from '../domain/Phase2/engine';
@@ -88,9 +89,24 @@ export function Phase2Questions() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#000', color: '#F8FAFC', padding: '24px', boxSizing: 'border-box' }}>
-      <p style={{ textAlign: 'center', color: '#64748B', fontSize: '12px', letterSpacing: '2px', marginTop: '32px', marginBottom: '64px' }}>
-        {currentIndex + 1} / {qids.length}
-      </p>
+      <div style={{ display: 'flex', alignItems: 'center', marginTop: '32px', marginBottom: '64px' }}>
+        <ArrowLeft 
+           size={24} 
+           color="#94A3B8" 
+           style={{ cursor: 'pointer' }} 
+           onClick={() => {
+             if (currentIndex > 0) {
+               setCurrentIndex(currentIndex - 1);
+             } else {
+               navigate('/phase2/entry');
+             }
+           }} 
+        />
+        <p style={{ flex: 1, textAlign: 'center', color: '#64748B', fontSize: '12px', letterSpacing: '2px', margin: 0 }}>
+          {currentIndex + 1} / {qids.length}
+        </p>
+        <div style={{ width: 24 }} />
+      </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h2 style={{ fontSize: '24px', fontWeight: 500, lineHeight: '32px', marginBottom: '8px' }}>

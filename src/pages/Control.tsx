@@ -145,6 +145,18 @@ export function Control() {
         </section>
 
         <section className="editorial-module footer-module" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>
+          <span className="kicker" style={{ color: '#38BDF8' }}>Beta Labs (Testes Locais)</span>
+          <div className="action-list" style={{ marginTop: '16px', marginBottom: '32px' }}>
+            <button onClick={() => navigate('/sensing')} className="primary-btn action-link" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38BDF8', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+              Testar Observação Acústica
+            </button>
+            <p style={{ marginTop: '8px', fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>
+              Spike técnico para cálculo de decibéis ambiente. O ecrã ficará preso em modo nocturno de alto-contraste. Sem envio para cloud.
+            </p>
+          </div>
+        </section>
+
+        <section className="editorial-module footer-module" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>
           <span className="kicker">Exportação e Apagamento</span>
           
           <div className="action-list">

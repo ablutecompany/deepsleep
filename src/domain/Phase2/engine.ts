@@ -2,6 +2,18 @@ import { getManualLogs } from '../Phase1/manualLogStore';
 
 export type PrimarySleepPattern = 'DIFICULDADE_ADORMECIMENTO' | 'FRAGMENTACAO_MANUTENCAO' | 'REENTRADA_DESPERTAR' | 'IRREGULARIDADE_HORARIOS' | 'COMPONENTE_ORGANICA' | 'INDEFINIDO';
 
+export type ResonanceLevel = 'high' | 'partial' | 'low' | 'none';
+export type DisagreementReason = 'primary_reason' | 'sub_motives' | 'wording' | 'missing_context' | 'unsure';
+
+export interface ReadingResonanceFeedback {
+  id: string;
+  linkedAssessmentId: string;
+  linkedPattern: string;
+  resonanceLevel: ResonanceLevel;
+  disagreementReason?: DisagreementReason;
+  submittedAt: string;
+}
+
 export interface AssessmentDeliverable {
   schemaVersion: number;
   assessmentId: string;
@@ -26,6 +38,7 @@ export interface AssessmentDeliverable {
   profileContribution: Record<string, any>;
   proposalConstraints: string[];
   proposalOpportunities: string[];
+  resonanceFeedback?: ReadingResonanceFeedback;
 }
 
 

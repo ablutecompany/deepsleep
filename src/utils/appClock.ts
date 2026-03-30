@@ -7,10 +7,10 @@ export const appClock = {
     const isSimulated = localStorage.getItem('__beta_clock_mode') === 'simulated';
     if (!isSimulated) return new Date();
     
-    const offset = parseInt(localStorage.getItem('__beta_clock_offset_days') || '0', 10);
-    const d = new Date();
-    d.setDate(d.getDate() + offset);
-    return d;
+    const simulatedNowStr = localStorage.getItem('deepsleep_simulated_now');
+    if (!simulatedNowStr) return new Date();
+    
+    return new Date(parseInt(simulatedNowStr, 10));
   },
 
   /**
@@ -30,9 +30,19 @@ export const appClock = {
    * Utiliza EventTarget para forçar stores e componentes a atualizarem.
    */
   addDays(n: number) {
-    const currentOffset = parseInt(localStorage.getItem('__beta_clock_offset_days') || '0', 10);
-    localStorage.setItem('__beta_clock_offset_days', String(currentOffset + n));
+    const isSimulated = localStorage.getItem('__beta_clock_mode') === 'simulated';
+    let currentMs = Date.now();
+    
+    if (isSimulated) {
+       const savedMs = localStorage.getItem('deepsleep_simulated_now');
+       if (savedMs) currentMs = parseInt(savedMs, 10);
+    }
+    
+    const msInDay = 24 * 60 * 60 * 1000;
+    const newMs = currentMs + (n * msInDay);
+    
     localStorage.setItem('__beta_clock_mode', 'simulated');
+    localStorage.setItem('deepsleep_simulated_now', newMs.toString());
     window.dispatchEvent(new Event('deepsleep_app_clock'));
   },
 
@@ -41,12 +51,9 @@ export const appClock = {
    * Opcionalmente purga todos os dados criados no "futuro" pela beta,
    * para evitar estados paradoxais onde a app acha que preencheste registos amanhã.
    */
-  reset(purgeFutureData: boolean = true) {
-    if (purgeFutureData) {
-      this.clearFutureSimulatedData();
-    }
+  reset() {
     localStorage.removeItem('__beta_clock_mode');
-    localStorage.removeItem('__beta_clock_offset_days');
+    localStorage.removeItem('deepsleep_simulated_now');
     window.dispatchEvent(new Event('deepsleep_app_clock'));
   },
 
@@ -94,9 +101,5 @@ export const appClock = {
 
   isSimulated(): boolean {
     return localStorage.getItem('__beta_clock_mode') === 'simulated';
-  },
-
-  getOffsetDays(): number {
-    return parseInt(localStorage.getItem('__beta_clock_offset_days') || '0', 10);
   }
 };
