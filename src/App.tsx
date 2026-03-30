@@ -2,9 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { BottomNav } from './components/BottomNav';
 import { DevTools } from './components/DevTools';
-import { Home } from './pages/Home';
 import { InsightDetail } from './pages/InsightDetail';
-import { Tonight } from './pages/Tonight';
 import { Patterns } from './pages/Patterns';
 import { Profile } from './pages/Profile';
 import { Control } from './pages/Control';
@@ -15,9 +13,6 @@ import { DataSourceSelection } from './pages/DataSourceSelection';
 import { ManualPhase1Hub } from './pages/ManualPhase1Hub';
 import { ManualLogForm } from './pages/ManualLogForm';
 
-import { Phase1Entry } from './pages/Phase1Entry';
-import { Phase1Progress } from './pages/Phase1Progress';
-import { ActiveSession } from './pages/ActiveSession';
 import { Phase2Entry } from './pages/Phase2Entry';
 import { Phase2Questions } from './pages/Phase2Questions';
 import { Phase2Context } from './pages/Phase2Context';
@@ -50,12 +45,6 @@ export default function App() {
             <Route path="/data_source" element={<DataSourceSelection />} />
             <Route path="/manual_log_hub" element={<ManualPhase1Hub />} />
             <Route path="/manual_log_form" element={<ManualLogForm />} />
-
-            <Route path="/phase1_entry" element={<Phase1Entry />} />
-            <Route path="/phase1_home" element={<Home />} />
-            <Route path="/phase1_progress" element={<Phase1Progress />} />
-            <Route path="/tonight" element={<Tonight />} />
-            <Route path="/active_session" element={<ActiveSession />} />
             
             <Route path="/patterns" element={<Patterns />} />
             <Route path="/profile" element={<Profile />} />

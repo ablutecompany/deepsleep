@@ -1,45 +1,62 @@
-# Ligação Global da UI ao Motor de Decisão (Fase Final)
+# Tempo Simulado e App Clock Central
 
-O objetivo desta fase é destruir abstrações da UI. Em vez de painéis genéricos de "O teu sono é um Processo" com botões cegos que podem cair em estados mortos, a interface deve apenas refletir o estado real persistente das camadas inferiores (`decisionEngine` e `Phase2/3Stores`).
+O objetivo é adicionar um motor interno de simulação temporal ("fast-forward") para testar autonomamente ciclos interativos da Fase 3 de forma contínua, isolada, e sem interferir ou causar regressões com a arquitetura do motor. O modo de teste também simulará re-hidratações de dependências como a data dos check-ins diários.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> **Fim dos Painéis Educativos Genéricos na Home**: Vou apagar o bloco dos "process-stages" do fundo do `ProcessHome.tsx`. A Home passará a ser puramente um bloco central situacional que muda 100% o seu layout consoante a *pendência* (tens de registar o dia hoje / a janela expirou para rever / o teu ciclo está em *Hold Prudente* / ainda estás em Fase 1, etc.). De acordo?
-
 > [!WARNING]
-> **Footer Tabs**: O Botão "Padrões" do rodapé apontava para `/phase2/context` o que mistura Interpretação pontual (Fase 2) com Leitura longitudinal. Vou corrigir o apontamento do "Padrões" estritamente para a página `/patterns` e deixar o gateway para Interpretação nas mãos puras do motor situacional da Home.
+> Este refactoring obriga a uma pesquisa global e substituição de todas as datas estáticas baseadas em `new Date()` em ficheiros de lógica de negócio e da UI por `appClock.todayStr()` ou `appClock.now()`. Estás de acordo que todos os domínios (incluindo ManualLogs e Stores da Fase 3) passem a receber tempo via `appClock`?
+
+> [!NOTE]
+> Vou hospedar os controlos ("Avançar 1 Dia", "Reset Modo Real") no painel flutuante vazio atual que se encontra em `<DevTools />` (que vive globalmente por cima da app invisível para utilizadores normais, no canto inferior direito/debug). Aprovas utilizar este container? Se sim, implemento o relógio lá.
 
 ## Proposed Changes
 
-### 1. Reentrada e Home Central (`ProcessHome.tsx`)
-- **Remoção de Espaços Mortos e Divagações**: A Home deixará de renderizar as caixas de Estado global (Fase 1/2/3). 
-- **Mapping Direto de Outcomes do Motor**: 
-   - A Home dita a ação imperativa: "A aguardar Interpretação" (`nightCount >= 5` mas sem `deliverable`).
-   - Ciclo `active` = Foco no check-in do dia.
-   - Ciclo expirou = Foco máximo na "Revisão Pendente".
-   - Outcomes Concluídos (`completed_keep`, `completed_adjust`, `switch`, `pending_reassessment`, `active_hold`) mostram um layout dedicado correspondente e bloqueiam interações redundantes. O copy reflete a semântica de forma determinística ("Nova Direção", etc).
-- **Sem Loops**: Os CTA da home injetam o utilizador no percurso certo (`Phase2/Entry` se não interpretou, `/manual_log_hub` se faltam dias, `/phase3_home` se janela para fechar).
+---
 
-### 2. Semântica Dura no Rodapé (`BottomNav.tsx` & Roteamento em App.tsx)
-- **Início**: Renders `/process_home`.
-- **Noite**: Renders `/manual_log_hub` (onde tens "Adicionar registo", histórico das sestas e edição da privação de sono). Apagarei botões de transição narrativa ("Avançar para interpretação") para que esta tab sirva sempre APENAS a recolha orgânica do sono diário (view history, edit/delete, add new log).
-- **Padrões**: Point to `/patterns`. Remover CTA abstrato no final desta página para que seja um visualizador analítico longitudinal puro.
-- **Perfil**: Point to `/profile`. A página de perfil reflete propostas do motor e histórico. 
+### Phase 3 - Domain e Utilidades
 
-### 3. Histórico e Motor Legacy no Profile (`Profile.tsx`)
-- **Bug Fix de Abstração Legacy**: Como mudámos o Motor, o `Profile.tsx` ainda tenta pintar o histórico assumindo labels antigos do `learningStore` como "KEEP_REFINING". Irei refatorizar o Profile para consumir as novas decisões estruturadas em `CycleFeedbackRecord.decisionEngineOutcome`. O perfil passa a listar o teu histórico de evolução longitudinal real baseado nos outputs do motor.
+#### [NEW] src/utils/appClock.ts
+Será a espinha dorsal de todo o _deepSleep_.
+Contará com um singleton exportado com métodos que delegam internamente para o standard `Date`:
+- `now()`: se a flag `__beta_clock_mode` for `"simulated"`, avalia um offset em dias guardado no local storage (ex: `1` = um dia à frente) e aplica-o sobre `new Date()`. Retorna o Date final. Se for real, só resolve com `new Date()`.
+- `todayStr()`: retorna `this.now().toISOString().split('T')[0]`. Prático para indexar datas exatas num fuso correto local.
+- `addDays(n: number)`: soma dias ao offset de simulação e ativa o modo _simulated_. Lança um CustomEvent para forçar reactividade global das UIs ativas (Home, Profile, Phase3Context): `window.dispatchEvent(new Event('deepsleep_clock'))`.
+- `reset()`: volta ao _real mode_, limpando os offset simulados e despachando o evento `deepsleep_clock`.
+
+#### [MODIFY] src/store/Phase3ContextStore.tsx
+- O próprio hook de estado da store de Fase 3 vai passar a ter um `useEffect` para escutar `'deepsleep_clock'` e atualizar o subestado reativo `todayStr` da session atual.
+- Tudo o que envolvia `new Date()` em mutadores reativos internos passará para o helper `appClock`.
+
+#### [MODIFY] src/pages/ProcessHome.tsx
+- Injeta hooks adaptáveis que dependem de ver qual a data simulada de hoje.
+- O ecrã subscreve os eventos temporais para decidir instantaneamente o *nextStep* (ex: O user premir "+1 Dia" deve atualizar do checkin feito para pedir o próximo, ou saltar para o botão final de Review Phase 3).
+
+#### [MODIFY] src/domain/... (ManualLogStore e Engine)
+- Atualizar geradores estáticos de datas em logs, check-ins, `createdAt`, etc. para se socorrerem unicamente do relógio simulado (em testes) em vez da máquina.
+
+---
+
+### Controlo de UI na Superfície Beta
+
+#### [MODIFY] src/components/DevTools.tsx
+Adição de um pequeno menu UI com os botões rápidos:
+- Toggle real / simulado explícito.
+- "Avançar +1 Dia."
+- Componente reactivo refletindo texto "Modo: Simulado | Data: 2024-05-12".
+*A interface será super compacta e restrita propositadamente a Beta Tester Tools invisível.*
 
 ## Open Questions
 
-Desejas manter o botão text-btn no fundo da Home que diz **"Reiniciar Beta"** para os teus testes de usabilidade no momento, ou já o devemos esconder agora que estamos na versão de usabilidade "hardened"? Recomendo manter com baixa opacidade para não trancar ninguém num mau estado durante a experimentação alpha.
+1. Quero confirmar: Queres que a app inteira obedeça a este relógio, certo? **Isto inclui os IDs e campos de data gerados num Formulário Manual (Noites)**. Eu considero isto o cenário ideal, para garantir que registos falsos no modo de teste se agregam nas datas simuladas do futuro ou do passado sem gerar bugs estranhos. Concordas?
+2. Em termos do fuso horário para a separação `[T][0]`, tens preferência numa adaptação pura baseada em Local Time do browser (correto e clássico para local-storage na App de Sono) ao invés do estrito UTC global? (Vou usar o offset do fuso local).
 
 ## Verification Plan
 
-### Manual Verification
-1. Abrir a app e confirmar que não há ciclos em loop.
-2. Chegar a 5 noites -> A home reage dinamicamente ditando "Interpretação Pendente".
-3. Nas tabs do rodapé, validar o total desacoplamento:
-   - "Noite" permite voltar a apagar ou criar sem forçar redirect para Fases.
-   - "Padrões" lê a evidência longitudinal.
-4. Perfil carrega os *learning records* passados com a linguagem madura ditada pelo motor de decisão central.
+### Testes Rápidos Frequentes ("Time-travel")
+1. Arrancar _deepSleep_.
+2. Começar um _Active Phase 3 Cycle_ novo num dispositivo sem ciclo.
+3. Submeter um log real, regressar a Home e registar o Check-in positivo. Verificar que bloqueia até "*voltarmos amanhã*".
+4. Recorrer ao mini-panel flutuante no canto e clicar **"+1 Dia"**.
+5. Validar o refresh instantâneo da Home para "Hoje precisamos deste registo" com o dia do calendário fictício novo atualizado.
+6. Repetir e validar expiração. Clicar **Reset Tempo Real** e garantir que se regressa atrás purgado do teste virtual.

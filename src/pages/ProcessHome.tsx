@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Settings, CheckCircle2, XCircle, HelpCircle, Bell, ArrowRight, Activity, Calendar } from 'lucide-react';
 import { useNightCount } from '../hooks/useNightCount';
@@ -10,9 +9,8 @@ export function ProcessHome() {
   const navigate = useNavigate();
   const nightCount = useNightCount();
   const { deliverable } = usePhase2Store();
-  const { cycle, checkInToday } = usePhase3Store();
+  const { cycle, todayStr, checkInToday } = usePhase3Store();
 
-  const [todayStr] = useState(() => new Date().toISOString().split('T')[0]);
   const hasPendingAction = cycle?.status === 'active' && !cycle.dailyCheckins[todayStr];
   const phase1Done = nightCount >= 5;
 

@@ -1,3 +1,5 @@
+import { appClock } from '../../utils/appClock';
+
 export type SleepDurationEstimate = '< 15m' | '15-30m' | '30-60m' | '> 60m' | 'Não sei bem';
 export type ReSleepDifficulty = 'Fácil' | 'Algum esforço' | 'Muito difícil' | 'Não voltei a dormir';
 export type IntensityScale = 'Nenhuma' | 'Leve' | 'Alta';
@@ -105,7 +107,7 @@ export function saveManualLog(logInfo: Omit<ManualAppLog, 'id' | 'createdAt' | '
   const newLog: ManualAppLog = { 
     ...logInfo, 
     id: 'man_log_' + Date.now(),
-    createdAt: new Date().toISOString(),
+    createdAt: appClock.now().toISOString(),
     ...validity
   };
   

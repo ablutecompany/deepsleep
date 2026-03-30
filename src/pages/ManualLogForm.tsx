@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Moon } from 'lucide-react';
+import { appClock } from '../utils/appClock';
 import { saveManualLog, type SleepDurationEstimate, type ReSleepDifficulty, type IntensityScale, ENVIRONMENT_OPTIONS } from '../domain/Phase1/manualLogStore';
 
 export function ManualLogForm() {
   const navigate = useNavigate();
 
-  const [dateStr, setDateStr] = useState(() => new Date().toISOString().split('T')[0]);
+  const [dateStr, setDateStr] = useState(() => appClock.todayStr());
   const [sleepType, setSleepType] = useState<'NIGHT' | 'NAP'>('NIGHT');
 
   // Relógios

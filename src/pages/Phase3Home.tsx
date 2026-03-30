@@ -4,14 +4,14 @@ import { usePhase3Store } from '../store/Phase3ContextStore';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { getProposals, getPriorityTest } from '../domain/Phase2/proposals';
 import { generateLearningPayload } from '../domain/Phase3/learningStore';
+import { appClock } from '../utils/appClock';
 import { ArrowLeft, CheckCircle2, XCircle, HelpCircle, MapPin } from 'lucide-react';
 
 export function Phase3Home() {
   const navigate = useNavigate();
   const { deliverable } = usePhase2Store();
-  const { cycle, startCycle, checkInToday, submitReview } = usePhase3Store();
+  const { cycle, todayStr, startCycle, checkInToday, submitReview } = usePhase3Store();
 
-  const [todayStr] = useState(() => new Date().toISOString().split('T')[0]);
   const [reviewStep, setReviewStep] = useState(0);
   const [adesao, setAdesao] = useState('');
   const [dificuldade, setDificuldade] = useState('');
@@ -54,7 +54,7 @@ export function Phase3Home() {
   const checkinsList = Object.values(cycle.dailyCheckins);
   const loggedDaysCount = checkinsList.length;
   // Fallback para demodata se elapsed der negativo (timezones ou edge cases):
-  const daysElapsed = Math.max(0, Math.floor((Date.now() - new Date(cycle.startedAt).getTime()) / 86400000));
+  const daysElapsed = Math.max(0, Math.floor((appClock.now().getTime() - new Date(cycle.startedAt).getTime()) / 86400000));
   
   // Numa demo real, `daysElapsed` pode ser 0 e bloquear o review. Assumimos o maior entre elapsed real e numero de checkins.
   const effectiveElapsed = Math.max(daysElapsed, loggedDaysCount);

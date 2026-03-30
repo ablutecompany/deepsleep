@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { appClock } from '../utils/appClock';
 
 export type CheckinValue = 'success' | 'failed' | 'skipped' | 'incerto';
 
@@ -19,6 +20,7 @@ export interface Phase3Cycle {
 
 interface Phase3ContextType {
   cycle: Phase3Cycle | null;
+  todayStr: string;
   startCycle: (proposalId: string, priorityScore: number, selectionReason: string, linkedAssessmentId: string, minDays: number) => void;
   checkInToday: (val: CheckinValue) => void;
   submitReview: (decision: any) => void;
@@ -62,12 +64,19 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const [todayStr, setTodayStr] = useState(() => appClock.todayStr());
+
   useEffect(() => {
-    const handleInvalidation = () => {
-      setCycleState(null);
-    };
+    const handleInvalidation = () => setCycleState(null);
+    const handleClock = () => setTodayStr(appClock.todayStr());
+    
     window.addEventListener('deepsleep_baseline_invalidated', handleInvalidation);
-    return () => window.removeEventListener('deepsleep_baseline_invalidated', handleInvalidation);
+    window.addEventListener('deepsleep_app_clock', handleClock);
+    
+    return () => {
+      window.removeEventListener('deepsleep_baseline_invalidated', handleInvalidation);
+      window.removeEventListener('deepsleep_app_clock', handleClock);
+    };
   }, []);
 
   const startCycle = (proposalId: string, priorityScore: number, selectionReason: string, linkedAssessmentId: string, minDays: number) => {
@@ -77,7 +86,7 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
       priorityScore,
       selectionReason,
       linkedAssessmentId,
-      startedAt: new Date().toISOString(),
+      startedAt: appClock.now().toISOString(), // Keeping fallback ISO if not defined but driven by offset
       minDays,
       dailyCheckins: {},
       status: 'active'
@@ -87,10 +96,10 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
 
   const checkInToday = (val: CheckinValue) => {
     if (!cycle) return;
-    const todayStr = new Date().toISOString().split('T')[0];
+    const currentToday = appClock.todayStr();
     saveCycle({
       ...cycle,
-      dailyCheckins: { ...cycle.dailyCheckins, [todayStr]: val }
+      dailyCheckins: { ...cycle.dailyCheckins, [currentToday]: val }
     });
   };
 
@@ -112,7 +121,7 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <Phase3StoreContext.Provider value={{ cycle, startCycle, checkInToday, submitReview }}>
+    <Phase3StoreContext.Provider value={{ cycle, todayStr, startCycle, checkInToday, submitReview }}>
       {children}
     </Phase3StoreContext.Provider>
   );
