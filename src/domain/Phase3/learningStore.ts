@@ -22,6 +22,11 @@ export interface CycleFeedbackRecord {
   nextRecommendation: string;
   eligibleForAnonymizedLearning: boolean;
   anonymizedLearningPayload?: string;
+  userReviewAnswers?: {
+    adesao: string;
+    dificuldade: string;
+    efeito: string;
+  };
 }
 
 export function getLearningRecords(): CycleFeedbackRecord[] {
@@ -41,7 +46,8 @@ export function generateLearningPayload(
   cycle: Phase3Cycle, 
   deliverable: AssessmentDeliverable, 
   userReview: 'manter' | 'ajustar' | 'trocar',
-  recommendation: string
+  recommendation: string,
+  reviewAnswers?: { adesao: string; dificuldade: string; efeito: string }
 ) {
   const logs = getManualLogs();
   
@@ -86,7 +92,8 @@ export function generateLearningPayload(
     proposalSuitability: userReview === 'manter' ? 'HIGH' : (userReview === 'ajustar' ? 'LOW' : 'INCOMPATIBLE'),
     constraintsTriggered: userReview !== 'manter' ? ['Atribuição gerou atrito logístico ou ineficácia mecânica'] : [],
     nextRecommendation: userReview === 'manter' ? 'Prosseguir aprofundamento ou isolar novos fatores se desejado.' : 'Sinalizar re-avaliação do contexto principal; recalcular Proposta Dominante.',
-    eligibleForAnonymizedLearning: true
+    eligibleForAnonymizedLearning: true,
+    userReviewAnswers: reviewAnswers
   };
 
   // The Stringified payload for the external backend that ablute_ will eventually have

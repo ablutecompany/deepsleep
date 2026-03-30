@@ -18,6 +18,12 @@ export type EnhancedProposal = {
   minWindow: string;
   minDays: number;
   future: string;
+  
+  reviewQuestions: {
+    adesao: string;
+    dificuldade: string;
+    efeito: string;
+  };
 };
 
 export type PriorityTest = {
@@ -42,7 +48,12 @@ const ACTION_LIBRARY: Record<string, EnhancedProposal> = {
     whenNotTo: 'Se tens medicação que força essa hidratação noturna ou outra indicação clínica contrária.',
     minWindow: '4 noites',
     minDays: 4,
-    future: 'Remover o obstáculo mecânico primário antes de analisar stress subjacente.'
+    future: 'Remover o obstáculo mecânico primário antes de analisar stress subjacente.',
+    reviewQuestions: {
+      adesao: 'Conseguiste cortar totalmente os líquidos nas 2 horas antes de deitar?',
+      dificuldade: 'Foi muito difícil suportar a sede ao final do dia?',
+      efeito: 'Acordaste menos vezes de madrugada com vontade de urinar?'
+    }
   },
   PRESSAO_DORMIR: {
     id: 'pressao_dormir',
@@ -58,7 +69,12 @@ const ACTION_LIBRARY: Record<string, EnhancedProposal> = {
     whenNotTo: 'Se sentires sinais de tontura extrema, não prolongues o estar em pé.',
     minWindow: '5 noites',
     minDays: 5,
-    future: 'Aprender a distinguir "estar exausto mas alerta" de "pressão real de sono".'
+    future: 'Aprender a distinguir "estar exausto mas alerta" de "pressão real de sono".',
+    reviewQuestions: {
+      adesao: 'Retardaste ativamente a ida para a cama até os olhos pesarem pesado?',
+      dificuldade: 'Foi stressante ficar acordado pela sala em vez de tentar forçar na cama?',
+      efeito: 'Quando finalmente foste para a cama, adormeceste com mais agressividade química (mais rápido)?'
+    }
   },
   CONTROLO_TEMPERATURA: {
     id: 'controlo_temp',
@@ -74,7 +90,12 @@ const ACTION_LIBRARY: Record<string, EnhancedProposal> = {
     whenNotTo: 'Noites de frio extremo onde o ar refrequeça excessivamente as vias respiratórias provocando tosse.',
     minWindow: '3 noites',
     minDays: 3,
-    future: 'Criar as rampas fisiológicas naturais de dissipação de calor orgânico.'
+    future: 'Criar as rampas fisiológicas naturais de dissipação de calor orgânico.',
+    reviewQuestions: {
+      adesao: 'Fizeste questão de arrefecer o ar do quarto na hora de deitar?',
+      dificuldade: 'Sentiste um frio desconfortável que te impediu de relaxar?',
+      efeito: 'Tiveste menos suores noturnos ou acordaste mais fresco e contínuo?'
+    }
   },
   DESCOMPRESSAO_MENTAL: {
     id: 'descompressao_mental',
@@ -90,7 +111,12 @@ const ACTION_LIBRARY: Record<string, EnhancedProposal> = {
     whenNotTo: 'Emergências e semanas atípicas inevitáveis onde falhes a janela por força maior de vida.',
     minWindow: '3 noites',
     minDays: 3,
-    future: 'Apoiará todo o sistema quando entrarmos em técnicas avançadas de relaxamento muscular passivo.'
+    future: 'Apoiará todo o sistema quando entrarmos em técnicas avançadas de relaxamento muscular passivo.',
+    reviewQuestions: {
+      adesao: 'Substituiste e-mails e tarefas urgentes por uma atividade neutra de quebra?',
+      dificuldade: 'Foi impossível desligar mentalmente do trabalho ou da logística?',
+      efeito: 'A velocidade do bater do coração ao encostar no quarto pareceu mais baixa?'
+    }
   },
   IRREGULARIDADE_LEVANTAR: {
     id: 'irar_levantar',
@@ -106,7 +132,12 @@ const ACTION_LIBRARY: Record<string, EnhancedProposal> = {
     whenNotTo: 'Turnos instáveis. Sob fadiga impeditiva como motorista ou em controlo de maquinaria pesada.',
     minWindow: '5 noites',
     minDays: 5,
-    future: 'Sem âncora final, todas as outras táticas fisiológicas serão ilusões passageiras.'
+    future: 'Sem âncora final, todas as outras táticas fisiológicas serão ilusões passageiras.',
+    reviewQuestions: {
+      adesao: 'Levantaste-te imediatamente ao alarme independentemente das horas dormidas?',
+      dificuldade: 'A inércia e a dor física de levantar na privação agudizou muito?',
+      efeito: 'A pressão para dormir natural (fome de sono) antecipou-se substancialmente à noite?'
+    }
   },
   REENTRADA_DESPERTOS: {
     id: 'reent_despertos',
@@ -122,7 +153,12 @@ const ACTION_LIBRARY: Record<string, EnhancedProposal> = {
     whenNotTo: 'Idade senil, pisos escorregadios fracos no aspeto quedas ao levantar de rompante. Risco térmico de hipotermia grave.',
     minWindow: '7 noites',
     minDays: 7,
-    future: 'É a base mais clínica e robusta na quebra de insónias psicofisiológicas clássicas que se alimentam a si mesmas.'
+    future: 'É a base mais clínica e robusta na quebra de insónias psicofisiológicas clássicas que se alimentam a si mesmas.',
+    reviewQuestions: {
+      adesao: 'Saíste prontamente da cama sempre que a frustração se instalou?',
+      dificuldade: 'O tempo na sala pareceu-te demorado e solitário ao quebrar o ciclo?',
+      efeito: 'A cama deixou gradualmente de ser percecionada como um ringue de boxe mental?'
+    }
   },
   SESTAS_TARDES: {
     id: 'sestas_pressao',
@@ -138,7 +174,12 @@ const ACTION_LIBRARY: Record<string, EnhancedProposal> = {
     whenNotTo: 'Na obrigatoriedade total de segurança operacional se conduzires por quilómetros contínuos.',
     minWindow: '3 noites',
     minDays: 3,
-    future: 'É vital reconstruir uma parede biológica unificada de "fome de sono" para os nossos rituais base de madrugada resultarem.'
+    future: 'É vital reconstruir uma parede biológica unificada de "fome de sono" para os nossos rituais base de madrugada resultarem.',
+    reviewQuestions: {
+      adesao: 'Resististe totalmente à tentação de encostar os olhos a meio da tarde?',
+      dificuldade: 'A privação diurna retirou-te uma capacidade funcional crítica no dia-a-dia?',
+      efeito: 'Notaste uma consolidação da madrugada por estares significativamente mais "esfomeado" de sono?'
+    }
   },
   ALCOOL_NOTURNO: {
     id: 'alcool_rebote',
@@ -154,7 +195,12 @@ const ACTION_LIBRARY: Record<string, EnhancedProposal> = {
     whenNotTo: 'Esta ação não prevê interações, a não ser dependência puramente clínica onde o despiste do alcool não deve ser travado abruptamente sem acompanhamento geral de psiquiatria.',
     minWindow: '5 noites',
     minDays: 5,
-    future: 'Isolamento de um dos maiores falsos amigos da sonolência rápida antes de julgar a capacidade cerebral basal individual.'
+    future: 'Isolamento de um dos maiores falsos amigos da sonolência rápida antes de julgar a capacidade cerebral basal individual.',
+    reviewQuestions: {
+      adesao: 'Suprimiste totalmente a bebida alcoólica vespertina ou de indução de noite?',
+      dificuldade: 'Este corte logístico na rotina social provocou-te atrito?',
+      efeito: 'O sentimento geral de nitidez celular de manhã revelou-se mais purificado?'
+    }
   }
 };
 
@@ -242,7 +288,12 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
           whenNotTo: 'Extinto para as pessoas que dependem medicamente de controlos de aparelhagem sensíveis com avisadores nos blocos perto do campo da almofada em que reagem em dormência perante interrupções de vida base do seu quadro patológico.',
           minWindow: '4 noites',
           minDays: 4,
-          future: 'Sem voltar ao passo natural biológico basal primordial não conseguiremos injetar mais carga tática isolada.'
+          future: 'Sem voltar ao passo natural biológico basal primordial não conseguiremos injetar mais carga tática isolada.',
+          reviewQuestions: {
+            adesao: 'Submeteste-te de forma consistente a uma escuridão rígida antes do sono?',
+            dificuldade: 'O aborrecimento ou ansiedade noturna multiplicou contra o esvaziamento?',
+            efeito: 'O restabelecimento do silêncio isolado repôs alguma pressão basilar na paragem biológica?'
+          }
         }];
       }
     }

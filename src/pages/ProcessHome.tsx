@@ -130,7 +130,9 @@ export function ProcessHome() {
 
           {!cycle.dailyCheckins[todayStr] ? (
             <div>
-              <h4 style={{ fontSize: '12px', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px', textAlign: 'center' }}>Registo Diário da Ação</h4>
+              <h4 style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 400, marginBottom: '20px', textAlign: 'center', lineHeight: 1.4, padding: '0 12px' }}>
+                {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.reportQuestion || "Foi fácil manter a orientação hoje?"}
+              </h4>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
                   onClick={() => { checkInToday('success'); setShowPlanPanel(false); }}

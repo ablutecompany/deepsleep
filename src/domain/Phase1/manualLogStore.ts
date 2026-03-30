@@ -8,6 +8,16 @@ export type ManualNightLog = {
   wakeTime: string;
   recovery: 'Má' | 'Razoável' | 'Boa' | 'Excelente';
   markers: string[]; 
+  
+  // Novos campos estruturados (Prioridade 2)
+  bathroomAwakenings?: number;
+  outOfBedTime?: string;
+  tensionAtBedtime?: 'Nenhuma' | 'Leve' | 'Alta';
+  physicalDiscomfort?: boolean;
+  hungerAtBedtime?: boolean;
+  nicotineNearBedtime?: boolean;
+  disturbingDreams?: boolean;
+
   nap?: {
     tookNap: boolean;
     durationMin?: number;

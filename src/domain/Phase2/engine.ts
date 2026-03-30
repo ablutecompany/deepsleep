@@ -239,6 +239,12 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
       l.markers.forEach(m => {
         markerUsage[m] = (markerUsage[m] || 0) + 1;
       });
+      // Injeta variáveis primitivas no array de marcadores lidos pelo engine
+      if (l.disturbingDreams) markerUsage['Pesadelos'] = (markerUsage['Pesadelos'] || 0) + 1;
+      if (l.nicotineNearBedtime) markerUsage['Cigarro / Nicotina'] = (markerUsage['Cigarro / Nicotina'] || 0) + 1;
+      if (l.hungerAtBedtime) markerUsage['Fome'] = (markerUsage['Fome'] || 0) + 1;
+      if (l.physicalDiscomfort) markerUsage['Dor / desconforto'] = (markerUsage['Dor / desconforto'] || 0) + 1;
+      if (l.bathroomAwakenings && l.bathroomAwakenings > 0) markerUsage['Ida à casa de banho'] = (markerUsage['Ida à casa de banho'] || 0) + 1;
     });
     avgLatency /= numLogs;
     avgAwakenings /= numLogs;

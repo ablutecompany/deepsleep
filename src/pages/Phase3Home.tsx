@@ -12,6 +12,12 @@ export function Phase3Home() {
   const { cycle, startCycle, checkInToday, submitReview } = usePhase3Store();
 
   const [todayStr] = useState(() => new Date().toISOString().split('T')[0]);
+  const [reviewStep, setReviewStep] = useState(0);
+  const [adesao, setAdesao] = useState('');
+  const [dificuldade, setDificuldade] = useState('');
+  const [efeito, setEfeito] = useState('');
+  
+  const activeProposal = cycle && deliverable ? getProposals(deliverable).find(p => p.id === cycle.proposalId) : null;
 
   useEffect(() => {
     if (deliverable && !cycle) {
@@ -72,7 +78,7 @@ export function Phase3Home() {
     else rec = "Faltam provas na tua fase original de haver alteração contundente dos despertares com este trajeto específico. A escolha tática vai redirecionar-se.";
     
     // Gerar registo incremental vivo 
-    generateLearningPayload(cycle, deliverable, review, rec);
+    generateLearningPayload(cycle, deliverable, review, rec, { adesao, dificuldade, efeito });
     
     submitReview(review, rec);
   };
@@ -202,9 +208,8 @@ export function Phase3Home() {
           </div>
         )}
 
-        {cycle.status === 'active' && isMinWindowReached && (
+        {cycle.status === 'active' && isMinWindowReached && reviewStep === 0 && (
           <div style={{ marginTop: 'auto', marginBottom: '24px' }}>
-            
             <div className="editorial-card" style={{ background: 'transparent', padding: 0, border: 'none', marginBottom: '32px' }}>
               <h3 className="kicker" style={{ color: '#F8FAFC', marginBottom: '16px' }}>Leitura Parcial Observada</h3>
               <p className="module-desc" style={{ marginBottom: '8px' }}>
@@ -214,37 +219,112 @@ export function Phase3Home() {
                 {trendMsg}.
               </p>
             </div>
+            
+            <button onClick={() => setReviewStep(1)} className="primary-btn" style={{ width: '100%', justifyContent: 'center' }}>
+              Iniciar Avaliação de Janela
+            </button>
+          </div>
+        )}
 
-            <h3 className="kicker" style={{ color: '#64748B', marginBottom: '16px' }}>Reflexo Final Sugerido</h3>
+        {cycle.status === 'active' && isMinWindowReached && reviewStep === 1 && (
+          <div className="fade-in" style={{ marginTop: 'auto', marginBottom: '24px' }}>
+            <h3 className="kicker" style={{ color: '#38BDF8', marginBottom: '16px' }}>Passo 1 de 4</h3>
+            <h2 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '24px', lineHeight: 1.3 }}>
+              {activeProposal?.reviewQuestions?.adesao || 'Conseguiste seguir esta orientação na maioria dos dias?'}
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {['Sim, sem falhas', 'Parcialmente / Custo esforço', 'Muito pouco / Quase nada'].map(opt => (
+                <button key={opt} onClick={() => { setAdesao(opt); setReviewStep(2); }} className="ritual-trigger" style={{ justifyContent: 'flex-start', padding: '20px', borderRadius: '12px', color: '#F8FAFC' }}>
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {cycle.status === 'active' && isMinWindowReached && reviewStep === 2 && (
+          <div className="fade-in" style={{ marginTop: 'auto', marginBottom: '24px' }}>
+            <h3 className="kicker" style={{ color: '#38BDF8', marginBottom: '16px' }}>Passo 2 de 4</h3>
+            <h2 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '24px', lineHeight: 1.3 }}>
+              {activeProposal?.reviewQuestions?.dificuldade || 'Foi fácil, difícil ou muito difícil de manter na prática?'}
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {['Fácil de encaixar', 'Exigiu alguma adaptação', 'Demasiado difícil fisicamente/logisticamente'].map(opt => (
+                <button key={opt} onClick={() => { setDificuldade(opt); setReviewStep(3); }} className="ritual-trigger" style={{ justifyContent: 'flex-start', padding: '20px', borderRadius: '12px', color: '#F8FAFC' }}>
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {cycle.status === 'active' && isMinWindowReached && reviewStep === 3 && (
+          <div className="fade-in" style={{ marginTop: 'auto', marginBottom: '24px' }}>
+            <h3 className="kicker" style={{ color: '#38BDF8', marginBottom: '16px' }}>Passo 3 de 4</h3>
+            <h2 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '24px', lineHeight: 1.3 }}>
+              {activeProposal?.reviewQuestions?.efeito || 'Notaste alguma diferença útil no sono ou no despertar?'}
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {['Sim, diferença clara e positiva', 'Talvez algo subtil mas inconclusivo', 'Nenhuma diferença notória', 'Piorou a situação'].map(opt => (
+                <button key={opt} onClick={() => { setEfeito(opt); setReviewStep(4); }} className="ritual-trigger" style={{ justifyContent: 'flex-start', padding: '20px', borderRadius: '12px', color: '#F8FAFC' }}>
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {cycle.status === 'active' && isMinWindowReached && reviewStep === 4 && (
+          <div className="fade-in" style={{ marginTop: 'auto', marginBottom: '24px' }}>
+            <h3 className="kicker" style={{ color: '#64748B', marginBottom: '16px' }}>Passo Final</h3>
+            <h2 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px', lineHeight: 1.3 }}>
+              Decisão de Ajuste
+            </h2>
+            <p style={{ fontSize: '14px', color: '#94A3B8', marginBottom: '24px', lineHeight: 1.5 }}>
+              Baseado na tua experiência (Adesão: {adesao.split(',')[0]} / Dificuldade: {dificuldade.split(' ')[0]} / Efeito: {efeito.split(' ')[0]}), o que preferes fazer a seguir?
+            </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button onClick={() => handleReview('manter')} className="ritual-trigger" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '20px', borderRadius: '12px', borderLeftColor: '#F8FAFC' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Pedir p/ Repetir o Trajeto</span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Gostaria de dar mais alguns dias a este caminho sem alterações drásticas.</span>
+                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Manter: Pedir p/ Repetir o Trajeto</span>
+                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Ideal se o efeito for subtil ou positivo e quiser consolidá-lo mais dias sem mexer.</span>
               </button>
               
               <button onClick={() => handleReview('ajustar')} className="ritual-trigger" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '20px', borderRadius: '12px', borderLeftColor: '#F59E0B' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Incompatível na Prática</span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Apesar de tentado, não sinto facilidade realista para os meus dias em cumprir isto.</span>
+                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Ajustar: Incompatível na Prática</span>
+                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Gerou demasiado atrito ou foi logísticamente inviável e precisamos de mudar de prisma.</span>
               </button>
               
               <button onClick={() => handleReview('trocar')} className="ritual-trigger" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '20px', borderRadius: '12px', borderLeftColor: '#EF4444' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Trocar Caminho Inteiro</span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Os dias assinaram estéril nesta fase. Parecia bom, mas o sono não mudou em nada com a manobra.</span>
+                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Trocar: Caminho Inteiro (Sem efeito)</span>
+                <span style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 300, textAlign: 'left', lineHeight: '1.5' }}>Aplicaste bem as diretrizes mas não gerou qualquer tração de sono passivo. Trocar tática.</span>
               </button>
             </div>
           </div>
         )}
 
-        {cycle.status !== 'active' && (
+        {cycle.status === 'completed' && (
           <div style={{ marginTop: 'auto', marginBottom: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <MapPin size={32} color="#10B981" style={{ marginBottom: '24px', opacity: 0.8 }} strokeWidth={1.5} />
-            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Término do Teste</h3>
+            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Ciclo Prolongado com Sucesso</h3>
             <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '280px', fontWeight: 300, marginBottom: '24px' }}>
-              O teste cumpriu o seu ciclo de observação inicial preestabelecido. A eficácia robusta precisa de muito mais noites avaliadas para fechar hipóteses. Pode fechar.
+              A direção será mantida nos registos futuros dada a eficácia. Continua a monitorizar o sono na Home.
             </p>
             <button onClick={() => navigate('/process_home')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-               Voltar ao Início
+               Voltar à Base Central
+            </button>
+          </div>
+        )}
+
+        {cycle.status === 'adjusted' && (
+          <div style={{ marginTop: 'auto', marginBottom: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <MapPin size={32} color="#F59E0B" style={{ marginBottom: '24px', opacity: 0.8 }} strokeWidth={1.5} />
+            <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Ajuste Tático Necessário</h3>
+            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '280px', fontWeight: 300, marginBottom: '24px' }}>
+              A abordagem testada não produziu a tração base pretendida. O perfil atualizou os fatores ativos e precisamos de refinar o caminho tático.
+            </p>
+            <button onClick={() => navigate('/phase2/proposals')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+               Procurar Novo Caminho
             </button>
           </div>
         )}
