@@ -15,6 +15,9 @@ export function ProcessHome() {
   const { cycle, checkInToday } = usePhase3Store();
 
   const [todayStr] = useState(() => new Date().toISOString().split('T')[0]);
+  const hasPendingAction = cycle?.status === 'active' && !cycle.dailyCheckins[todayStr];
+  const [showPlanPanel, setShowPlanPanel] = useState<boolean>(hasPendingAction || false);
+  
   const phase1Done = nightCount >= 5;
 
   const handlePhase1Click = () => {
@@ -47,9 +50,17 @@ export function ProcessHome() {
     <div className="process-home fade-in" style={{ padding: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <span style={{ fontSize: '18px', fontWeight: 300, letterSpacing: '1px', color: '#F8FAFC' }}>_deepSleep</span>
-        <div style={{ display: 'flex', gap: '16px' }}>
-          <User size={24} color="#F8FAFC" onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }} />
-          <Settings size={24} color="#F8FAFC" onClick={() => navigate('/settings')} style={{ cursor: 'pointer' }} />
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          {cycle && cycle.status === 'active' && (
+            <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setShowPlanPanel(!showPlanPanel)}>
+              <Bell size={20} color={hasPendingAction ? "#38BDF8" : "#94A3B8"} />
+              {hasPendingAction && (
+                <div style={{ position: 'absolute', top: '-2px', right: '-2px', width: '8px', height: '8px', background: '#38BDF8', borderRadius: '50%', boxShadow: '0 0 8px #38BDF8' }} />
+              )}
+            </div>
+          )}
+          <User size={22} color="#F8FAFC" onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }} />
+          <Settings size={22} color="#F8FAFC" onClick={() => navigate('/settings')} style={{ cursor: 'pointer' }} />
         </div>
       </div>
 
@@ -60,8 +71,8 @@ export function ProcessHome() {
         A evolução baseia-se num sistema faseado rigoroso. Conclui a fase atual para desbloquear recursos avançados.
       </p>
 
-      {cycle && cycle.status === 'active' && deliverable ? (
-        <div style={{ marginBottom: '48px' }}>
+      {cycle && cycle.status === 'active' && deliverable && showPlanPanel && (
+        <div className="fade-in" style={{ marginBottom: '48px' }}>
           
           <div style={{ borderLeft: '2px solid #38BDF8', paddingLeft: '16px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
@@ -111,21 +122,21 @@ export function ProcessHome() {
               <h4 style={{ fontSize: '12px', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px', textAlign: 'center' }}>Registo Diário da Ação</h4>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  onClick={() => checkInToday('success')}
+                  onClick={() => { checkInToday('success'); setShowPlanPanel(false); }}
                   style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#10B981', cursor: 'pointer' }}
                 >
                   <CheckCircle2 size={20} strokeWidth={1.5} />
                   <span style={{ fontSize: '12px', fontWeight: 500 }}>Alinhado</span>
                 </button>
                 <button
-                  onClick={() => checkInToday('failed')}
+                  onClick={() => { checkInToday('failed'); setShowPlanPanel(false); }}
                   style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#EF4444', cursor: 'pointer' }}
                 >
                   <XCircle size={20} strokeWidth={1.5} />
                   <span style={{ fontSize: '12px', fontWeight: 500 }}>Falhou</span>
                 </button>
                 <button
-                  onClick={() => checkInToday('incerto')}
+                  onClick={() => { checkInToday('incerto'); setShowPlanPanel(false); }}
                   style={{ flex: 1, padding: '16px 8px', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', cursor: 'pointer' }}
                 >
                   <HelpCircle size={20} strokeWidth={1.5} />
@@ -156,8 +167,9 @@ export function ProcessHome() {
           )}
 
         </div>
-      ) : (
-        <div className="process-stages">
+      )}
+
+      <div className="process-stages">
           {/* Phase 1 */}
           <div 
             onClick={handlePhase1Click}
@@ -194,7 +206,6 @@ export function ProcessHome() {
             <p className="stage-desc">Teste controlado das propostas de ação e observação.</p>
           </div>
         </div>
-      )}
       
       {/* Botões de segurança */}
       <div style={{ marginTop: '64px', textAlign: 'center' }}>
