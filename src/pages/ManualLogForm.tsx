@@ -5,7 +5,7 @@ import { appClock } from '../utils/appClock';
 import { saveManualLog, type SleepDurationEstimate, type ReSleepDifficulty, type IntensityScale, ENVIRONMENT_OPTIONS } from '../domain/Phase1/manualLogStore';
 import { trackEvent, startTimer, endTimer } from '../domain/Telemetry/tracker';
 import { useLocation } from 'react-router-dom';
-import { getSensingSessions, saveSensingSession } from '../domain/Sensing/store';
+import { getSensingSessions } from '../domain/Sensing/store';
 
 export function ManualLogForm() {
   const navigate = useNavigate();

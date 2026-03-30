@@ -6,11 +6,16 @@ import { getTelemetryLogs } from '../domain/Telemetry/tracker';
 import { getSensingSessions } from '../domain/Sensing/store';
 import { evaporateNightCascade, wipeEntireProfile } from '../domain/DataGovernance/manager';
 import { getBetaFeedbackRecords } from '../domain/Telemetry/betaFeedbackStore';
+import { restoreFromSnapshot, verifyStorageHealth, getLastDefensiveSnapshotDate } from '../domain/DataGovernance/backupManager';
+import { Upload, HardDrive, ShieldAlert } from 'lucide-react';
 
 export function Control() {
   const navigate = useNavigate();
   const { deliverable } = usePhase2Store();
   const sensingSessions = getSensingSessions();
+  
+  const storageHealth = verifyStorageHealth();
+  const lastSnapshot = getLastDefensiveSnapshotDate();
   const sensingUsable = sensingSessions.filter(s => s.qualityState !== 'unusable').length;
   const sensingErrors = sensingSessions.filter(s => s.qualityState === 'unusable').length;
 
@@ -121,6 +126,30 @@ export function Control() {
       }
     }
   };
+
+  const handleImportRestore = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!window.confirm("⚠️ RESTORE DE SEGURANÇA ⚠️\n\nVais descarregar um Snapshot agressivo e substituir TODOS os dados do teu telemóvel por este ficheiro.\nIsto serve para não perderes semanas de teste se o storage se corromper. Confirmas?")) {
+       return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+       const str = e.target?.result as string;
+       if (str) {
+         const success = restoreFromSnapshot(str);
+         if (success) {
+           alert("Restore Concluído. A app vai reinicializar todos os fluxos e motor com os novos dados.");
+           window.location.href = '/';
+         } else {
+           alert("Falha no Restore. Ficheiro incompatível ou corrompido.");
+         }
+       }
+    };
+    reader.readAsText(file);
+  };
   return (
     <div className="home-page">
       <div className="home-content">
@@ -225,28 +254,84 @@ export function Control() {
         <section className="editorial-module footer-module" style={{ borderTop: '2px dashed rgba(245, 158, 11, 0.4)', paddingTop: '32px', background: 'rgba(245, 158, 11, 0.02)', padding: '24px', borderRadius: '12px' }}>
           <span className="kicker" style={{ color: '#F59E0B', marginBottom: '16px' }}>[Beta] Painel Operacional de Sessão</span>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', marginBottom: '24px' }}>
              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
                <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Noites Válidas</div>
                <div style={{ fontSize: '16px', color: '#F8FAFC' }}>{getManualLogs().filter(l => l.sleepType === 'NIGHT' && l.countsForBaseline).length} / 5</div>
              </div>
              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
-               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Baseline Motor</div>
+               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Baseline</div>
                <div style={{ fontSize: '16px', color: deliverable ? '#10B981' : '#F59E0B' }}>{deliverable ? 'Pronta' : 'Pendente'}</div>
              </div>
+             
+             {(() => {
+                let phase3ActiveResult = 'Nenhum';
+                let reviewPending = false;
+                try {
+                  const p3 = JSON.parse(localStorage.getItem('deepsleep_phase3_cycle') || 'null');
+                  if (p3) {
+                     phase3ActiveResult = p3.status === 'active' || p3.status === 'active_hold' ? 'Ativo' : 'Concluído';
+                     reviewPending = (p3.status === 'active' || p3.status === 'active_hold') && Object.keys(p3.dailyCheckins || {}).length >= p3.minDays && !p3.dailyCheckins[appClock.todayStr()];
+                  }
+                } catch(e) {}
+                const unlinkedSensing = getSensingSessions().find(s => !getManualLogs().some(log => log.dateStr === s.linkedNightId));
+
+                return (
+                  <>
+                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Ciclo e Review</div>
+                      <div style={{ fontSize: '16px', color: '#F8FAFC' }}>{phase3ActiveResult} {reviewPending ? <span style={{color:'#F59E0B', fontSize:'11px', marginLeft:'4px'}}>(Review pendente)</span> : ''}</div>
+                    </div>
+                    
+                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', border: unlinkedSensing ? '1px solid rgba(56, 189, 248, 0.4)' : 'none' }}>
+                      <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Wake Flow</div>
+                      <div style={{ fontSize: '16px', color: unlinkedSensing ? '#38BDF8' : '#F8FAFC' }}>{unlinkedSensing ? 'Manhã Pendente' : 'Resolvido'}</div>
+                    </div>
+                  </>
+                );
+             })()}
+
              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
                <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Telemetria Ativa</div>
                <div style={{ fontSize: '16px', color: '#F8FAFC' }}>{getTelemetryLogs().length} <span style={{fontSize: '11px', color: '#64748B'}}>evts</span></div>
              </div>
              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
                <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Fricção Registada</div>
-               <div style={{ fontSize: '16px', color: '#F8FAFC' }}>{getBetaFeedbackRecords().length} <span style={{fontSize: '11px', color: '#64748B'}}>reps</span></div>
+               <div style={{ fontSize: '16px', color: getBetaFeedbackRecords().length > 0 ? '#10B981' : '#F8FAFC' }}>{getBetaFeedbackRecords().length} <span style={{fontSize: '11px', color: '#64748B'}}>reps</span></div>
              </div>
           </div>
           
-          <button onClick={handleExportFullTestSession} className="primary-btn" style={{ width: '100%', justifyContent: 'center', background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-            Baixar Exportação Agregada (Beta)
+          <button onClick={handleExportFullTestSession} className="primary-btn" style={{ width: '100%', justifyContent: 'center', background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)', marginBottom: '16px' }}>
+            Descarregar Backup de Segurança Completo
           </button>
+
+          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', background: 'transparent', border: '1px dashed rgba(245, 158, 11, 0.3)', color: '#F59E0B', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>
+             <Upload size={16} />
+             Restaurar Sessão via JSON
+             <input type="file" accept=".json" onChange={handleImportRestore} style={{ display: 'none' }} />
+          </label>
+        </section>
+
+        <section className="editorial-module footer-module" style={{ borderTop: '2px dashed rgba(255, 255, 255, 0.1)', paddingTop: '32px', background: 'transparent', padding: '24px' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+             {storageHealth === 'storage_ok' ? (
+                <HardDrive size={20} color="#10B981" />
+             ) : (
+                <ShieldAlert size={20} color="#EF4444" />
+             )}
+             <span className="kicker" style={{ color: storageHealth === 'storage_ok' ? '#10B981' : '#EF4444', margin: 0 }}>
+               Saúde de Armazenamento: {storageHealth === 'storage_ok' ? 'Estável' : 'Degradada'}
+             </span>
+           </div>
+           
+           <p style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 300, lineHeight: 1.5 }}>
+             A inteligência da app grava Snapshots invisíveis automaticamente (<strong style={{color:'#E2E8F0'}}>{lastSnapshot ? new Date(lastSnapshot).toLocaleString() : 'Não encontrado'}</strong>). Se o browser purgar o *localStorage* do seu telemóvel nativamente, a app pode sofrer falhas vitais. Faz um backup manual no botão acima a cada 3 dias.
+           </p>
+
+           <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
+              <span className="kicker" style={{ margin: 0 }}>Version: 1.0.0-rc.1 (Beta-Interno)</span>
+              <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', display: 'block', marginTop: '4px' }}>Build controlada para testes reais. Funcionalidades encerram aqui.</span>
+           </div>
         </section>
 
         <section className="editorial-module footer-module" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>

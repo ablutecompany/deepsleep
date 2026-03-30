@@ -1,4 +1,5 @@
 import type { SleepObservationSession } from './types';
+import { saveDefensiveSnapshot } from '../DataGovernance/backupManager';
 
 const STORAGE_KEY = 'deepsleep_sensing_sessions';
 
@@ -34,4 +35,5 @@ export function saveSensingSession(session: SleepObservationSession) {
   
   all.unshift(session);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  saveDefensiveSnapshot();
 }

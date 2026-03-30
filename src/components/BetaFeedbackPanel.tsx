@@ -56,7 +56,7 @@ export function BetaFeedbackPanel() {
         onClick={() => setIsOpen(true)}
         style={{
           position: 'fixed',
-          bottom: '24px',
+          bottom: '100px', // Acima da bottom-nav
           right: '24px',
           zIndex: 9999,
           background: 'rgba(245, 158, 11, 0.15)',
@@ -83,11 +83,17 @@ export function BetaFeedbackPanel() {
           background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(4px)',
           display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
         }}>
-          <div className="editorial-card fade-in" style={{ 
-            width: '100%', maxWidth: '400px', margin: '0 16px 24px 16px',
-            borderTop: '2px solid rgba(245, 158, 11, 0.5)',
+          <div className="fade-in" style={{ 
+            width: '100%', maxWidth: '100%', margin: 'auto 0 0 0',
+            borderTop: '1px solid rgba(245, 158, 11, 0.3)',
+            borderTopLeftRadius: '24px',
+            borderTopRightRadius: '24px',
+            borderBottomLeftRadius: '0',
+            borderBottomRightRadius: '0',
+            background: '#070709',
+            padding: '24px 20px calc(24px + env(safe-area-inset-bottom, 0px)) 20px',
             position: 'relative',
-            maxHeight: '85vh',
+            maxHeight: '90vh',
             overflowY: 'auto'
           }}>
             <button onClick={() => setIsOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', color: '#94A3B8', background: 'transparent', border: 'none', cursor: 'pointer' }}>

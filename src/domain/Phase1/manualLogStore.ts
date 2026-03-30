@@ -1,5 +1,6 @@
 import { appClock } from '../../utils/appClock';
 import type { SyncableBaseEntity } from '../CloudSync/contracts';
+import { saveDefensiveSnapshot } from '../DataGovernance/backupManager';
 
 export type SleepDurationEstimate = '< 15m' | '15-30m' | '30-60m' | '> 60m' | 'Não sei bem';
 export type ReSleepDifficulty = 'Fácil' | 'Algum esforço' | 'Muito difícil' | 'Não voltei a dormir';
@@ -120,6 +121,7 @@ export function saveManualLog(logInfo: Omit<ManualAppLog, 'id' | 'createdAt' | '
   
   recalculateGatingIntegrity(updated);
   window.dispatchEvent(new Event('deepsleep_simulated_change'));
+  saveDefensiveSnapshot();
 }
 
 export function deleteManualLog(id: string) {
@@ -129,6 +131,7 @@ export function deleteManualLog(id: string) {
   
   recalculateGatingIntegrity(updated);
   window.dispatchEvent(new Event('deepsleep_simulated_change'));
+  saveDefensiveSnapshot();
 }
 
 export function getManualNightCount() {

@@ -1,18 +1,18 @@
 :root {
   /* Colors - Ultra Deep Pitch Black */
-  --bg-core: #020203; 
-  --surface-1: rgba(20, 20, 23, 0.4); 
-  --border-subtle: rgba(255, 255, 255, 0.04);
-  --border-strong: rgba(255, 255, 255, 0.1);
+  --bg-core: #000000; 
+  --surface-1: #070709; 
+  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-strong: rgba(255, 255, 255, 0.08);
   
-  --text-primary: #FFFFFF;
-  --text-secondary: #E2E8F0;
-  --text-muted: #94A3B8;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
   
   --accent-color: #38BDF8; 
   --warning-color: #F59E0B;
   
-  --nav-bg: rgba(2, 2, 3, 0.7);
+  --nav-bg: rgba(0, 0, 0, 0.85);
   
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -35,14 +35,15 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: #000; /* Força fundo absoluto em volta da app container */
+  background-color: #000; 
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.6;
   height: 100vh;
   width: 100vw;
   overflow-x: hidden;
+  font-size: 16px; /* Base size garante não haver zoom no iOS */
 }
 
 #root {
@@ -199,7 +200,7 @@ body {
 }
 
 .module-desc {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.7;
   font-weight: 300;
@@ -271,9 +272,9 @@ body {
 
 .ritual-trigger-label {
   font-family: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   z-index: 2;
 }
@@ -725,8 +726,9 @@ body {
   border: none;
   border-radius: 8px;
   padding: 16px 24px;
+  min-height: 48px; /* Safe touch target */
   font-family: inherit;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.02em;
   display: inline-flex;
@@ -746,12 +748,13 @@ body {
 /* Secondary Button Minimal */
 .secondary-btn {
   background-color: transparent;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   border: 1px solid var(--border-strong);
   border-radius: 8px;
   padding: 16px 24px;
+  min-height: 48px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
@@ -759,6 +762,11 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
+}
+
+/* Force iOS Input Zoom Prevention */
+input, textarea, select {
+  font-size: 16px !important; 
 }
 
 /* Session State Panel */

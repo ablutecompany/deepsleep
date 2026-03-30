@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { saveDefensiveSnapshot } from '../domain/DataGovernance/backupManager';
 import type { AssessmentDeliverable, ReadingResonanceFeedback } from '../domain/Phase2/engine';
 
 interface Phase2ContextType {
@@ -36,6 +37,7 @@ export function Phase2StoreProvider({ children }: { children: ReactNode }) {
     setDeliverableState(d);
     if (d) {
       localStorage.setItem('deepsleep_phase2_deliverable', JSON.stringify(d));
+      saveDefensiveSnapshot();
     } else {
       localStorage.removeItem('deepsleep_phase2_deliverable');
     }

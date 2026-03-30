@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { appClock } from '../utils/appClock';
-
+import { saveDefensiveSnapshot } from '../domain/DataGovernance/backupManager';
 import type { SyncableBaseEntity } from '../domain/CloudSync/contracts';
 
 export type CheckinValue = 'success' | 'failed' | 'skipped' | 'incerto';
@@ -73,8 +73,10 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
     setCycleState(c);
     if (c) {
       localStorage.setItem('deepsleep_phase3_cycle', JSON.stringify(c));
+      saveDefensiveSnapshot();
     } else {
       localStorage.removeItem('deepsleep_phase3_cycle');
+      saveDefensiveSnapshot();
     }
   };
 
