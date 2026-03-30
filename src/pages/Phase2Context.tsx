@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { FACTOR_LABELS, FACTOR_DESCRIPTIONS } from '../domain/Phase2/interpreter';
+import { Home } from 'lucide-react';
 
 function getConfidenceLabel(confidence: number): string {
   if (confidence < 60) return "Leitura inicial";
@@ -126,6 +127,30 @@ export function Phase2Context() {
           >
             <span>Ver propostas de ação</span>
             <ArrowRight size={16} />
+          </button>
+          
+          <button 
+            onClick={() => navigate('/process_home')}
+            className="secondary-btn"
+            style={{ border: 'none', background: 'rgba(255,255,255,0.02)' }}
+          >
+            <Home size={16} strokeWidth={1.5} style={{ marginRight: '8px' }}/>
+            Ir para o Início
+          </button>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '16px', paddingBottom: '32px' }}>
+          <button 
+            onClick={() => {
+              if (window.confirm("Refazer a leitura implica apagar as respostas atuais do motor. Queres continuar?")) {
+                localStorage.removeItem('deepsleep_phase2_deliverable');
+                navigate('/phase2/entry');
+              }
+            }}
+            className="text-btn"
+            style={{ color: '#EF4444', opacity: 0.6 }}
+          >
+            Refazer Leitura
           </button>
         </div>
 

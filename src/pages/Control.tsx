@@ -1,6 +1,6 @@
 export function Control() {
   return (
-    <div className="home-page" style={{ paddingBottom: '100px' }}>
+    <div className="home-page">
       <div className="home-content">
         <header className="hero-section">
           <span className="kicker">Conservação e Confiança</span>

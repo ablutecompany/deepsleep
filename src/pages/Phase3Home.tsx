@@ -227,11 +227,30 @@ export function Phase3Home() {
           <div style={{ marginTop: 'auto', marginBottom: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <MapPin size={32} color="#10B981" style={{ marginBottom: '24px', opacity: 0.8 }} strokeWidth={1.5} />
             <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginBottom: '12px' }}>Término do Teste</h3>
-            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '280px', fontWeight: 300 }}>
+            <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: '1.6', maxWidth: '280px', fontWeight: 300, marginBottom: '24px' }}>
               O teste cumpriu o seu ciclo de observação inicial preestabelecido. A eficácia robusta precisa de muito mais noites avaliadas para fechar hipóteses. Pode fechar.
             </p>
+            <button onClick={() => navigate('/process_home')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+               Voltar ao Início
+            </button>
           </div>
         )}
+
+        <div style={{ textAlign: 'center', marginTop: '32px', paddingBottom: '32px' }}>
+          <button 
+            onClick={() => {
+              if (window.confirm("Queres mesmo cancelar o plano em curso? Vais perder o histórico logado deste ciclo atual.")) {
+                localStorage.removeItem('deepsleep_phase3_cycle');
+                navigate('/process_home');
+                window.location.reload();
+              }
+            }}
+            className="text-btn"
+            style={{ color: '#EF4444', opacity: 0.5 }}
+          >
+            Cancelar Plano Ativo
+          </button>
+        </div>
 
       </div>
     </div>

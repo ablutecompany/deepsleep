@@ -41,7 +41,7 @@ export function ProcessHome() {
   };
 
   return (
-    <div className="process-home fade-in" style={{ padding: '24px', paddingBottom: '100px' }}>
+    <div className="process-home fade-in" style={{ padding: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <span style={{ fontSize: '18px', fontWeight: 300, letterSpacing: '1px', color: '#F8FAFC' }}>_deepSleep</span>
         <div style={{ display: 'flex', gap: '16px' }}>

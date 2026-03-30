@@ -2,7 +2,7 @@ import { NightSignature } from '../components/NightSignature';
 
 export function Patterns() {
   return (
-    <div className="home-page" style={{ paddingBottom: '100px' }}>
+    <div className="home-page">
       <div style={{ opacity: 0.4 }}>
         <NightSignature />
       </div>

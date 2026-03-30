@@ -14,8 +14,8 @@ export function BottomNav() {
     }
   }, [location.pathname]);
 
-  // Allow visibility in the 4 stable tabs plus the active plan home
-  if (!['/process_home', '/manual_log_hub', '/phase2/context', '/profile', '/phase3_home'].includes(location.pathname)) {
+  // Allow visibility in the stable tabs plus the active plan home and context areas
+  if (!['/process_home', '/manual_log_hub', '/phase2/context', '/phase2/entry', '/phase2/proposals', '/profile', '/phase3_home'].includes(location.pathname)) {
     return null;
   }
 
