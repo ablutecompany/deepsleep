@@ -24,13 +24,13 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
   if (!deliverable) {
     proposals.push({
       id: 'prop_ancora',
-      title: "Manter Constância Térmica e de Rumo",
-      why: "Sem dados concretos, a correção circadiana ao amanhecer é o ponto seguro basal.",
-      observe: "Irritabilidade na alvorada se não houver cumprimento de horas de sono.",
-      whenNotTo: "Quando o limite for perigoso para a condução.",
-      minWindow: "5 noites sucessivas",
+      title: "Acordar sempre à mesma hora",
+      why: "Como ainda não temos os teus dados completos, o passo mais testado e seguro é criares um horário inegociável para sair da cama. Isso força o teu relógio biológico a regular aos poucos.",
+      observe: "A resistência inicial em sair da cama. O cansaço a meio do dia.",
+      whenNotTo: "Se trabalhas por turnos ou se a fadiga colocar em risco a tua segurança na condução.",
+      minWindow: "5 noites",
       minDays: 5,
-      future: "Estabelecer estabilidade no horário basal afunila padrões biológicos."
+      future: "Garante que o relógio interno estabiliza antes de testarmos o resto do ambiente."
     });
     return proposals;
   }
@@ -41,25 +41,25 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
       if (deliverable.flags.some(f => f.includes('Noctúria'))) {
         proposals.push({
           id: 'prop_hidrica',
-          title: "Cronometria de Impacto Hídrico Noturno",
-          why: "A fragmentação registada cruza-se com a pressão vesical durante o ciclo. Adiar ou concentrar hidratação ajuda a distinguir causas orgânicas de ansiedade na interrupção do sono.",
-          observe: "Padrões de ingestão concentrados na hora da refeição ou ceia por défice diurno.",
-          whenNotTo: "Se existir indicação médica contrária ou necessidade para medicação específica.",
-          minWindow: "4 noites sucessivas",
+          title: "Ajustar líquidos ao fim do dia",
+          why: "O teu registo diz que acordas muitas vezes. Isso pode ser provocado pela simples vontade de ir à casa de banho, o que corta ciclos vitais do sono. Bebe mais de dia e menos depois de jantar.",
+          observe: "Presta atenção a despertares logo após acabares ciclos ou depois de jantar.",
+          whenNotTo: "Se o teu médico recomendou de forma estrita, ou tens medicação que força esse consumo de noite.",
+          minWindow: "4 noites",
           minDays: 4,
-          future: "Reduz o volume de interrupções puramente fisiológicas."
+          future: "Reduz idas desnecessárias à casa de banho que fragmentam a noite mecanicamente."
         });
       }
       if (deliverable.proposalConstraints.some(c => c.includes('Dor'))) {
         proposals.push({
           id: 'prop_ergo',
-          title: "Eliminação e Suporte Físico",
-          why: "O impacto mecânico relatado interfere com a continuidade natural do ciclo do sono.",
-          observe: "A relação entre posições adotadas e o momento de despertar consecutivo.",
-          whenNotTo: "Quando existir protocolo médico de reabilitação estruturado.",
-          minWindow: "3 noites seguidas",
+          title: "Controlar desconforto físico",
+          why: "Sinalizaste dores como entrave grave no teu histórico de noites. O teu corpo acorda para evitar dor pela posição ou colchão errados. Foca nesta correção de posição e suporte base.",
+          observe: "A relação entre as tuas posturas ao deitar e o momento preciso em que acordas a meio.",
+          whenNotTo: "Se tens um limite rigoroso imposto por ortopedista ou médico para certas posturas.",
+          minWindow: "3 noites",
           minDays: 3,
-          future: "Diminui o potencial de despertar gerado pelo próprio corpo."
+          future: "Previne que seja o teu corpo a forçar a interrupção biológica a meio da noite."
         });
       }
       break;
@@ -68,26 +68,26 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
     case 'FRAGMENTACAO_MANUTENCAO':
       proposals.push({
         id: 'prop_levantar',
-        title: "Estratégia de Interrupção do Comportamento de Cama",
-        why: "Permanecer na cama durante muito tempo sem conseguir dormir agrava o alerta. Levantar-se temporariamente interrompe essa fase de associação negativa.",
-        observe: "A tendência para justificar a permanência na cama enquanto o estado de alerta aumenta.",
-        whenNotTo: "Quando o levantar gerar risco físico de quedas ou impacto no contexto familiar.",
-        minWindow: "5 dias experimentais",
+        title: "Levantar da cama se não adormecer",
+        why: "Estar na cama acordado a lutar contra os pensamentos treina o teu cérebro a ligar o quarto ao stress. Se passaram 20 minutos e não dormes, levanta-te e lê num lugar com pouca luz até teres sono.",
+        observe: "Tenta perceber em que ponto a tua tentativa de dormir vira irritação e frustração real.",
+        whenNotTo: "Se ao levantares acordares familiares ou se houver risco sério de quedas.",
+        minWindow: "5 noites",
         minDays: 5,
-        future: "Impede a cronificação do alerta condicionado perante o ambiente de dormida."
+        future: "Quebra a associação tóxica entre a tua própria almofada e estado de alerta acelerado."
       });
       break;
 
     case 'IRREGULARIDADE_HORARIOS':
       proposals.push({
         id: 'prop_ancora_horaria',
-        title: "Barreira Circadiana de Fecho",
-        why: "A ausência de ritmo inibe a produção de melatonina no tempo exato. Ajustar uma barreira fixa para terminar a atividade diária serve de indutor passivo.",
-        observe: "O prolongamento desnecessário do dia em alturas críticas.",
-        whenNotTo: "Quando sujeito a horários rotativos curtos impostos por turnos laborais.",
-        minWindow: "7 dias seguidos",
+        title: "Impor uma hora restrita para deitar",
+        why: "A ausência total de ritmo bloqueia a libertação de substâncias naturais. Tenta respeitar um horário âncora de encerramento, para o teu corpo perceber que o dia finalmente acabou.",
+        observe: "Sê franco a perceber o número de noites onde a hora final esticou sem razão útil real.",
+        whenNotTo: "Se estás confinado a turnos dinâmicos por trabalho que não podes evitar.",
+        minWindow: "7 noites",
         minDays: 7,
-        future: "Normalização do ponto zero noturno antes do sono surgir."
+        future: "Deixa o teu corpo ter um alvo físico diário onde programar o cansaço."
       });
       break;
 
@@ -96,13 +96,13 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
       if (deliverable.dominantDrivers.includes('P1') || deliverable.dominantDrivers.includes('P2')) {
         proposals.push({
           id: 'prop_foco_passivo',
-          title: "Substituição para Carga Cognitiva Neutra",
-          why: "O uso de ecrãs não tem de interromper o adormecimento se o estímulo for reduzido. Preferir conteúdos previsíveis e lineares pode pacificar a transição e modular a carga do foco.",
-          observe: "A necessidade de interação constante e rodar o feed de forma intensa antes do sono.",
-          whenNotTo: "Se o próprio dispositivo for fonte central do disparo ansiogénico e houver histórico forte de excitação digital.",
+          title: "Não lutes: substitui o telemóvel por algo neutro",
+          why: "Se precisas do ecrã para atuar contra o aborrecimento, tenta pelo menos não alimentar conversas, ou ler notícias ansiosas. Troca tudo por um e-reader fixo ou documentário longo aborrecido.",
+          observe: "Avalia a tua ansiedade de querer dar sempre 'só mais um scroll' ou responder mensagens tarde.",
+          whenNotTo: "Se o simples pegar num ecrã já disparar dor de cabeça intensa ou se isso perturbar o sono grave.",
           minWindow: "3 noites",
           minDays: 3,
-          future: "Validação entre estímulo utilitário que regula e o que perturba visualmente."
+          future: "Abrandar radicalmente a estimulação ativa, e focar em conteúdos passivos que causem tédio ou paz."
         });
       }
       break;
@@ -111,13 +111,13 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
   if (proposals.length === 0) {
     proposals.push({
       id: 'prop_descompressao',
-      title: "Descompressão Cognitiva Suave",
-      why: "Para o padrão assinalado, gerir a passagem do estado ativo para passivo carece de regulação marginal.",
-      observe: "A dificuldade em mudar de registos agitados para ações de processamento basal.",
-      whenNotTo: "Semanas de exceção incontornável.",
+      title: "Cortar tarefas a meia-luz antes de deitar",
+      why: "Tenta não saltar de limpezas profundas, e-mails de trabalho ou stress agudo direto para dentro dos lençóis numa fração de segundo. Isso nunca resulta. Define 30 minutos de paz forçada, com luz fraca.",
+      observe: "A velocidade e stress mental que levas quando dás por ti a deitar, o chamado 'acelerar até parar'.",
+      whenNotTo: "Semanas atípicas onde não tiveste rigorosamente margem nas 24 horas por razões incontornáveis.",
       minWindow: "3 noites",
       minDays: 3,
-      future: "Prepara a base temporal livre de perturbação antes do deitar planeado."
+      future: "O abrandamento passivo treina quimicamente o cansaço."
     });
   }
 
@@ -138,13 +138,13 @@ export function getProposals(deliverable: AssessmentDeliverable | null): Enhance
         // Se todas as listadas esgotaram, fazemos fallback de contingência
         proposals = [{
           id: 'prop_fallback_regenerativo',
-          title: "Controlo Passivo de Luz",
-          why: "Os testes anteriores geraram atrito funcional. O passo base mais seguro e irrejeitável é fechar a componente luminosa exógena.",
-          observe: "Frestas de estores ou leds espalhados no quarto que afetam a fase 1 biológica.",
-          whenNotTo: "Quando existir fobia comprovada ao escuro total.",
-          minWindow: "4 noites sucessivas",
+          title: "Bloquear a luz no quarto escuro",
+          why: "Todos os testes anteriores foram incompatíveis com o teu estilo. O passo base irredutivel e irrejeitável que nos resta é tapar todas as frinchas e luzes azuis agressivas de carregadores e tentar dormir em paz térmica e visual pura.",
+          observe: "Olha para os leds ou candeeiros de rua que cortaram a escuridão enquanto esticavas as noites.",
+          whenNotTo: "Se for de todo impossível desligar equipamento médico com pequenas luzes no recinto ou se tiveres fobias extremas impeditivas.",
+          minWindow: "4 noites",
           minDays: 4,
-          future: "Estabelece química isolada permitindo repensar abordagens táticas nulas."
+          future: "Recria o vazio inicial do quarto puro para rever a base, antes dos constrangimentos que forçamos antigamente."
         }];
       }
     }

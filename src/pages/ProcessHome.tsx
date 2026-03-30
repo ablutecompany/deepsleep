@@ -4,6 +4,7 @@ import { useNightCount } from '../hooks/useNightCount';
 
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { usePhase3Store } from '../store/Phase3ContextStore';
+import { getProposals } from '../domain/Phase2/proposals';
 
 export function ProcessHome() {
   const navigate = useNavigate();
@@ -55,6 +56,31 @@ export function ProcessHome() {
       <p style={{ fontSize: '15px', color: '#94A3B8', lineHeight: '1.6', marginBottom: '48px', fontWeight: 300 }}>
         A evolução baseia-se num sistema faseado rigoroso. Conclui a fase atual para desbloquear recursos avançados.
       </p>
+
+      {cycle && cycle.status === 'active' && deliverable && (
+        <div style={{ marginBottom: '32px', background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.2)', padding: '24px', borderRadius: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <div>
+              <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#38BDF8', fontWeight: 600 }}>Plano Diário Ativo</span>
+              <h3 style={{ fontSize: '18px', color: '#FFF', marginTop: '4px', fontWeight: 400 }}>
+                {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.title || 'Teste em curso'}
+              </h3>
+            </div>
+            <span style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38BDF8', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 600 }}>
+              Dia {Object.keys(cycle.dailyCheckins).length + 1} de {cycle.minDays}
+            </span>
+          </div>
+          <p style={{ fontSize: '14px', color: '#E2E8F0', lineHeight: '1.6', marginBottom: '20px' }}>
+             <strong style={{ color: '#94A3B8', fontWeight: 500 }}>Observar hoje:</strong> {getProposals(deliverable).find(p => p.id === cycle.proposalId)?.observe}
+          </p>
+          <button 
+            onClick={() => navigate('/phase3_home')}
+            style={{ width: '100%', padding: '14px', background: '#38BDF8', color: '#0F172A', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+          >
+            Ver Detalhes e Inserir Registo
+          </button>
+        </div>
+      )}
 
       <div className="process-stages">
         {/* Phase 1 */}

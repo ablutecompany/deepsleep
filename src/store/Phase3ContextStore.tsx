@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
-export type CheckinValue = 'success' | 'failed' | 'skipped';
+export type CheckinValue = 'success' | 'failed' | 'skipped' | 'incerto';
 
 export interface Phase3Cycle {
   cycleId: string;
@@ -28,6 +28,11 @@ const Phase3StoreContext = createContext<Phase3ContextType | undefined>(undefine
 export function Phase3StoreProvider({ children }: { children: ReactNode }) {
   const [cycle, setCycleState] = useState<Phase3Cycle | null>(() => {
     const saved = localStorage.getItem('deepsleep_phase3_cycle');
+    const deliverableExists = localStorage.getItem('deepsleep_phase2_deliverable');
+    if (saved && !deliverableExists) {
+       localStorage.removeItem('deepsleep_phase3_cycle'); // Remove orpha
+       return null;
+    }
     return saved ? JSON.parse(saved) : null;
   });
 

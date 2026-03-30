@@ -8,6 +8,11 @@ export type ManualNightLog = {
   wakeTime: string;
   recovery: 'Má' | 'Razoável' | 'Boa' | 'Excelente';
   markers: string[]; 
+  nap?: {
+    tookNap: boolean;
+    durationMin?: number;
+    period?: 'Manhã' | 'Tarde' | 'Início da Noite';
+  };
 };
 
 export const MARKER_OPTIONS = [
@@ -15,7 +20,14 @@ export const MARKER_OPTIONS = [
   'Telemóvel antes de dormir',
   'Stress mental',
   'Dor / desconforto',
-  'Ruído / luz'
+  'Ruído / luz',
+  'Cigarro / Nicotina',
+  'Fome',
+  'Pesadelos',
+  'Álcool',
+  'Cafeína tardia',
+  'Medicação para dormir / Calmantes',
+  'Calor / Frio desconfortável'
 ];
 
 export function getManualLogs(): ManualNightLog[] {

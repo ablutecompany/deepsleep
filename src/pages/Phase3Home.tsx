@@ -4,7 +4,7 @@ import { usePhase3Store } from '../store/Phase3ContextStore';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { getProposals, getPriorityTest } from '../domain/Phase2/proposals';
 import { generateLearningPayload } from '../domain/Phase3/learningStore';
-import { ArrowLeft, CheckCircle2, XCircle, MapPin } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, HelpCircle, MapPin } from 'lucide-react';
 
 export function Phase3Home() {
   const navigate = useNavigate();
@@ -150,6 +150,21 @@ export function Phase3Home() {
               >
                 <XCircle size={24} strokeWidth={1.5} />
                 <span style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.5px' }}>Desalinhado</span>
+              </button>
+              
+              <button
+                onClick={() => checkInToday('incerto')}
+                className="ritual-trigger"
+                style={{
+                  flex: 1, padding: '24px 16px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                  background: todayValue === 'incerto' ? 'rgba(245, 158, 11, 0.05)' : 'rgba(255,255,255,0.02)',
+                  borderColor: todayValue === 'incerto' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(255,255,255,0.08)',
+                  borderLeft: todayValue === 'incerto' ? '2px solid #F59E0B' : '1px solid rgba(255,255,255,0.08)',
+                  color: todayValue === 'incerto' ? '#F59E0B' : '#F8FAFC'
+                }}
+              >
+                <HelpCircle size={24} strokeWidth={1.5} />
+                <span style={{ fontSize: '14px', fontWeight: 500, letterSpacing: '0.5px' }}>Incerto</span>
               </button>
             </div>
             

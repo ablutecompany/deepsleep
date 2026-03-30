@@ -14,6 +14,10 @@ export function ManualPhase1Form() {
   const [awakeTimeMin, setAwakeTimeMin] = useState<number | ''>('');
   const [recovery, setRecovery] = useState<ManualNightLog['recovery']>('Razoável');
   const [markers, setMarkers] = useState<string[]>([]);
+  
+  const [tookNap, setTookNap] = useState(false);
+  const [napDurationMin, setNapDurationMin] = useState<number | ''>('');
+  const [napPeriod, setNapPeriod] = useState<'Manhã'|'Tarde'|'Início da Noite'>('Tarde');
 
   const toggleMarker = (m: string) => {
     if (markers.includes(m)) {
@@ -36,7 +40,11 @@ export function ManualPhase1Form() {
       awakenings: Number(awakenings),
       awakeTimeMin: Number(awakeTimeMin),
       recovery,
-      markers
+      markers,
+      nap: {
+        tookNap,
+        ...(tookNap ? { durationMin: Number(napDurationMin), period: napPeriod } : {})
+      }
     });
     navigate(-1);
   };
@@ -120,6 +128,34 @@ export function ManualPhase1Form() {
               onChange={e => setAwakeTimeMin(Number(e.target.value))}
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '16px', color: '#F8FAFC', fontSize: '16px', fontWeight: 400 }}
             />
+          </div>
+
+          {/* Secção de Sestas */}
+          <div style={{ marginTop: '16px', padding: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#F8FAFC', fontWeight: 500 }}>Fizeste alguma sesta hoje?</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => setTookNap(true)} style={{ padding: '6px 16px', borderRadius: '4px', background: tookNap ? '#38BDF8' : 'rgba(255,255,255,0.05)', color: tookNap ? '#000' : '#94A3B8', border: 'none' }}>Sim</button>
+                <button onClick={() => setTookNap(false)} style={{ padding: '6px 16px', borderRadius: '4px', background: !tookNap ? '#64748B' : 'rgba(255,255,255,0.05)', color: !tookNap ? '#FFF' : '#94A3B8', border: 'none' }}>Não</button>
+              </div>
+            </div>
+            
+            {tookNap && (
+              <div style={{ display: 'flex', gap: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '11px', textTransform: 'uppercase', color: '#94A3B8' }}>Minutos</label>
+                  <input type="number" min="0" value={napDurationMin} onChange={e => setNapDurationMin(Number(e.target.value))} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '6px', color: '#FFF' }} />
+                </div>
+                <div style={{ flex: 1.5, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '11px', textTransform: 'uppercase', color: '#94A3B8' }}>Período</label>
+                  <select value={napPeriod} onChange={e => setNapPeriod(e.target.value as any)} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '6px', color: '#FFF' }}>
+                    <option>Manhã</option>
+                    <option>Tarde</option>
+                    <option>Início da Noite</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>

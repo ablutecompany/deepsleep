@@ -52,6 +52,7 @@ export function Profile() {
   let markerCounts = {} as Record<string, number>;
   const sumRecovery = { 'Má': 1, 'Razoável': 2, 'Boa': 3, 'Excelente': 4 };
   let avgRecScore = 0;
+  let totalNaps = 0;
 
   logs.forEach(l => {
      avgLatency += l.timeToSleepMin;
@@ -59,6 +60,8 @@ export function Profile() {
      avgAwakeTime += l.awakeTimeMin;
      avgRecScore += sumRecovery[l.recovery];
      l.markers.forEach(m => { markerCounts[m] = (markerCounts[m] || 0) + 1; });
+     
+     if (l.nap?.tookNap) totalNaps++;
      
      const [bH, bM] = l.bedTime.split(':').map(Number);
      const [wH, wM] = l.wakeTime.split(':').map(Number);
@@ -137,6 +140,13 @@ export function Profile() {
                <span style={{ fontStyle: 'italic', fontSize: '13px', color: '#64748B' }}>Não emergiram padrões de atividade marcantes até ao momento.</span>
             )}
           </div>
+          
+          {totalNaps > 0 && (
+            <div className="editorial-card" style={{ marginTop: '24px', paddingBottom: '0' }}>
+               <h3 className="kicker" style={{ color: '#F8FAFC' }}>Impacto Diurno / Sestas</h3>
+               <p className="module-desc">Registaste um total de <strong style={{ color: '#F8FAFC', fontWeight: 400 }}>{totalNaps} sestas</strong> ao longo das tuas medições. Estes episódios reduzem a pressão de sono noturna e podem justificar demoras a adormecer.</p>
+            </div>
+          )}
         </section>
 
         <section style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '64px' }}>

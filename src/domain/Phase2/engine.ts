@@ -233,6 +233,9 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
       avgLatency += l.timeToSleepMin;
       avgAwakenings += l.awakenings;
       avgAwakeTime += l.awakeTimeMin;
+      if (l.nap?.tookNap) {
+        markerUsage['$Nap'] = (markerUsage['$Nap'] || 0) + 1;
+      }
       l.markers.forEach(m => {
         markerUsage[m] = (markerUsage[m] || 0) + 1;
       });
@@ -261,6 +264,29 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
 
     if (markerUsage['Dor / desconforto'] && markerUsage['Dor / desconforto'] > numLogs * 0.3) {
       F9 *= 1.8;  // Pain interference overrides subtle psych factors
+    }
+    
+    if (markerUsage['Cigarro / Nicotina'] || markerUsage['Álcool'] || markerUsage['Cafeína tardia']) {
+      F12 *= 1.6; // Substance interaction
+    }
+    
+    if (markerUsage['Calor / Frio desconfortável'] && markerUsage['Calor / Frio desconfortável'] > numLogs * 0.4) {
+      F6 *= 1.5; // Environmental temperature constraints
+    }
+    
+    if (markerUsage['Pesadelos'] && markerUsage['Pesadelos'] > 0) {
+      F2 *= 1.5; // Sleep anxiety spikes with nightmares
+    }
+    
+    if (markerUsage['Fome']) {
+      F3 /= 1.2; // Diet factors messing maintenance
+    }
+    
+    if (markerUsage['$Nap'] && markerUsage['$Nap'] > numLogs * 0.4) {
+      if (avgLatency > 30) {
+        // High napping + high latency = direct pressure steal
+        F1 *= 0.5; // Not psych anxiety, just lacks sleep drive
+      }
     }
 
     // Phone is only considered an "aggravator" (F1) if the user actually struggles to fall asleep.
