@@ -368,11 +368,11 @@ export function evaluateAssessment(raw: Record<string, string[]>, mode: 10 | 25)
   if (F5 > 1.5) constraints.push('Não sugerir rotinas rígidas por irregularidade nos turnos.');
 
   if (avgAwakenings >= 2 && avgAwakeTime > 30) {
-    opportunities.push('Trabalhar consolidacao da vigilha re-entrante após despertar.');
+    opportunities.push('Reduzir o tempo que ficas a desesperar acordado a meio da noite.');
   } else if (avgLatency > 30) {
-    opportunities.push('Trabalhar focos pre-cama com carga passiva.');
+    opportunities.push('Tirar pressão da hora de ir para a cama.');
   } else {
-    opportunities.push('Estabilização holística de âncoras circadianas de dia e de noite.');
+    opportunities.push('Dar mais consistência aos teus horários de dia e de noite.');
   }
 
   let flags = [];
