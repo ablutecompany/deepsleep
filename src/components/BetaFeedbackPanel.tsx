@@ -50,6 +50,8 @@ export function BetaFeedbackPanel() {
     setTimeout(() => setIsOpen(false), 2000);
   };
 
+  if (location.pathname === '/sensing') return null;
+  
   return (
     <>
       <button

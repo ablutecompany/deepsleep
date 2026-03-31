@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { RotateCcw, Bug, FastForward, CalendarX2 } from 'lucide-react';
 import { usePhase2Store } from '../store/Phase2ContextStore';
 import { appClock } from '../utils/appClock';
@@ -6,6 +7,7 @@ import { appClock } from '../utils/appClock';
 // Seeded Profiles removed per request to ensure real beta testing.
 
 export function DevTools() {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [clockInfo, setClockInfo] = useState({ 
     simulated: appClock.isSimulated(), 
@@ -33,6 +35,8 @@ export function DevTools() {
   };
 
 // Legacy profile loading and night simulations completely stripped off.
+
+  if (location.pathname === '/sensing') return null;
 
   if (!isOpen) {
     return (
