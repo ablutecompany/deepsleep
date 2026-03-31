@@ -6,7 +6,7 @@ import { getTelemetryLogs } from '../domain/Telemetry/tracker';
 import { getSensingSessions } from '../domain/Sensing/store';
 import { evaporateNightCascade, wipeEntireProfile } from '../domain/DataGovernance/manager';
 import { getBetaFeedbackRecords } from '../domain/Telemetry/betaFeedbackStore';
-import { restoreFromSnapshot, verifyStorageHealth, getLastDefensiveSnapshotDate } from '../domain/DataGovernance/backupManager';
+import { restoreFromSnapshot, verifyStorageHealth, getLastDefensiveSnapshotDate, generateSnapshotJSON } from '../domain/DataGovernance/backupManager';
 import { Upload, HardDrive, ShieldAlert } from 'lucide-react';
 
 export function Control() {
@@ -69,23 +69,8 @@ export function Control() {
   };
 
   const handleExportFullTestSession = () => {
-    let phase3 = null;
-    try { phase3 = JSON.parse(localStorage.getItem('deepsleep_phase3_cycle') || 'null'); } catch(e) {}
-    let learning = [];
-    try { learning = JSON.parse(localStorage.getItem('deepsleep_learning_records') || '[]'); } catch(e) {}
-
-    const data = {
-      beta_export_timestamp: new Date().toISOString(),
-      beta_simulated_clock: appClock.todayStr(),
-      tester_feedback: getBetaFeedbackRecords(),
-      raw_logs: getManualLogs(),
-      profile: deliverable,
-      active_cycle: phase3,
-      learning_records: learning,
-      sensing_sessions: getSensingSessions(),
-      telemetry: getTelemetryLogs(),
-    };
-    downloadFile(`deepsleep_agg_beta_test_${appClock.todayStr()}.json`, JSON.stringify(data, null, 2));
+    const snapStr = generateSnapshotJSON();
+    downloadFile(`deepsleep_snapshot_beta_${appClock.todayStr()}.json`, snapStr);
   };
 
   const handleExportTelemetry = () => {
@@ -111,16 +96,16 @@ export function Control() {
       return;
     }
     
-    if (window.confirm(`Vais apagar permanentemente o registo desta noite (${today}).\n\nEste recálculo irá remover contextualmente quaisquer observações acústicas ligadas a esta noite e pode suspender o teu plano diário se passares abaixo do limite de baseline. Confirmas ação destrutiva?`)) {
+    if (window.confirm(`Vais apagar o registo da noite de ${today}.\n\nAo fazeres isto, qualquer som gravado nesta janela também será deitado fora. Se baixares das 5 noites limite do histórico, vamos ter de suspender o encosto dos teus conselhos diários.\n\nQueres mesmo apagar isto?`)) {
       evaporateNightCascade(todaysLog.id);
-      alert("Registo diário evaporado. Recálculo efetuado com sucesso.");
+      alert("A noite foi apagada do teu historial.");
       navigate('/');
     }
   };
 
   const handleHardReset = () => {
-    if (window.confirm("⚠️ APAGAMENTO PERMANENTE DE PERFIL ⚠️\n\nVais destruir e reinicializar:\n- Diário basal\n- Interpretações do motor\n- Decisões ativas (Fase 3)\n- Gravações locais do Microfone\n\nAs tuas exportações locais de histórico também ficarão órfãs. Confirmas limpar tudo?")) {
-      if (window.confirm("Ação destrutiva final. A tua app irá suspender num ecrã em branco e reinicializar.")) {
+    if (window.confirm("⚠️ APAGAR TODO O HISTÓRICO ⚠️\n\nVais apagar de vez tudo o que a app sabe sobre o teu sono:\n- Todas as noites e sestas\n- A avaliação que fez de ti\n- O plano que estás a seguir agora\n- Análises locais do quarto\n\nQueres mesmo desfazer tudo e recomeçar do zero?")) {
+      if (window.confirm("Tem a certeza absoluta? A app vai reiniciar completamente em branco.")) {
         wipeEntireProfile();
         window.location.href = '/';
       }
@@ -229,9 +214,9 @@ export function Control() {
         </section>
 
         <section className="editorial-module">
-          <span className="kicker">Dados Recolhidos Observacionais</span>
+          <span className="kicker">Os teus Registos de Som</span>
           <p className="module-desc" style={{ marginBottom: '16px' }}>
-            Histórico opcional das tuas sessões acústicas de observação de sinal local, cruzadas e acopladas ao teu diário manual.
+            As medições de som automático que o telemóvel vai ouvindo para complementar o diário quando acordas.
           </p>
           <ul className="retention-list" style={{ marginTop: 0 }}>
             <li className="retention-item">
@@ -260,8 +245,8 @@ export function Control() {
                <div style={{ fontSize: '16px', color: '#F8FAFC' }}>{getManualLogs().filter(l => l.sleepType === 'NIGHT' && l.countsForBaseline).length} / 5</div>
              </div>
              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
-               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Baseline</div>
-               <div style={{ fontSize: '16px', color: deliverable ? '#10B981' : '#F59E0B' }}>{deliverable ? 'Pronta' : 'Pendente'}</div>
+               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>O Teu Perfil</div>
+               <div style={{ fontSize: '16px', color: deliverable ? '#10B981' : '#F59E0B' }}>{deliverable ? 'Pronto' : 'Pendente'}</div>
              </div>
              
              {(() => {
@@ -332,7 +317,7 @@ export function Control() {
            </div>
            
            <p style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 300, lineHeight: 1.5 }}>
-             A inteligência da app grava Snapshots invisíveis automaticamente (<strong style={{color:'#E2E8F0'}}>{lastSnapshot ? new Date(lastSnapshot).toLocaleString() : 'Não encontrado'}</strong>). Se o browser purgar o *localStorage* do seu telemóvel nativamente, a app pode sofrer falhas vitais. Faz um backup manual no botão acima a cada 3 dias.
+             A app vai gerando Backups escondidos (<strong style={{color:'#E2E8F0'}}>{lastSnapshot ? new Date(lastSnapshot).toLocaleString() : 'Não encontrado'}</strong>). Se o teu telemóvel de repente decidir libertar memória, podes perder as tuas noites todas! Vai fazendo download do Backup Agregado aqui abaixo (a cada 3-4 dias).
            </p>
 
            <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>

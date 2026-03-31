@@ -72,7 +72,7 @@ export function Phase2Proposals() {
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                 <Activity size={14} color="#64748B" style={{ marginTop: '3px', flexShrink: 0 }} />
                 <p style={{ fontSize: '13px', color: '#94A3B8', lineHeight: '1.5', fontWeight: 300 }}>
-                  <span style={{ color: '#64748B', display: 'block', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em', marginBottom: '2px' }}>Porque vem antes:</span>
+                  <span style={{ color: '#64748B', display: 'block', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em', marginBottom: '2px' }}>Porque deves testar isto primeiro:</span>
                   {p.future}
                 </p>
               </div>

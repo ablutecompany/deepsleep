@@ -48,7 +48,7 @@ export function Phase3Home() {
   if (!deliverable) {
     return (
       <div className="home-page fade-in" style={{ padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-core)', color: '#F8FAFC', justifyContent: 'center', alignItems: 'center' }}>
-        <p style={{ color: '#64748B', fontWeight: 300 }}>Acesso indisponível. Conclui primeiro a fase de interpretação contextual.</p>
+        <p style={{ color: '#64748B', fontWeight: 300 }}>Ainda não tens um plano ativo.</p>
         <button className="text-btn" style={{ marginTop: '24px', color: '#38BDF8' }} onClick={() => navigate('/phase2/entry')}>
           Retroceder
         </button>
@@ -75,10 +75,10 @@ export function Phase3Home() {
   const successCount = checkinsList.filter(c => c === 'success').length;
   const adherenceRate = loggedDaysCount > 0 ? successCount / loggedDaysCount : 0;
   
-  let trendMsg = "Ainda sem sinal de fundo";
-  if (loggedDaysCount < 3) trendMsg = "Leitura em aceleração inicial";
-  else if (adherenceRate >= 0.7) trendMsg = "A ganhar tração e estabilidade tática";
-  else if (adherenceRate <= 0.3) trendMsg = "Resistência massiva; incompatibilidade mecânica suspeita";
+  let trendMsg = "Ainda sem dados suficientes";
+  if (loggedDaysCount < 3) trendMsg = "A registar os primeiros dias...";
+  else if (adherenceRate >= 0.7) trendMsg = "Estás no bom caminho, continua assim";
+  else if (adherenceRate <= 0.3) trendMsg = "Parece que esta dica não está a resultar para ti";
 
   const handleSubmitAnswers = () => {
     // Gerar registo e obter decisão analítica do motor
@@ -96,16 +96,16 @@ export function Phase3Home() {
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/process_home')} />
         
         <header style={{ marginBottom: '40px' }}>
-          <span className="kicker" style={{ color: '#10B981', marginBottom: '16px' }}>Direção Ativa · Observância</span>
+          <span className="kicker" style={{ color: '#10B981', marginBottom: '16px' }}>O teu Plano Atual</span>
           <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2', marginBottom: '16px' }}>
             {cycle.status === 'active' ? "Em Percurso" : "Janela Concluída"}
           </h1>
           <div style={{ display: 'flex', gap: '16px' }}>
              <button onClick={() => navigate('/phase2/context')} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94A3B8', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}>
-               Consultar Contexto (Fase 2)
+               Consultar Contexto
              </button>
              <button onClick={() => navigate('/process_home')} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94A3B8', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}>
-               Ver Métricas Bases
+               Ver Progresso
              </button>
           </div>
         </header>
@@ -123,14 +123,14 @@ export function Phase3Home() {
           </p>
 
           <div style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', marginBottom: '24px', borderLeft: '2px solid rgba(56, 189, 248, 0.4)' }}>
-             <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94A3B8', display: 'block', marginBottom: '4px' }}>Racional Biológico</span>
+             <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94A3B8', display: 'block', marginBottom: '4px' }}>Por que funciona?</span>
              <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: 1.5, fontWeight: 300 }}>{currentProposal.why}</p>
           </div>
           
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '13px', color: '#64748B' }}>Duração do trajeto</span>
-              <span style={{ fontSize: '13px', color: isMinWindowReached ? '#10B981' : '#F8FAFC', fontWeight: 300 }}>{effectiveElapsed} de {cycle.minDays} noites focais</span>
+              <span style={{ fontSize: '13px', color: '#64748B' }}>Progresso desta dica</span>
+              <span style={{ fontSize: '13px', color: isMinWindowReached ? '#10B981' : '#F8FAFC', fontWeight: 300 }}>{effectiveElapsed} de {cycle.minDays} noites</span>
             </div>
             
             <div style={{ width: '100%', height: '2px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
@@ -250,9 +250,9 @@ export function Phase3Home() {
         {cycle.status === 'active' && isMinWindowReached && reviewStep === 0 && (
           <div style={{ marginTop: 'auto', marginBottom: '24px' }}>
             <div className="editorial-card" style={{ background: 'transparent', padding: 0, border: 'none', marginBottom: '32px' }}>
-              <h3 className="kicker" style={{ color: '#F8FAFC', marginBottom: '16px' }}>Leitura Parcial Observada</h3>
+              <h3 className="kicker" style={{ color: '#F8FAFC', marginBottom: '16px' }}>Ponto de Situação</h3>
               <p className="module-desc" style={{ marginBottom: '8px' }}>
-                <strong style={{ color: '#F8FAFC', fontWeight: 400 }}>{Math.round(adherenceRate * 100)}% de correspondência ao pedido inicial.</strong>
+                <strong style={{ color: '#F8FAFC', fontWeight: 400 }}>{Math.round(adherenceRate * 100)}% de sucesso ao longo dos dias.</strong>
               </p>
               <p className="module-desc">
                 {trendMsg}.
@@ -260,7 +260,7 @@ export function Phase3Home() {
             </div>
             
             <button onClick={() => setReviewStep(1)} className="primary-btn" style={{ width: '100%', justifyContent: 'center', marginBottom: '16px' }}>
-              Iniciar Avaliação de Janela
+              Fazer a Avaliação desta Dica
             </button>
             <button onClick={() => {
                trackEvent('beta_review_skipped');
@@ -331,7 +331,7 @@ export function Phase3Home() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button onClick={handleSubmitAnswers} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '16px' }}>
-                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Processar Perfil</span>
+                <span style={{ fontWeight: 400, fontSize: '15px', color: '#F8FAFC' }}>Guardar e Avaliar</span>
               </button>
             </div>
           </div>
@@ -358,7 +358,7 @@ export function Phase3Home() {
               {cycle.decisionEngineOutcome.nextStepPhrase}
             </p>
             <button onClick={() => navigate('/phase2/proposals')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-               Afinar Nova Direcção Realística
+               Ajustar Nova Direção
             </button>
           </div>
         )}
@@ -371,7 +371,7 @@ export function Phase3Home() {
               {cycle.decisionEngineOutcome.nextStepPhrase}
             </p>
             <button onClick={() => navigate('/phase2/proposals')} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-               Trocar Abordagem Base
+               Tentar Nova Abordagem
             </button>
           </div>
         )}

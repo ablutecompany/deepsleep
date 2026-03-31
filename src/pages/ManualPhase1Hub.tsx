@@ -29,11 +29,11 @@ export function ManualPhase1Hub() {
 
   const handleDelete = (log: ManualAppLog) => {
     if (log.sleepType === 'NIGHT' && log.countsForBaseline && validNights.length === 5) {
-      if (!window.confirm("⚠️ AVISO CRÍTICO DE BASELINE\n\nAo apagar esta noite válida, ficarás com menos de 5 registos matematicamente estáveis. A app irá invalidar o teu perfil atual e suspender qualquer interpretação ou plano ativo até registares novos dados.\n\nQueres mesmo forçar esta purga e apagar a noite?")) {
+      if (!window.confirm("Atenção: Vais apagar uma noite importante.\n\nAo apagares esta noite, ficarás com menos de 5 noites válidas. Até juntares mais 1 noite, teremos de colocar o teu plano atual em espera, para garantir que as nossas dicas se baseiam no teu sono real.\n\nQueres mesmo apagar esta noite?")) {
         return;
       }
     } else {
-      if (!window.confirm("Queres mesmo apagar este registo? A ação não pode ser desfeita.")) {
+      if (!window.confirm("Queres apagar este registo? Esta ação não pode ser recuperada.")) {
         return;
       }
     }
@@ -59,8 +59,8 @@ export function ManualPhase1Hub() {
           </h1>
           <p style={{ marginTop: '12px', fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
             {done 
-              ? 'A tua baseline orgânica está estabilizada matematicamente. Podes consultar o teu historial abaixo.'
-              : 'Para impedir falsos positivos, necessitamos de pelo menos 5 noites válidas observadas para validar o teu motor mecânico basal.'}
+              ? 'Já conhecemos o teu perfil inicial. Podes rever o teu histórico abaixo.'
+              : 'Precisamos de avaliar 5 noites de sono tuas para perceber o teu ritmo natural com eficácia.'}
           </p>
         </header>
 
@@ -84,10 +84,10 @@ export function ManualPhase1Hub() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Ear size={20} color="#38BDF8" />
-                <span style={{ fontWeight: 600, fontSize: '15px', color: '#F8FAFC' }}>Pendência Matinal Encontrada</span>
+                <span style={{ fontWeight: 600, fontSize: '15px', color: '#F8FAFC' }}>Completa a Avaliação Sonora de Ontem</span>
               </div>
               <p style={{ fontSize: '13px', color: '#CBD5E1', lineHeight: '1.4' }}>
-                 Possuis uma observação acústica de hoje terminada. Falta anexares a tua própria percepção lógica da noite para fechar a correlação analítica.
+                 A app já fez o processamento sonoro da tua noite. Só precisas de acrescentar a tua percepção pessoal para juntarmos tudo.
               </p>
               <span style={{ fontSize: '14px', fontWeight: 500, marginTop: '8px' }}>Completar Registo da Noite →</span>
             </button>
@@ -130,7 +130,7 @@ export function ManualPhase1Hub() {
             }}
           >
             <Ear size={14} color="#38BDF8" />
-            <span>Observação Acústica Automática <span style={{ opacity: 0.5, fontSize: '11px', textTransform: 'uppercase', marginLeft: '6px' }}>Beta</span></span>
+            <span>Ferramenta de Escuta Sonora <span style={{ opacity: 0.5, fontSize: '11px', textTransform: 'uppercase', marginLeft: '6px' }}>Beta Automático</span></span>
           </button>
 
           {logs.length === 0 && (
@@ -210,7 +210,7 @@ export function ManualPhase1Hub() {
                        return (
                          <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                            <Ear size={14} color="#64748B" opacity={0.5} />
-                           <span style={{ fontSize: '12px', color: '#64748B', opacity: 0.5 }}>Sem observação acústica local</span>
+                           <span style={{ fontSize: '12px', color: '#64748B', opacity: 0.5 }}>Sem processamento sonoro associado</span>
                          </div>
                        );
                     }
@@ -221,16 +221,16 @@ export function ManualPhase1Hub() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                           <Ear size={14} color="#38BDF8" />
                           <span style={{ fontSize: '13px', color: '#38BDF8', fontWeight: 500 }}>
-                             {isUsable ? 'Observação Acústica (Beta)' : 'Sessão Acústica Insuficiente'}
+                             {isUsable ? 'Processamento Sonoro Local' : 'Áudio Corrompido/Curto'}
                           </span>
                         </div>
                         {isUsable && linkedSensing.summary?.dominantDisturbance ? (
                           <div style={{ fontSize: '12px', color: '#94A3B8', paddingLeft: '20px', lineHeight: '1.4' }}>
-                           <strong>Sinal:</strong> {linkedSensing.summary.dominantDisturbance}
+                           <strong>Detetado:</strong> {linkedSensing.summary.dominantDisturbance}
                           </div>
                         ) : (
                           <div style={{ fontSize: '12px', color: '#94A3B8', paddingLeft: '20px' }}>
-                            Amostra corrompida ({linkedSensing.contaminationReasons?.[0] || 'ruído/curta'})
+                            Sem resumo sonoro claro ({linkedSensing.contaminationReasons?.[0] || 'ruído/curta'})
                           </div>
                         )}
                       </div>

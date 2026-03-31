@@ -46,17 +46,17 @@ export function ProcessHome() {
           return (
             <div className="fade-in" style={{ padding: '24px', background: 'rgba(56, 189, 248, 0.05)', borderRadius: '12px', border: '1px solid rgba(56, 189, 248, 0.2)', marginBottom: '24px' }}>
                <h3 style={{ fontSize: '20px', color: '#F8FAFC', fontWeight: 300, marginBottom: '8px', lineHeight: 1.3 }}>
-                 A tua manhã está pendente
+                 A tua gravação de ontem está pronta
                </h3>
                <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: 1.5, marginBottom: '24px', fontWeight: 300 }}>
-                 Terminaste a tua gravação local silenciosa mas não fechaste a componente manual necessária para extrair o teu basal. Completa agora.
+                 A app já fez o processamento sonoro da tua noite. Só precisas de acrescentar a tua percepção rápida num bloco para cruzarmos as análises.
                </p>
                <button 
                  onClick={() => navigate(`/manual_log_form?fromSensing=true&sessionId=${unlinkedSensing.id}`)}
                  className="primary-btn" 
                  style={{ width: '100%', justifyContent: 'center', background: '#38BDF8', color: '#0F172A', fontWeight: 500 }}
                >
-                 Completar Diário e Resumo Matinal
+                 Juntar o meu Diário à Gravação
                </button>
             </div>
           );
@@ -128,7 +128,7 @@ export function ProcessHome() {
                 <div className="editorial-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '24px', borderRadius: '12px', marginBottom: '24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                     <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#10B981', fontWeight: 600 }}>
-                      Direção Ativa · Dia {Math.max(1, Object.keys(cycle.dailyCheckins).length + (cycle.dailyCheckins[todayStr] ? 0 : 1))} de {cycle.minDays}
+                      O teu Plano · Dia {Math.max(1, Object.keys(cycle.dailyCheckins).length + (cycle.dailyCheckins[todayStr] ? 0 : 1))} de {cycle.minDays}
                     </span>
                   </div>
 
@@ -159,7 +159,7 @@ export function ProcessHome() {
 
                 {!cycle.dailyCheckins[todayStr] && Object.keys(cycle.dailyCheckins).length >= cycle.minDays && (
                   <button onClick={() => navigate('/phase3_home')} className="primary-btn" style={{ width: '100%', justifyContent: 'center', marginTop: '24px' }}>
-                    Esta janela está pronta para a revisão técnica
+                    A avaliação desta tua fase está pronta para veres
                   </button>
                 )}
               </div>
@@ -227,10 +227,10 @@ export function ProcessHome() {
                  Tudo pronto para avançar.
                </h3>
                <p style={{ fontSize: '15px', color: '#94A3B8', lineHeight: 1.6, marginBottom: '32px', fontWeight: 300 }}>
-                 A leitura do teu historial gerou um vetor focado na fricção real. A tua proposta inicial para a próxima fase está pendente.
+                 A análise do teu historial criou um plano focado exatamente no teu ponto fraco principal. O plano de ação está pronto para veres.
                </p>
                <button onClick={() => navigate('/phase2/proposals')} className="primary-btn" style={{ width: '100%', justifyContent: 'center' }}>
-                 Ver Proposta Pendente
+                 Ver o teu Plano
                </button>
             </div>
           );
@@ -239,18 +239,18 @@ export function ProcessHome() {
         // --- CASO 3: Fase 1 Concluída. Faltam propostas / entry Phase 2
         if (phase1Done) {
           return (
-            <div className="fade-in" style={{ padding: '32px 20px', textAlign: 'center' }}>
+             <div className="fade-in" style={{ padding: '32px 20px', textAlign: 'center' }}>
                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
                  <CheckCircle2 size={28} color="#10B981" />
                </div>
                <h3 style={{ fontSize: '26px', color: '#F8FAFC', fontWeight: 300, marginBottom: '16px', lineHeight: 1.2 }}>
-                 Já tens base suficiente para a leitura inicial.
+                 Já conhecemos bem o teu sono.
                </h3>
                <p style={{ fontSize: '15px', color: '#94A3B8', lineHeight: 1.6, marginBottom: '40px', fontWeight: 300 }}>
-                 Com {nightCount} noites estabilizamos o perfil orgânico. Falta fechar a tua leitura inicial para gerarmos o primeiro vetor prático.
+                 Com {nightCount} noites guardadas, a app já aprendeu o teu perfil base. Só falta fecharmos uma última avaliação tua para criarmos o teu primeiro plano.
                </p>
                <button onClick={() => navigate('/phase2/entry')} className="primary-btn" style={{ width: '100%', justifyContent: 'center', background: '#38BDF8' }}>
-                 Fechar leitura inicial
+                 Criar o teu Perfil Personalizado
                  <ArrowRight size={18} style={{ marginLeft: '8px' }} />
                </button>
             </div>
@@ -262,10 +262,10 @@ export function ProcessHome() {
           <div className="fade-in" style={{ padding: '24px 16px', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center' }}>
             <Calendar size={28} color="#94A3B8" style={{ marginBottom: '20px', margin: '0 auto' }} />
             <h3 style={{ fontSize: '22px', color: '#F8FAFC', fontWeight: 300, marginBottom: '12px', lineHeight: 1.3 }}>
-              Base matemática pendente ({nightCount}/5).
+              Precisamos que registes o teu sono ({nightCount}/5).
             </h3>
             <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: 1.6, marginBottom: '32px', fontWeight: 300 }}>
-              Para impedir falsos positivos no motor, exigimos um basal prudente de 5 dias. Sempre que os teus registos descem deste limite, todas as propostas ativas são suspensas até restabeleceres a estabilidade basal.
+              Para garantirmos que as nossas avaliações são corretas para o teu caso, precisamos de pelo menos 5 noites. Quando tens menos, o teu plano pausa as sugestões para nós não dizermos "disparates" com pouca informação.
             </p>
             <button onClick={() => navigate('/manual_log_hub')} className="primary-btn" style={{ width: '100%', justifyContent: 'center' }}>
              Ver / Adicionar Registos
