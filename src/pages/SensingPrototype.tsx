@@ -27,6 +27,13 @@ export function SensingPrototype() {
       if (!engineRef.current) engineRef.current = new AcousticSensingEngine();
       await engineRef.current.startSession();
       setStatus('recording');
+      
+      // Tentativa silenciosa de Fullscreen para reduzir luz de botões de sistema
+      try {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch (e) {}
     } catch (e: any) {
       if (e.message === 'permission_denied') {
         setErrorMsg('Permissão de microfone negada. Válida as tuas definições de browser.');
@@ -51,25 +58,14 @@ export function SensingPrototype() {
   
   if (status === 'recording') {
     return (
-      <div style={{ backgroundColor: '#000000', color: '#111111', height: '100vh', display: 'flex', flexDirection: 'column', padding: '24px' }}>
-        {/* Pitch Black State com elementos visuais cinza muito escuro para não queimar ecrã nem magoar vista/sono */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <p style={{ fontSize: '12px', letterSpacing: '2px', textAlign: 'center', opacity: 0.5, marginBottom: '24px' }}>
-             SESSÃO ACÚSTICA ACTIVA
-          </p>
-          <div style={{ padding: '32px', border: '1px solid #1a1a1a', borderRadius: '50%' }}>
-            <Moon size={32} color="#1a1a1a" />
-          </div>
-          <p style={{ marginTop: '24px', fontSize: '11px', textAlign: 'center', opacity: 0.3, maxWidth: '200px' }}>
-            A calcular ruído ambiente sem gravar conversas. Ecrã preso via Wakelock.
-          </p>
-        </div>
-
+      <div style={{ backgroundColor: '#000000', height: '100vh', display: 'flex', flexDirection: 'column', padding: '24px', cursor: 'none' }}>
+        {/* AMOLED Black - No light, No distracting text */}
+        <div style={{ flex: 1 }} onClick={handleStop} />
         <button 
           onClick={handleStop}
-          style={{ width: '100%', padding: '24px', background: '#0a0a0a', border: 'none', color: '#444444', fontSize: '14px', borderRadius: '8px' }}
+          style={{ width: '100%', padding: '24px', background: 'transparent', border: 'none', color: '#050505', fontSize: '10px', borderRadius: '8px' }}
         >
-          Acordar / Desativar Sessão
+          Toca em qualquer ponto para terminar
         </button>
       </div>
     );
@@ -80,18 +76,18 @@ export function SensingPrototype() {
       <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/control')} />
       
       <header style={{ marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Observação Acústica<br/><span style={{ color: '#38BDF8' }}>(Protótipo Local)</span></h1>
+        <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Observação de som</h1>
         
         {status === 'idle' && (
           <div style={{ marginTop: '24px', background: 'rgba(56, 189, 248, 0.05)', padding: '24px', borderRadius: '12px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
             <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#94A3B8' }}>
-              Esta camada beta valida métricas de perturbação e variação de ambiente basal (ruídos do canal) num sistema totalmente isolado à Internet.<br/><br/>
+              Esta funcionalidade permite detetar sons que possam estar a quebrar o teu sono, sem enviar nada para fora do teu telemóvel.<br/><br/>
               <strong style={{ color: '#E2E8F0' }}>O que vai acontecer:</strong>
             </p>
             <ul style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', paddingLeft: '20px', fontSize: '14px', color: '#64748B', lineHeight: '1.5' }}>
-              <li><strong>Nenhum áudio de voz ou ronco será gravado na memória.</strong> Extraimos amplitudes silenciosamente a cada 2s e destruímos imediatamente a matriz crúa.</li>
-              <li>O ecrã ficará virtualmente preso e num <strong>breu escuro</strong> para simular _sleep mode_.</li>
-              <li>Consome mais bateria devido ao bloqueio ativo do browser (Wakelock). <strong style={{color: '#94A3B8'}}>Deixa ligado à corrente.</strong></li>
+              <li><strong>Não gravamos vozes nem conversas.</strong> A app apenas mede a intensidade do som ambiente.</li>
+              <li>O ecrã ficará totalmente preto para não incomodar o teu descanso.</li>
+              <li>Consome bateria porque o telemóvel precisa de estar activo. <strong style={{color: '#94A3B8'}}>Deixa ligado à corrente.</strong></li>
             </ul>
           </div>
         )}
@@ -99,7 +95,7 @@ export function SensingPrototype() {
       
       {status === 'idle' && (
         <button className="primary-btn" onClick={handleStart} style={{ marginTop: '32px' }}>
-          <Mic size={18} style={{ marginRight: '8px' }}/> Iniciar Sessão Prudente
+          <Mic size={18} style={{ marginRight: '8px' }}/> Iniciar Observação
         </button>
       )}
 
@@ -118,21 +114,21 @@ export function SensingPrototype() {
            </div>
 
            <div>
-             <h3 className="kicker" style={{ color: '#94A3B8', marginBottom: '8px' }}>Resumo (Experimental)</h3>
+             <h3 className="kicker" style={{ color: '#94A3B8', marginBottom: '8px' }}>Resumo da noite</h3>
              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                <li style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', borderLeft: '2px solid #38BDF8' }}>
                  <p style={{ fontSize: '14px', color: '#E2E8F0' }}>
-                   {result.qualityState === 'pristine' ? 'Canal limpo e estável.' : (result.qualityState === 'degraded' ? 'Canal degradado. Existiram perturbações externas.' : 'Canal ruidoso/inválido. Não utilizável.')}
+                   {result.qualityState === 'pristine' ? 'Ambiente estável e silencioso.' : (result.qualityState === 'degraded' ? 'Houve algumas interferências de som.' : 'O ambiente estava demasiado ruidoso.')}
                  </p>
                </li>
                <li style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px' }}>
                  <p style={{ fontSize: '14px', color: '#E2E8F0' }}>
-                   {result.derivedFeatures?.suspectedFragmentationEvents ? `Foram registados ${result.derivedFeatures.suspectedFragmentationEvents} picos sonoros fora da base do silêncio.` : 'Nenhum pico agressivo de som captado.'}
+                   {result.derivedFeatures?.suspectedFragmentationEvents ? `Foram detetados ${result.derivedFeatures.suspectedFragmentationEvents} momentos de som fora do normal.` : 'Não houve ruídos significativos.'}
                  </p>
                </li>
              </ul>
              <p style={{ fontSize: '13px', color: '#64748B', marginTop: '16px', lineHeight: '1.4' }}>
-               Esta leitura é apenas um fragmento da noite. A verdadeira avaliação biológica despende da tua sensação matinal. Vamos fundir a informação.
+               Estes dados são apenas uma parte da análise. O mais importante é o teu registo matinal.
              </p>
            </div>
            
@@ -145,11 +141,11 @@ export function SensingPrototype() {
            </button>
            
            <button 
-             onClick={() => navigate('/')} 
+             onClick={() => navigate('/process_home')} 
              className="text-btn" 
              style={{ justifyContent: 'center', color: '#64748B' }}
            >
-             Deixar dados pendentes na grelha
+             Ignorar e voltar à Home
            </button>
         </div>
       )}

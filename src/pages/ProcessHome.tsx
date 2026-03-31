@@ -100,7 +100,7 @@ export function ProcessHome() {
                     </span>
                     
                     <h3 style={{ fontSize: '20px', color: '#F8FAFC', fontWeight: 300, lineHeight: '1.4', marginBottom: '8px' }}>
-                      {proposal?.reviewQuestions?.adesao || proposal?.reportQuestion || "Cumpriste a tua diretriz na noite passada?"}
+                      {proposal?.reviewQuestions?.adesao || proposal?.reportQuestion || "Conseguiste seguir o teu objetivo na noite passada?"}
                     </h3>
                     
                     <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: 1.5, marginBottom: '24px', fontWeight: 300 }}>
@@ -148,7 +148,7 @@ export function ProcessHome() {
                     <div style={{ width: '4px', height: '16px', borderRadius: '2px', background: 'transparent', border: '1px solid #64748B', marginTop: '4px' }}></div>
                     <span style={{ fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
                       <strong style={{ color: '#64748B', fontWeight: 400, marginRight: '6px' }}>Amanhã:</strong> 
-                      Vamos pedir-te que digas se cumpriste e se notaste diferença.
+                      Poderás confirmar se cumpriste e se notaste diferença.
                     </span>
                   </div>
 
@@ -171,18 +171,18 @@ export function ProcessHome() {
             let ctaAction = () => navigate('/phase2/proposals');
 
             if (cycle.status === 'completed_keep') {
-               titleText = "Mantemos esta direção por agora";
-               ctaText = "Ver Evolução nos Padrões";
+               titleText = "Mantemos este caminho por agora";
+               ctaText = "Ver Evolução";
                ctaAction = () => navigate('/patterns');
             } else if (cycle.status === 'completed_adjust') {
-               titleText = "Vamos ajustar o foco com base no que reportaste";
+               titleText = "Vamos ajustar o foco com base no que sentiste";
                ctaText = "Afinar Próximo Passo";
             } else if (cycle.status === 'completed_switch') {
-               titleText = "Temos base concreta para mudar de direção";
-               ctaText = "Avançar com Nova Tática";
+               titleText = "Temos base concreta para mudar de estratégia";
+               ctaText = "Tentar Nova Abordagem";
             } else if (cycle.status === 'pending_reassessment') {
                titleText = "Antes de mudar, precisamos de perceber um ponto";
-               ctaText = "Responder 3 perguntas curtas";
+               ctaText = "Responder a 3 perguntas curtas";
                ctaAction = () => navigate('/phase3_home'); // Rota de reavaliação se existir
             }
 
@@ -205,12 +205,12 @@ export function ProcessHome() {
                 </button>
                 
                 <button onClick={() => {
-                  if (window.confirm("Atenção: isto descarta a tática atual temporariamente.")) {
+                  if (window.confirm("Atenção: isto descarta a estratégia atual temporariamente.")) {
                     localStorage.removeItem('deepsleep_phase3_cycle');
                     window.location.reload();
                   }
                 }} className="text-btn" style={{ opacity: 0.4, marginTop: '8px' }}>
-                  Descartar tática
+                  Descartar estratégia
                 </button>
               </div>
             );
@@ -265,7 +265,7 @@ export function ProcessHome() {
               Precisamos que registes o teu sono ({nightCount}/5).
             </h3>
             <p style={{ fontSize: '14px', color: '#94A3B8', lineHeight: 1.6, marginBottom: '32px', fontWeight: 300 }}>
-              Para garantirmos que as nossas avaliações são corretas para o teu caso, precisamos de pelo menos 5 noites. Quando tens menos, o teu plano pausa as sugestões para nós não dizermos "disparates" com pouca informação.
+              Para garantir que as avaliações são corretas, precisamos de pelo menos 5 noites. Com menos registos, o plano pausa as sugestões para evitar conclusões precipitadas.
             </p>
             <button onClick={() => navigate('/manual_log_hub')} className="primary-btn" style={{ width: '100%', justifyContent: 'center' }}>
              Ver / Adicionar Registos

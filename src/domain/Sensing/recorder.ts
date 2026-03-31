@@ -147,7 +147,12 @@ export class AcousticSensingEngine {
         dominantDisturbance
       },
       linkedNightId: null,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      metadata: {
+        sampleCount: this.volumeHistory.length,
+        averageRMS,
+        isRecovered: stopReason !== 'user_stopped'
+      }
     };
 
     return session;

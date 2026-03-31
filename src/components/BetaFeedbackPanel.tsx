@@ -72,7 +72,7 @@ export function BetaFeedbackPanel() {
           backdropFilter: 'blur(8px)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
         }}
-        aria-label="Reportar Fricção"
+        aria-label="Reportar Dificuldade"
       >
         <MessageSquareWarning size={20} />
       </button>
@@ -103,14 +103,14 @@ export function BetaFeedbackPanel() {
             {submitted ? (
               <div style={{ textAlign: 'center', padding: '40px 20px' }}>
                 <MessageSquareWarning size={40} color="#10B981" style={{ margin: '0 auto 16px', opacity: 0.8 }} />
-                <h3 style={{ color: '#F8FAFC', fontSize: '18px', marginBottom: '8px' }}>Fricção Registada</h3>
+                <h3 style={{ color: '#F8FAFC', fontSize: '18px', marginBottom: '8px' }}>Feedback Registado</h3>
                 <p style={{ color: '#94A3B8', fontSize: '14px', fontWeight: 300 }}>Este reporte ficará contido na exportação final da tua simulação.</p>
               </div>
             ) : (
               <>
-                <h3 className="kicker" style={{ color: '#F59E0B', marginBottom: '16px' }}>[Beta] Reporte de Fricção</h3>
+                <h3 className="kicker" style={{ color: '#F59E0B', marginBottom: '16px' }}>[Beta] Reporte de Dificuldade</h3>
                 <p style={{ color: '#E2E8F0', fontSize: '14px', marginBottom: '24px', fontWeight: 300, lineHeight: 1.5 }}>
-                  O que quebrou a fluidez ou a confiança neste ecrã?
+                  O que quebrou a tua confiança neste ecrã?
                 </p>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px', marginBottom: '24px' }}>
@@ -161,7 +161,7 @@ export function BetaFeedbackPanel() {
                   className="primary-btn" 
                   style={{ width: '100%', justifyContent: 'center', opacity: !selectedCat ? 0.3 : 1 }}
                 >
-                  Registar Dificuldade Local
+                  Registar Feedback
                 </button>
               </>
             )}

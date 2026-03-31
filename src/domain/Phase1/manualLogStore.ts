@@ -85,7 +85,7 @@ export function calculateValidity(log: Partial<ManualAppLog>) {
   return { validityScore: score, countsForBaseline, isCompleteEnough };
 }
 
-// Sub-rotina crtítica de Purga (Gating Integrity)
+// Sub-rotina crítica de Integridade (Gating)
 function recalculateGatingIntegrity(updatedLogs: ManualAppLog[]) {
   const validNightsPattern = updatedLogs.filter(l => l.sleepType === 'NIGHT' && l.countsForBaseline);
   const validCount = validNightsPattern.length;
@@ -94,9 +94,9 @@ function recalculateGatingIntegrity(updatedLogs: ManualAppLog[]) {
 
   // Se o utilizador apagar noites ao ponto de descer da base mínima (5)
   if (validCount < 5) {
-    // Purga a fase matemática (A BaseDeDado Fricção)
+    // Remove a fase matemática (A Base de Dados de Obstáculos)
     localStorage.removeItem('deepsleep_phase2_context');
-    // Purga o Ciclo de Teste Activo e Outcomes (Não existe ciclo sem plano)
+    // Remove o Ciclo de Teste Ativo e Resultados (Não existe ciclo sem plano)
     localStorage.removeItem('deepsleep_phase3_cycle');
     
     // Anuncia de forma forçada uma invalidação central (Para a Home se ajustar)

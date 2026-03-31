@@ -48,7 +48,7 @@ export const appClock = {
 
   /**
    * Reseta a app para o tempo real.
-   * Opcionalmente purga todos os dados criados no "futuro" pela beta,
+   * Opcionalmente remove todos os dados criados no "futuro" pela beta,
    * para evitar estados paradoxais onde a app acha que preencheste registos amanhã.
    */
   reset() {
@@ -76,8 +76,8 @@ export const appClock = {
         localStorage.setItem('deepsleep_manual_logs', JSON.stringify(logs));
       }
 
-      // 2. Tentar purgar ciclo da Fase 3 se tivermos avançado mais que os limites da realidade
-      // Para manter tudo seguro na purga, destruímos o ciclo temporário de Fase 3 e os registos corrompidos.
+      // 2. Tentar limpar ciclo da Fase 3 se tivermos avançado mais que os limites da realidade
+      // Para manter a segurança, destruímos o ciclo temporário de Fase 3 e os registos corrompidos.
       const cycleStore = localStorage.getItem('deepsleep_phase3_cycle');
       if (cycleStore) {
         try {
@@ -90,7 +90,7 @@ export const appClock = {
           
           if (hasFutureCheckin || (parsedCycle.createdAt && parsedCycle.createdAt.split('T')[0] > realTodayStr)) {
              localStorage.removeItem('deepsleep_phase3_cycle');
-             console.warn('[Beta] Ciclo Fase 3 purgado pois continha dados com data simulada futura.');
+             console.warn('[Beta] Ciclo Fase 3 removido pois continha dados com data simulada futura.');
           }
         } catch(e){}
       }

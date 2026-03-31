@@ -83,10 +83,10 @@ export const QUESTIONS_BANK: Record<string, Question> = {
     type: 'single_choice',
     text: 'Quando pensas numa noite “boa”, o que costuma estar diferente?',
     options: [
-      { id: 'A', text: 'O meu corpo desliga mais depressa' },
-      { id: 'B', text: 'A minha cabeça vem mais calma' },
+      { id: 'A', text: 'Corpo desliga mais depressa' },
+      { id: 'B', text: 'Cabeça vem mais calma' },
       { id: 'C', text: 'O dia foi mais leve' },
-      { id: 'D', text: 'Houve menos interrupções à minha volta' },
+      { id: 'D', text: 'Houve menos interrupções à volta' },
       { id: 'E', text: 'Não noto um padrão claro' }
     ]
   },
@@ -169,7 +169,7 @@ export const QUESTIONS_BANK: Record<string, Question> = {
     options: [
       { id: 'A', text: 'Dias intensos' },
       { id: 'B', text: 'Noites desorganizadas' },
-      { id: 'C', text: 'Pessoas / casa / contexto' },
+      { id: 'C', text: 'Contexto / casa / pessoas' },
       { id: 'D', text: 'Sintomas físicos' },
       { id: 'E', text: 'Mudanças de horário' }
     ]
@@ -194,7 +194,7 @@ export const QUESTIONS_BANK: Record<string, Question> = {
       { id: 'A', text: 'Adormecer é a parte difícil' },
       { id: 'B', text: 'Manter o sono é a parte difícil' },
       { id: 'C', text: 'Acordar cedo demais é a parte difícil' },
-      { id: 'D', text: 'O problema é a sensação de sono pouco reparador' },
+      { id: 'D', text: 'Sensação de sono pouco reparador' },
       { id: 'E', text: 'O problema muda de forma' }
     ]
   },

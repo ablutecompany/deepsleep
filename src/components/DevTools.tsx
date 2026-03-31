@@ -71,7 +71,7 @@ export function DevTools() {
           </div>
           <button 
             onClick={() => {
-              if (window.confirm("Queres apagar todo o avanço de progresso (Fase 3 e registos) simulado agora no futuro e repor no dia de hoje?\n\n(Ok = Purgar dados futuros, Cancelar = Só acertar o relógio para hoje)")) {
+              if (window.confirm("Queres apagar todo o avanço de progresso (Fase 3 e registos) simulado agora no futuro e repor no dia de hoje?\n\n(Ok = Apagar dados futuros, Cancelar = Só acertar o relógio para hoje)")) {
                 // Hard reset tático exigido
                 const realToday = new Date();
                 const rY = realToday.getFullYear();

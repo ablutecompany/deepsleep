@@ -53,14 +53,14 @@ export function ManualPhase1Hub() {
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/process_home')} />
         
         <header style={{ marginBottom: '32px' }}>
-          <span className="kicker" style={{ color: '#64748B', marginBottom: '8px' }}>Fase 1 · Registo Integrado</span>
+          <span className="kicker" style={{ color: '#64748B', marginBottom: '8px' }}>Fase 1 · Registo de Noite</span>
           <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
             {progress} de {target} <span style={{ color: '#64748B' }}>noites</span>
           </h1>
           <p style={{ marginTop: '12px', fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
             {done 
-              ? 'Já conhecemos o teu perfil inicial. Podes rever o teu histórico abaixo.'
-              : 'Precisamos de avaliar 5 noites de sono tuas para perceber o teu ritmo natural com eficácia.'}
+              ? 'Já conhecemos o teu perfil básico. Revê o historial abaixo.'
+              : 'Precisamos de 5 noites para perceber o teu ritmo natural com clareza.'}
           </p>
         </header>
 
@@ -84,10 +84,10 @@ export function ManualPhase1Hub() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Ear size={20} color="#38BDF8" />
-                <span style={{ fontWeight: 600, fontSize: '15px', color: '#F8FAFC' }}>Completa a Avaliação Sonora de Ontem</span>
+                <span style={{ fontWeight: 600, fontSize: '15px', color: '#F8FAFC' }}>Completa o registo da noite passada</span>
               </div>
               <p style={{ fontSize: '13px', color: '#CBD5E1', lineHeight: '1.4' }}>
-                 A app já fez o processamento sonoro da tua noite. Só precisas de acrescentar a tua percepção pessoal para juntarmos tudo.
+                 A app já registou o ambiente da tua noite. Só precisas de acrescentar como te sentiste para juntarmos tudo.
               </p>
               <span style={{ fontSize: '14px', fontWeight: 500, marginTop: '8px' }}>Completar Registo da Noite →</span>
             </button>
@@ -130,7 +130,7 @@ export function ManualPhase1Hub() {
             }}
           >
             <Ear size={14} color="#38BDF8" />
-            <span>Ferramenta de Escuta Sonora <span style={{ opacity: 0.5, fontSize: '11px', textTransform: 'uppercase', marginLeft: '6px' }}>Beta Automático</span></span>
+            <span>Observação Experimental (Som)</span>
           </button>
 
           {logs.length === 0 && (
@@ -221,7 +221,7 @@ export function ManualPhase1Hub() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                           <Ear size={14} color="#38BDF8" />
                           <span style={{ fontSize: '13px', color: '#38BDF8', fontWeight: 500 }}>
-                             {isUsable ? 'Processamento Sonoro Local' : 'Áudio Corrompido/Curto'}
+                             {isUsable ? 'Observação Experimental (Som)' : 'Dados insuficientes/curtos'}
                           </span>
                         </div>
                         {isUsable && linkedSensing.summary?.dominantDisturbance ? (
@@ -230,7 +230,7 @@ export function ManualPhase1Hub() {
                           </div>
                         ) : (
                           <div style={{ fontSize: '12px', color: '#94A3B8', paddingLeft: '20px' }}>
-                            Sem resumo sonoro claro ({linkedSensing.contaminationReasons?.[0] || 'ruído/curta'})
+                            Sem resumo claro da noite ({linkedSensing.contaminationReasons?.[0] || 'ruído/curta'})
                           </div>
                         )}
                       </div>

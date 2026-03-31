@@ -37,4 +37,9 @@ export interface SleepObservationSession extends SyncableBaseEntity {
   linkedNightId: string | null; // Acoplamento a ManualLog se aplicável
   createdAt: string;
   endedReason?: string;
+  metadata?: {
+    sampleCount: number;
+    averageRMS: number;
+    isRecovered: boolean;
+  };
 }

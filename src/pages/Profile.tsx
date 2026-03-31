@@ -100,7 +100,7 @@ export function Profile() {
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/process_home')} />
         
         <header style={{ marginBottom: '40px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Perfil do teu sono.</h1>
+          <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2' }}>Perfil do sono.</h1>
           <p style={{ marginTop: '12px', fontSize: '15px', color: '#94A3B8', fontWeight: 300, lineHeight: '1.5' }}>
             {nightCount < 5 
               ? 'O teu perfil orgânico está em construção. Quantas mais noites válidas inserires, mais forte se tornará este ecrã base.' 
@@ -117,7 +117,7 @@ export function Profile() {
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
              <div className="editorial-card" style={{ padding: '20px' }}>
-               <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Duração na Cama média</span>
+               <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748B' }}>Tempo médio na cama</span>
                <h3 style={{ fontSize: '24px', fontWeight: 300, color: '#F8FAFC', marginTop: '8px' }}>{formatHrs(avgDurationMin)}</h3>
              </div>
              <div className="editorial-card" style={{ padding: '20px' }}>

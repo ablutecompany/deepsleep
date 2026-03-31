@@ -47,7 +47,7 @@ export function Phase3StoreProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('deepsleep_phase3_cycle');
     const deliverableExists = localStorage.getItem('deepsleep_phase2_deliverable');
     
-    // Purga agressiva de estados se houver desamparo (hidratação limpa)
+    // Limpeza de estados se o plano de Phase 2 desaparecer
     if (saved && !deliverableExists) {
        localStorage.removeItem('deepsleep_phase3_cycle');
        return null;

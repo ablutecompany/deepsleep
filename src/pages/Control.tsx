@@ -31,7 +31,7 @@ export function Control() {
 
   const handleExportProfile = () => {
     if (!deliverable) {
-      alert("Ainda não tens um perfil mecânico estabilizado para exportar.");
+      alert("Ainda não tens um perfil de sono estabilizado para exportar.");
       return;
     }
     downloadFile(`deepsleep_perfil_${appClock.todayStr()}.json`, JSON.stringify(deliverable, null, 2));
@@ -75,7 +75,7 @@ export function Control() {
 
   const handleExportTelemetry = () => {
     const data = getTelemetryLogs();
-    downloadFile(`deepsleep_telemetria_${appClock.todayStr()}.json`, JSON.stringify(data, null, 2));
+    downloadFile(`deepsleep_dados_${appClock.todayStr()}.json`, JSON.stringify(data, null, 2));
   };
 
   const handleExportSensing = () => {
@@ -92,13 +92,13 @@ export function Control() {
     const todaysLog = logs.find(l => l.dateStr === today);
     
     if (!todaysLog) {
-      alert(`Não existem registos mecânicos associados a hoje (${today}).`);
+      alert(`Não existem registos de sono associados a hoje (${today}).`);
       return;
     }
     
-    if (window.confirm(`Vais apagar o registo da noite de ${today}.\n\nAo fazeres isto, qualquer som gravado nesta janela também será deitado fora. Se baixares das 5 noites limite do histórico, vamos ter de suspender o encosto dos teus conselhos diários.\n\nQueres mesmo apagar isto?`)) {
+    if (window.confirm(`Vais apagar o registo da noite de ${today}.\n\nAo fazeres isto, qualquer som registado nesta janela também será apagado. Se desceres das 5 noites necessárias no histórico, vamos ter de deixar de mostrar os teus conselhos diários.\n\nQueres mesmo apagar isto?`)) {
       evaporateNightCascade(todaysLog.id);
-      alert("A noite foi apagada do teu historial.");
+      alert("A noite foi apagada do teu histórico.");
       navigate('/');
     }
   };
@@ -116,7 +116,7 @@ export function Control() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!window.confirm("⚠️ RESTORE DE SEGURANÇA ⚠️\n\nVais descarregar um Snapshot agressivo e substituir TODOS os dados do teu telemóvel por este ficheiro.\nIsto serve para não perderes semanas de teste se o storage se corromper. Confirmas?")) {
+    if (!window.confirm("⚠️ RESTORE DE SEGURANÇA ⚠️\n\nVais descarregar uma Cópia de Segurança e substituir TODOS os dados do teu telemóvel por este ficheiro.\nIsto serve para não perderes semanas de teste se a memória se corromper. Confirmas?")) {
        return;
     }
 
@@ -126,7 +126,7 @@ export function Control() {
        if (str) {
          const success = restoreFromSnapshot(str);
          if (success) {
-           alert("Restore Concluído. A app vai reinicializar todos os fluxos e motor com os novos dados.");
+           alert("Cópia restaurada. A app vai reiniciar com os novos dados.");
            window.location.href = '/';
          } else {
            alert("Falha no Restore. Ficheiro incompatível ou corrompido.");
@@ -151,7 +151,7 @@ export function Control() {
           
           <div className="permission-block">
             <div className="permission-header">
-              <h3 className="module-title" style={{ fontSize: '18px' }}>Áudio Nocturno</h3>
+              <h3 className="module-title" style={{ fontSize: '18px' }}>Ambiente do Quarto (Som)</h3>
               <span className="status-label active">Ativo</span>
             </div>
             <p className="module-desc">
@@ -184,7 +184,7 @@ export function Control() {
           <span className="kicker accent">Tempo de Retenção</span>
           <ul className="retention-list">
             <li className="retention-item">
-              <span className="retention-key">Áudio de processamento</span>
+              <span className="retention-key">Observação da noite</span>
               <span className="retention-val">Apenas 24 horas</span>
             </li>
             <li className="retention-item">
@@ -220,16 +220,16 @@ export function Control() {
           </p>
           <ul className="retention-list" style={{ marginTop: 0 }}>
             <li className="retention-item">
-              <span className="retention-key">Sessões Totais</span>
+              <span className="retention-key">Total de noites observadas</span>
               <span className="retention-val">{sensingSessions.length} sessões</span>
             </li>
             <li className="retention-item">
-              <span className="retention-key">Validadas p/ Histórico</span>
-              <span className="retention-val" style={{ color: '#10B981' }}>{sensingUsable} capturas legíveis</span>
+              <span className="retention-key">Noites com dados suficientes</span>
+              <span className="retention-val" style={{ color: '#10B981' }}>{sensingUsable} leituras completas</span>
             </li>
             {sensingErrors > 0 && (
               <li className="retention-item">
-                <span className="retention-key">Interrupções / Corrompidas</span>
+                <span className="retention-key">Sessões incompletas / com falhas</span>
                 <span className="retention-val" style={{ color: '#EF4444' }}>{sensingErrors} falhas</span>
               </li>
             )}
@@ -237,7 +237,7 @@ export function Control() {
         </section>
 
         <section className="editorial-module footer-module" style={{ borderTop: '2px dashed rgba(245, 158, 11, 0.4)', paddingTop: '32px', background: 'rgba(245, 158, 11, 0.02)', padding: '24px', borderRadius: '12px' }}>
-          <span className="kicker" style={{ color: '#F59E0B', marginBottom: '16px' }}>[Beta] Painel Operacional de Sessão</span>
+          <span className="kicker" style={{ color: '#F59E0B', marginBottom: '16px' }}>Estado do teu Plano</span>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', marginBottom: '24px' }}>
              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
@@ -269,37 +269,37 @@ export function Control() {
                     </div>
                     
                     <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', border: unlinkedSensing ? '1px solid rgba(56, 189, 248, 0.4)' : 'none' }}>
-                      <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Wake Flow</div>
-                      <div style={{ fontSize: '16px', color: unlinkedSensing ? '#38BDF8' : '#F8FAFC' }}>{unlinkedSensing ? 'Manhã Pendente' : 'Resolvido'}</div>
+                      <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Manhãs Pendentes</div>
+                      <div style={{ fontSize: '16px', color: unlinkedSensing ? '#38BDF8' : '#F8FAFC' }}>{unlinkedSensing ? 'Registo em falta' : 'Resolvido'}</div>
                     </div>
                   </>
                 );
              })()}
 
              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
-               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Telemetria Ativa</div>
+               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Dados Atuais</div>
                <div style={{ fontSize: '16px', color: '#F8FAFC' }}>{getTelemetryLogs().length} <span style={{fontSize: '11px', color: '#64748B'}}>evts</span></div>
              </div>
              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
-               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Fricção Registada</div>
-               <div style={{ fontSize: '16px', color: getBetaFeedbackRecords().length > 0 ? '#10B981' : '#F8FAFC' }}>{getBetaFeedbackRecords().length} <span style={{fontSize: '11px', color: '#64748B'}}>reps</span></div>
+               <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px' }}>Feedback enviado</div>
+               <div style={{ fontSize: '16px', color: getBetaFeedbackRecords().length > 0 ? '#10B981' : '#F8FAFC' }}>{getBetaFeedbackRecords().length} <span style={{fontSize: '11px', color: '#64748B'}}>itens</span></div>
              </div>
           </div>
         </section>
 
         <section className="editorial-module footer-module" style={{ borderTop: '2px dashed rgba(245, 158, 11, 0.4)', paddingTop: '32px', paddingBottom: '32px', paddingLeft: '24px', paddingRight: '24px', background: 'transparent' }}>
-          <span className="kicker" style={{ color: '#F59E0B', marginBottom: '8px' }}>Dados de Teste (Beta)</span>
+          <span className="kicker" style={{ color: '#F59E0B', marginBottom: '8px' }}>Cópia de Segurança</span>
           <p style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 300, lineHeight: 1.5, marginBottom: '24px' }}>
-            Fotografia útil completa da sessão de teste. Inclui schema, versão, noites, baseline, telemetria acústica e feedback interno.
+            Cópia completa da sessão de teste. Inclui versões, noites guardadas, registos de som e feedback interno.
           </p>
 
           <button onClick={handleExportFullTestSession} className="primary-btn" style={{ width: '100%', justifyContent: 'center', background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)', marginBottom: '16px' }}>
-            Baixar Exportação Agregada (Beta)
+            Fazer Cópia de Segurança Completa
           </button>
 
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', background: 'transparent', border: '1px dashed rgba(245, 158, 11, 0.3)', color: '#F59E0B', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>
              <Upload size={16} />
-             Restaurar Sessão via JSON
+             Restaurar dados via Ficheiro
              <input type="file" accept=".json" onChange={handleImportRestore} style={{ display: 'none' }} />
           </label>
         </section>
@@ -327,19 +327,19 @@ export function Control() {
         </section>
 
         <section className="editorial-module footer-module" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '32px' }}>
-          <span className="kicker" style={{ color: '#38BDF8' }}>Beta Labs (Testes Locais)</span>
+          <span className="kicker" style={{ color: '#38BDF8' }}>Funcionalidades Experimentais</span>
           <div className="action-list" style={{ marginTop: '16px', marginBottom: '32px' }}>
             <button onClick={() => navigate('/sensing')} className="primary-btn action-link" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38BDF8', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
               Testar Observação Acústica
             </button>
             <button onClick={handleExportSensing} className="text-btn action-link" style={{ marginTop: '16px', color: '#94A3B8' }}>
-              Exportar registos acústicos
+              Exportar registos de som
             </button>
             <button onClick={handleExportTelemetry} className="text-btn action-link" style={{ marginTop: '16px', color: '#94A3B8' }}>
-              Exportar telemetria local
+              Exportar dados de utilização
             </button>
             <p style={{ marginTop: '24px', fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>
-              Spike técnico para cálculo de decibéis ambiente. O ecrã ficará preso em modo nocturno de alto-contraste. Sem envio para cloud.
+              Ficheiro técnico para suporte no cálculo de ruído ambiente. O ecrã ficará desligado (preto) durante a observação. Nenhum dado sai do teu telemóvel.
             </p>
           </div>
         </section>

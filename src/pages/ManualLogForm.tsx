@@ -163,7 +163,7 @@ export function ManualLogForm() {
         
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '32px' }}>
           <ArrowLeft size={24} color="#F8FAFC" style={{ cursor: 'pointer', opacity: 0.6 }} onClick={handleBack} />
-          <h1 style={{ marginLeft: '16px', fontSize: '20px', fontWeight: 300, color: '#F8FAFC' }}>Novo Registo</h1>
+          <h1 style={{ marginLeft: '16px', fontSize: '20px', fontWeight: 300, color: '#F8FAFC' }}>Novo registo</h1>
         </div>
 
         {/* Tipo de Registo */}
@@ -184,7 +184,7 @@ export function ManualLogForm() {
 
         <div style={{ marginBottom: '32px' }}>
           <label style={{ display: 'block', fontSize: '13px', color: '#94A3B8', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Data Base (Dia anterior)
+            Data (dia anterior)
           </label>
           <input 
             type="date"
@@ -198,25 +198,25 @@ export function ManualLogForm() {
           <div className="fade-in">
             {/* Secção Relógios (Exatos) */}
             <div style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '32px' }}>
-              <h3 style={{ fontSize: '16px', color: '#F8FAFC', marginBottom: '24px', fontWeight: 400 }}>Horários de Relógio</h3>
+              <h3 style={{ fontSize: '16px', color: '#F8FAFC', marginBottom: '24px', fontWeight: 400 }}>Horários</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '15px', color: '#E2E8F0' }}>Deitar / Ligar alarme</span>
+                  <span style={{ fontSize: '15px', color: '#E2E8F0' }}>Hora de deitar</span>
                   <input type="time" value={bedTime} onChange={e => setBedTime(e.target.value)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '8px 12px', borderRadius: '6px', color: '#F8FAFC', fontSize: '16px', outline: 'none' }} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '15px', color: '#E2E8F0' }}>Acordar final</span>
+                  <span style={{ fontSize: '15px', color: '#E2E8F0' }}>Hora de acordar</span>
                   <input type="time" value={wakeTime} onChange={e => setWakeTime(e.target.value)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '8px 12px', borderRadius: '6px', color: '#F8FAFC', fontSize: '16px', outline: 'none' }} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '15px', color: '#E2E8F0' }}>Levantar da cama</span>
+                  <span style={{ fontSize: '15px', color: '#E2E8F0' }}>Hora de levantar</span>
                   <input type="time" value={outOfBedTime} onChange={e => setOutOfBedTime(e.target.value)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '8px 12px', borderRadius: '6px', color: '#F8FAFC', fontSize: '16px', outline: 'none' }} />
                 </div>
               </div>
             </div>
 
             {/* Secção Estimativas e UX Reduzido */}
-            {renderRadioGroup('Tempo Sentido até Adormecer', sleepOnset, setSleepOnset, ['< 15m', '15-30m', '30-60m', '> 60m', 'Não sei bem'])}
+            {renderRadioGroup('Tempo até adormecer', sleepOnset, setSleepOnset, ['< 15m', '15-30m', '30-60m', '> 60m', 'Não sei bem'])}
             
             {renderRadioGroup('Aproximadamente, quantas vezes acordaste?', awakeningsCount, setAwakeningsCount, ['0', '1', '2', '3+'])}
             
@@ -224,9 +224,9 @@ export function ManualLogForm() {
                renderRadioGroup('Dificuldade em readormecer', reSleepDifficulty, setReSleepDifficulty, ['Fácil', 'Algum esforço', 'Muito difícil', 'Não voltei a dormir'])
             )}
 
-            {renderRadioGroup('Qualidade da Recuperação Sentida', restoration, setRestoration, ['Fraca', 'Razoável', 'Boa', 'Excelente'])}
+            {renderRadioGroup('Qualidade da recuperação', restoration, setRestoration, ['Fraca', 'Razoável', 'Boa', 'Excelente'])}
 
-            {renderRadioGroup('Tensão Física ou Ansiedade ao Deitar?', tension, setTension, ['Nenhuma', 'Leve', 'Alta'])}
+            {renderRadioGroup('Tensão física ou ansiedade?', tension, setTension, ['Nenhuma', 'Leve', 'Alta'])}
 
             <div style={{ marginBottom: '32px' }}>
               <label style={{ display: 'block', fontSize: '13px', color: '#94A3B8', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -249,7 +249,7 @@ export function ManualLogForm() {
 
             <div style={{ marginBottom: '40px' }}>
                <label style={{ display: 'block', fontSize: '13px', color: '#94A3B8', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                 Toxinas Verificadas / Ambiente
+                Ambiente e outros fatores
                </label>
                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                  {ENVIRONMENT_OPTIONS.map(env => (

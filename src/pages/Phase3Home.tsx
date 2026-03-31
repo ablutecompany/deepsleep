@@ -48,9 +48,9 @@ export function Phase3Home() {
   if (!deliverable) {
     return (
       <div className="home-page fade-in" style={{ padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-core)', color: '#F8FAFC', justifyContent: 'center', alignItems: 'center' }}>
-        <p style={{ color: '#64748B', fontWeight: 300 }}>Ainda não tens um plano ativo.</p>
+        <p style={{ color: '#64748B', fontWeight: 300 }}>Ainda não tens um objetivo ativo.</p>
         <button className="text-btn" style={{ marginTop: '24px', color: '#38BDF8' }} onClick={() => navigate('/phase2/entry')}>
-          Retroceder
+          Voltar atrás
         </button>
       </div>
     );
@@ -96,16 +96,16 @@ export function Phase3Home() {
         <ArrowLeft size={24} color="#F8FAFC" style={{ marginBottom: '32px', cursor: 'pointer', opacity: 0.6 }} onClick={() => navigate('/process_home')} />
         
         <header style={{ marginBottom: '40px' }}>
-          <span className="kicker" style={{ color: '#10B981', marginBottom: '16px' }}>O teu Plano Atual</span>
+          <span className="kicker" style={{ color: '#10B981', marginBottom: '16px' }}>O teu Objetivo Atual</span>
           <h1 style={{ fontSize: '32px', fontWeight: 300, color: '#F8FAFC', letterSpacing: '-0.02em', lineHeight: '1.2', marginBottom: '16px' }}>
-            {cycle.status === 'active' ? "Em Percurso" : "Janela Concluída"}
+            {cycle.status === 'active' ? "Em curso" : "Fim do teste"}
           </h1>
           <div style={{ display: 'flex', gap: '16px' }}>
              <button onClick={() => navigate('/phase2/context')} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94A3B8', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}>
-               Consultar Contexto
+               Porquê esta dica?
              </button>
              <button onClick={() => navigate('/process_home')} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94A3B8', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}>
-               Ver Progresso
+               Ver histórico
              </button>
           </div>
         </header>
@@ -142,12 +142,12 @@ export function Phase3Home() {
         {cycle.status === 'active' && !isMinWindowReached && (
           <div style={{ marginTop: 'auto', marginBottom: '40px' }}>
             <h3 style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#64748B', marginBottom: '16px', textAlign: 'center' }}>
-              Posição Hoje ({todayStr.slice(5)})
+              Hoje ({todayStr.slice(5)})
             </h3>
             
             {dailyStep === 0 && !todayValue && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-                <p style={{ color: '#F8FAFC', fontSize: '15px', fontWeight: 300, marginBottom: '8px' }}>Seguiste a orientação da proposta?</p>
+                <p style={{ color: '#F8FAFC', fontSize: '15px', fontWeight: 300, marginBottom: '8px' }}>Conseguiste seguir a dica?</p>
                 <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
                   <button
                     onClick={() => { setDailyAdherence('success'); setDailyStep(1); }}
@@ -172,7 +172,7 @@ export function Phase3Home() {
             {dailyStep === 1 && !todayValue && (
               <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
                 <p style={{ color: '#F8FAFC', fontSize: '15px', fontWeight: 300, marginBottom: '8px' }}>
-                  {dailyAdherence === 'success' ? 'Foi fácil de executar?' : 'O que impediu a execução?'}
+                  {dailyAdherence === 'success' ? 'Foi fácil de cumprir?' : 'O que dificultou o cumprimento?'}
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                   {dailyAdherence === 'success' ? (
@@ -223,7 +223,7 @@ export function Phase3Home() {
             {todayValue && (
               <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
                 <p style={{ fontSize: '13px', color: '#64748B', textAlign: 'center', fontWeight: 300 }}>
-                  Posição guardada sileciosamente. O trajeto continua amanhã.
+                  Registo guardado com sucesso. Continuamos amanhã.
                 </p>
                 <button onClick={() => {
                    trackEvent('beta_simulate_tomorrow_used');
@@ -326,7 +326,7 @@ export function Phase3Home() {
               Confirmar Respostas
             </h2>
             <p style={{ fontSize: '14px', color: '#94A3B8', marginBottom: '24px', lineHeight: 1.5 }}>
-              Baseado na tua experiência logada (Adesão: {adesao.split(',')[0]} / Dificuldade: {dificuldade.split(' ')[0]} / Efeito: {efeito.split(' ')[0]}), vamos entregar a decisão ao motor.
+              Baseado na tua experiência (Adesão: {adesao.split(',')[0]} / Dificuldade: {dificuldade.split(' ')[0]} / Efeito: {efeito.split(' ')[0]}), vamos pedir à app para avaliar.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
